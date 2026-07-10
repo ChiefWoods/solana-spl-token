@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { getBase64Encoder } from '@solana/codecs-strings';
 import { createEmitInstruction, pack } from '@solana/spl-token-metadata';
 import {
+    Address,
     type Connection,
     sendAndConfirmTransaction,
     Keypair,
@@ -40,19 +41,19 @@ describe('tokenMetadata', async () => {
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintAuthority = Keypair.generate();
-        updateAuthority = Keypair.generate();
+        mintAuthority = await Keypair.generate();
+        updateAuthority = await Keypair.generate();
     });
 
     beforeEach(async () => {
-        mint = Keypair.generate();
+        mint = await Keypair.generate();
 
         const mintLen = getMintLen(EXTENSIONS);
         const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: mint.publicKey,
                 space: mintLen,
                 lamports: lamports,
@@ -94,7 +95,7 @@ describe('tokenMetadata', async () => {
         const lamports = await connection.getMinimumBalanceForRentExemption(pack(tokenMetadata).length);
         const transaction = new Transaction().add(
             SystemProgram.transfer({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 toPubkey: mint.publicKey,
                 lamports,
             }),
@@ -450,7 +451,7 @@ describe('tokenMetadata', async () => {
             undefined,
             TEST_PROGRAM_ID,
         );
-        const newAuthority = Keypair.generate().publicKey;
+        const newAuthority = (await Keypair.generate()).publicKey;
         await tokenMetadataUpdateAuthority(
             connection,
             payer,
@@ -496,7 +497,7 @@ describe('tokenMetadata', async () => {
             TEST_PROGRAM_ID,
         );
 
-        const payerKey = payer.publicKey;
+        const payerKey = new Address(payer.address);
         const recentBlockhash = await connection.getLatestBlockhash().then(res => res.blockhash);
         const instructions = [
             createEmitInstruction({
@@ -512,13 +513,13 @@ describe('tokenMetadata', async () => {
             instructions,
         }).compileToV0Message();
         const tx = new VersionedTransaction(messageV0);
-        tx.sign([payer]);
+        tx.sign([payer as Keypair]);
 
         const returnDataBase64 = (await connection
             .simulateTransaction(tx)
             .then(res => res.value.returnData?.data[0])) as string;
         const returnData = getBase64Encoder().encode(returnDataBase64);
 
-        expect(returnData).to.deep.equal(tokenMetadata.updateAuthority.toBuffer());
+        expect(returnData).to.deep.equal(tokenMetadata.updateAuthority.toBytes());
     });
 });

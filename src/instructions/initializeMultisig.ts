@@ -1,6 +1,9 @@
-import { struct, u8 } from '@solana/buffer-layout';
+import {
+    getInitializeMultisigInstructionDataDecoder,
+    getInitializeMultisigInstructionDataEncoder,
+} from '@solana-program/token';
 import type { AccountMeta, Signer } from '@solana/web3.js';
-import { PublicKey, SYSVAR_RENT_PUBKEY, TransactionInstruction } from '@solana/web3.js';
+import { Address, SYSVAR_RENT_PUBKEY, TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
     TokenInvalidInstructionDataError,
@@ -10,6 +13,7 @@ import {
 } from '../errors.js';
 import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface InitializeMultisigInstructionData {
@@ -18,10 +22,12 @@ export interface InitializeMultisigInstructionData {
 }
 
 /** TODO: docs */
-export const initializeMultisigInstructionData = struct<InitializeMultisigInstructionData>([
-    u8('instruction'),
-    u8('m'),
-]);
+export const initializeMultisigInstructionData = createInstructionDataCodec({
+    encoder: getInitializeMultisigInstructionDataEncoder(),
+    decoder: getInitializeMultisigInstructionDataDecoder(),
+    fromPublic: ({ m }: InitializeMultisigInstructionData) => ({ m }),
+    toPublic: ({ discriminator, m }) => ({ instruction: discriminator, m }),
+});
 
 /**
  * Construct an InitializeMultisig instruction
@@ -34,8 +40,8 @@ export const initializeMultisigInstructionData = struct<InitializeMultisigInstru
  * @return Instruction to add to a transaction
  */
 export function createInitializeMultisigInstruction(
-    account: PublicKey,
-    signers: (Signer | PublicKey)[],
+    account: Address,
+    signers: (Signer | Address)[],
     m: number,
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
@@ -45,7 +51,7 @@ export function createInitializeMultisigInstruction(
     ];
     for (const signer of signers) {
         keys.push({
-            pubkey: signer instanceof PublicKey ? signer : signer.publicKey,
+            pubkey: signer instanceof Address ? signer : new Address(signer.address),
             isSigner: false,
             isWritable: false,
         });
@@ -65,7 +71,7 @@ export function createInitializeMultisigInstruction(
 
 /** A decoded, valid InitializeMultisig instruction */
 export interface DecodedInitializeMultisigInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta;
         rent: AccountMeta;
@@ -115,7 +121,7 @@ export function decodeInitializeMultisigInstruction(
 
 /** A decoded, non-validated InitializeMultisig instruction */
 export interface DecodedInitializeMultisigInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta | undefined;
         rent: AccountMeta | undefined;

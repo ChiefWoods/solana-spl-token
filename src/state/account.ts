@@ -1,6 +1,12 @@
-import { struct, u32, u8 } from '@solana/buffer-layout';
-import { publicKey, u64 } from '@solana/buffer-layout-utils';
-import type { AccountInfo, Commitment, Connection, PublicKey } from '@solana/web3.js';
+import {
+    getTokenDecoder,
+    getTokenEncoder,
+    getTokenSize,
+    type Token as CodamaToken,
+    type TokenArgs,
+} from '@solana-program/token';
+import type { AccountInfo, Commitment, Connection } from '@solana/web3.js';
+import { Address } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
     TokenAccountNotFoundError,
@@ -16,15 +22,15 @@ import { MULTISIG_SIZE } from './multisig.js';
 /** Information about a token account */
 export interface Account {
     /** Address of the account */
-    address: PublicKey;
+    address: Address;
     /** Mint associated with the account */
-    mint: PublicKey;
+    mint: Address;
     /** Owner of the account */
-    owner: PublicKey;
+    owner: Address;
     /** Number of tokens the account holds */
     amount: bigint;
     /** Authority that can transfer tokens from the account */
-    delegate: PublicKey | null;
+    delegate: Address | null;
     /** Number of tokens the delegate is authorized to transfer */
     delegatedAmount: bigint;
     /** True if the account is initialized */
@@ -39,7 +45,7 @@ export interface Account {
      */
     rentExemptReserve: bigint | null;
     /** Optional authority to close the account */
-    closeAuthority: PublicKey | null;
+    closeAuthority: Address | null;
     tlvData: Buffer;
 }
 
@@ -52,36 +58,82 @@ export enum AccountState {
 
 /** Token account as stored by the program */
 export interface RawAccount {
-    mint: PublicKey;
-    owner: PublicKey;
+    mint: Address;
+    owner: Address;
     amount: bigint;
     delegateOption: 1 | 0;
-    delegate: PublicKey;
+    delegate: Address;
     state: AccountState;
     isNativeOption: 1 | 0;
     isNative: bigint;
     delegatedAmount: bigint;
     closeAuthorityOption: 1 | 0;
-    closeAuthority: PublicKey;
+    closeAuthority: Address;
 }
 
-/** Buffer layout for de/serializing a token account */
-export const AccountLayout = struct<RawAccount>([
-    publicKey('mint'),
-    publicKey('owner'),
-    u64('amount'),
-    u32('delegateOption'),
-    publicKey('delegate'),
-    u8('state'),
-    u32('isNativeOption'),
-    u64('isNative'),
-    u64('delegatedAmount'),
-    u32('closeAuthorityOption'),
-    publicKey('closeAuthority'),
-]);
+type CodamaOption<T> = { __option: 'Some'; value: T } | { __option: 'None' };
+
+const DEFAULT_ADDRESS = new Address('11111111111111111111111111111111');
+
+function unwrapAddressOption(option: CodamaOption<string>): Address | null {
+    return option.__option === 'Some' ? new Address(option.value) : null;
+}
+
+function unwrapBigIntOption(option: CodamaOption<bigint>): bigint | null {
+    return option.__option === 'Some' ? option.value : null;
+}
+
+function getRawAddressOption(option: CodamaOption<string>): { option: 1 | 0; address: Address } {
+    return option.__option === 'Some'
+        ? { option: 1, address: new Address(option.value) }
+        : { option: 0, address: DEFAULT_ADDRESS };
+}
+
+function rawAccountToCodamaArgs(rawAccount: RawAccount): TokenArgs {
+    return {
+        mint: rawAccount.mint.toBase58() as TokenArgs['mint'],
+        owner: rawAccount.owner.toBase58() as TokenArgs['owner'],
+        amount: rawAccount.amount,
+        delegate: rawAccount.delegateOption ? (rawAccount.delegate.toBase58() as TokenArgs['delegate']) : null,
+        state: rawAccount.state as TokenArgs['state'],
+        isNative: rawAccount.isNativeOption ? rawAccount.isNative : null,
+        delegatedAmount: rawAccount.delegatedAmount,
+        closeAuthority: rawAccount.closeAuthorityOption
+            ? (rawAccount.closeAuthority.toBase58() as TokenArgs['closeAuthority'])
+            : null,
+    };
+}
+
+/** Codama-backed layout compatibility helper for de/serializing a token account */
+export const AccountLayout = {
+    span: getTokenSize(),
+    decode(data: Uint8Array, offset = 0): RawAccount {
+        const account = getTokenDecoder().decode(data.slice(offset, offset + ACCOUNT_SIZE));
+        const delegate = getRawAddressOption(account.delegate);
+        const closeAuthority = getRawAddressOption(account.closeAuthority);
+
+        return {
+            mint: new Address(account.mint),
+            owner: new Address(account.owner),
+            amount: account.amount,
+            delegateOption: delegate.option,
+            delegate: delegate.address,
+            state: account.state,
+            isNativeOption: account.isNative.__option === 'Some' ? 1 : 0,
+            isNative: account.isNative.__option === 'Some' ? account.isNative.value : BigInt(0),
+            delegatedAmount: account.delegatedAmount,
+            closeAuthorityOption: closeAuthority.option,
+            closeAuthority: closeAuthority.address,
+        };
+    },
+    encode(rawAccount: RawAccount, buffer: Uint8Array = new Uint8Array(ACCOUNT_SIZE), offset = 0): number {
+        buffer.set(getTokenEncoder().encode(rawAccountToCodamaArgs(rawAccount)), offset);
+        return ACCOUNT_SIZE;
+    },
+};
 
 /** Byte length of a token account */
-export const ACCOUNT_SIZE = AccountLayout.span;
+export const ACCOUNT_SIZE = getTokenSize();
 
 /**
  * Retrieve information about a token account
@@ -95,7 +147,7 @@ export const ACCOUNT_SIZE = AccountLayout.span;
  */
 export async function getAccount(
     connection: Connection,
-    address: PublicKey,
+    address: Address,
     commitment?: Commitment,
     programId = TOKEN_PROGRAM_ID,
 ): Promise<Account> {
@@ -115,7 +167,7 @@ export async function getAccount(
  */
 export async function getMultipleAccounts(
     connection: Connection,
-    addresses: PublicKey[],
+    addresses: Address[],
     commitment?: Commitment,
     programId = TOKEN_PROGRAM_ID,
 ): Promise<Account[]> {
@@ -150,7 +202,7 @@ export async function getMinimumBalanceForRentExemptAccountWithExtensions(
     commitment?: Commitment,
 ): Promise<number> {
     const accountLen = getAccountLen(extensions);
-    return await connection.getMinimumBalanceForRentExemption(accountLen, commitment);
+    return Number(await connection.getMinimumBalanceForRentExemption(accountLen, commitment));
 }
 
 /**
@@ -163,34 +215,34 @@ export async function getMinimumBalanceForRentExemptAccountWithExtensions(
  * @return Unpacked token account
  */
 export function unpackAccount(
-    address: PublicKey,
-    info: AccountInfo<Buffer> | null,
+    address: Address,
+    info: AccountInfo<Uint8Array> | null,
     programId = TOKEN_PROGRAM_ID,
 ): Account {
     if (!info) throw new TokenAccountNotFoundError();
     if (!info.owner.equals(programId)) throw new TokenInvalidAccountOwnerError();
     if (info.data.length < ACCOUNT_SIZE) throw new TokenInvalidAccountSizeError();
 
-    const rawAccount = AccountLayout.decode(info.data.slice(0, ACCOUNT_SIZE));
+    const rawAccount: CodamaToken = getTokenDecoder().decode(info.data.slice(0, ACCOUNT_SIZE));
     let tlvData = Buffer.alloc(0);
     if (info.data.length > ACCOUNT_SIZE) {
         if (info.data.length === MULTISIG_SIZE) throw new TokenInvalidAccountSizeError();
         if (info.data[ACCOUNT_SIZE] != AccountType.Account) throw new TokenInvalidAccountError();
-        tlvData = info.data.slice(ACCOUNT_SIZE + ACCOUNT_TYPE_SIZE);
+        tlvData = Buffer.from(info.data.slice(ACCOUNT_SIZE + ACCOUNT_TYPE_SIZE));
     }
 
     return {
         address,
-        mint: rawAccount.mint,
-        owner: rawAccount.owner,
+        mint: new Address(rawAccount.mint),
+        owner: new Address(rawAccount.owner),
         amount: rawAccount.amount,
-        delegate: rawAccount.delegateOption ? rawAccount.delegate : null,
+        delegate: unwrapAddressOption(rawAccount.delegate),
         delegatedAmount: rawAccount.delegatedAmount,
         isInitialized: rawAccount.state !== AccountState.Uninitialized,
         isFrozen: rawAccount.state === AccountState.Frozen,
-        isNative: !!rawAccount.isNativeOption,
-        rentExemptReserve: rawAccount.isNativeOption ? rawAccount.isNative : null,
-        closeAuthority: rawAccount.closeAuthorityOption ? rawAccount.closeAuthority : null,
+        isNative: rawAccount.isNative.__option === 'Some',
+        rentExemptReserve: unwrapBigIntOption(rawAccount.isNative),
+        closeAuthority: unwrapAddressOption(rawAccount.closeAuthority),
         tlvData,
     };
 }

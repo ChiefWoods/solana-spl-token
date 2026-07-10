@@ -1,6 +1,5 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { u64 } from '@solana/buffer-layout-utils';
-import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
+import { getMintToInstructionDataDecoder, getMintToInstructionDataEncoder } from '@solana-program/token';
+import type { AccountMeta, Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -11,6 +10,7 @@ import {
 } from '../errors.js';
 import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface MintToInstructionData {
@@ -19,7 +19,12 @@ export interface MintToInstructionData {
 }
 
 /** TODO: docs */
-export const mintToInstructionData = struct<MintToInstructionData>([u8('instruction'), u64('amount')]);
+export const mintToInstructionData = createInstructionDataCodec({
+    encoder: getMintToInstructionDataEncoder(),
+    decoder: getMintToInstructionDataDecoder(),
+    fromPublic: ({ amount }: MintToInstructionData) => ({ amount }),
+    toPublic: ({ discriminator, amount }) => ({ instruction: discriminator, amount }),
+});
 
 /**
  * Construct a MintTo instruction
@@ -34,11 +39,11 @@ export const mintToInstructionData = struct<MintToInstructionData>([u8('instruct
  * @return Instruction to add to a transaction
  */
 export function createMintToInstruction(
-    mint: PublicKey,
-    destination: PublicKey,
-    authority: PublicKey,
+    mint: Address,
+    destination: Address,
+    authority: Address,
     amount: number | bigint,
-    multiSigners: (Signer | PublicKey)[] = [],
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -64,7 +69,7 @@ export function createMintToInstruction(
 
 /** A decoded, valid MintTo instruction */
 export interface DecodedMintToInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
         destination: AccountMeta;
@@ -115,7 +120,7 @@ export function decodeMintToInstruction(
 
 /** A decoded, non-validated MintTo instruction */
 export interface DecodedMintToInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta | undefined;
         destination: AccountMeta | undefined;

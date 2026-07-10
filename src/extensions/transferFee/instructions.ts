@@ -1,7 +1,19 @@
-import { struct, u16, u8 } from '@solana/buffer-layout';
-import { u64 } from '@solana/buffer-layout-utils';
-import type { AccountMeta, Signer, PublicKey } from '@solana/web3.js';
-import { TransactionInstruction } from '@solana/web3.js';
+import {
+    getHarvestWithheldTokensToMintInstructionDataDecoder,
+    getHarvestWithheldTokensToMintInstructionDataEncoder,
+    getInitializeTransferFeeConfigInstructionDataDecoder,
+    getInitializeTransferFeeConfigInstructionDataEncoder,
+    getSetTransferFeeInstructionDataDecoder,
+    getSetTransferFeeInstructionDataEncoder,
+    getTransferCheckedWithFeeInstructionDataDecoder,
+    getTransferCheckedWithFeeInstructionDataEncoder,
+    getWithdrawWithheldTokensFromAccountsInstructionDataDecoder,
+    getWithdrawWithheldTokensFromAccountsInstructionDataEncoder,
+    getWithdrawWithheldTokensFromMintInstructionDataDecoder,
+    getWithdrawWithheldTokensFromMintInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { AccountMeta, Signer, Address } from '@solana/web3.js';
+import { Address as Web3Address, TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions, TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import {
     TokenInvalidInstructionDataError,
@@ -12,7 +24,12 @@ import {
 } from '../../errors.js';
 import { addSigners } from '../../instructions/internal.js';
 import { TokenInstruction } from '../../instructions/types.js';
-import { COptionPublicKeyLayout } from '../../serialization.js';
+
+type CodamaOption<T> = { __option: 'Some'; value: T } | { __option: 'None' };
+
+function unwrapAddressOption(option: CodamaOption<string>): Address | null {
+    return option.__option === 'Some' ? new Web3Address(option.value) : null;
+}
 
 export enum TransferFeeInstruction {
     InitializeTransferFeeConfig = 0,
@@ -29,21 +46,11 @@ export enum TransferFeeInstruction {
 export interface InitializeTransferFeeConfigInstructionData {
     instruction: TokenInstruction.TransferFeeExtension;
     transferFeeInstruction: TransferFeeInstruction.InitializeTransferFeeConfig;
-    transferFeeConfigAuthority: PublicKey | null;
-    withdrawWithheldAuthority: PublicKey | null;
+    transferFeeConfigAuthority: Address | null;
+    withdrawWithheldAuthority: Address | null;
     transferFeeBasisPoints: number;
     maximumFee: bigint;
 }
-
-/** TODO: docs */
-export const initializeTransferFeeConfigInstructionData = struct<InitializeTransferFeeConfigInstructionData>([
-    u8('instruction'),
-    u8('transferFeeInstruction'),
-    new COptionPublicKeyLayout('transferFeeConfigAuthority'),
-    new COptionPublicKeyLayout('withdrawWithheldAuthority'),
-    u16('transferFeeBasisPoints'),
-    u64('maximumFee'),
-]);
 
 /**
  * Construct an InitializeTransferFeeConfig instruction
@@ -58,9 +65,9 @@ export const initializeTransferFeeConfigInstructionData = struct<InitializeTrans
  * @return Instruction to add to a transaction
  */
 export function createInitializeTransferFeeConfigInstruction(
-    mint: PublicKey,
-    transferFeeConfigAuthority: PublicKey | null,
-    withdrawWithheldAuthority: PublicKey | null,
+    mint: Address,
+    transferFeeConfigAuthority: Address | null,
+    withdrawWithheldAuthority: Address | null,
     transferFeeBasisPoints: number,
     maximumFee: bigint,
     programId = TOKEN_2022_PROGRAM_ID,
@@ -69,38 +76,33 @@ export function createInitializeTransferFeeConfigInstruction(
         throw new TokenUnsupportedInstructionError();
     }
     const keys = [{ pubkey: mint, isSigner: false, isWritable: true }];
-
-    const data = Buffer.alloc(78); // worst-case size
-    initializeTransferFeeConfigInstructionData.encode(
-        {
-            instruction: TokenInstruction.TransferFeeExtension,
-            transferFeeInstruction: TransferFeeInstruction.InitializeTransferFeeConfig,
-            transferFeeConfigAuthority: transferFeeConfigAuthority,
-            withdrawWithheldAuthority: withdrawWithheldAuthority,
+    const data = Buffer.from(
+        getInitializeTransferFeeConfigInstructionDataEncoder().encode({
+            transferFeeConfigAuthority: transferFeeConfigAuthority?.toBase58() ?? null,
+            withdrawWithheldAuthority: withdrawWithheldAuthority?.toBase58() ?? null,
             transferFeeBasisPoints: transferFeeBasisPoints,
             maximumFee: maximumFee,
-        },
-        data,
+        }),
     );
 
     return new TransactionInstruction({
         keys,
         programId,
-        data: data.subarray(0, initializeTransferFeeConfigInstructionData.getSpan(data)),
+        data,
     });
 }
 
 /** A decoded, valid InitializeTransferFeeConfig instruction */
 export interface DecodedInitializeTransferFeeConfigInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
     };
     data: {
         instruction: TokenInstruction.TransferFeeExtension;
         transferFeeInstruction: TransferFeeInstruction.InitializeTransferFeeConfig;
-        transferFeeConfigAuthority: PublicKey | null;
-        withdrawWithheldAuthority: PublicKey | null;
+        transferFeeConfigAuthority: Address | null;
+        withdrawWithheldAuthority: Address | null;
         transferFeeBasisPoints: number;
         maximumFee: bigint;
     };
@@ -116,16 +118,24 @@ export interface DecodedInitializeTransferFeeConfigInstruction {
  */
 export function decodeInitializeTransferFeeConfigInstruction(
     instruction: TransactionInstruction,
-    programId: PublicKey,
+    programId: Address,
 ): DecodedInitializeTransferFeeConfigInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
-    if (instruction.data.length !== initializeTransferFeeConfigInstructionData.getSpan(instruction.data))
-        throw new TokenInvalidInstructionDataError();
 
     const {
         keys: { mint },
         data,
     } = decodeInitializeTransferFeeConfigInstructionUnchecked(instruction);
+    if (
+        instruction.data.length !==
+        getInitializeTransferFeeConfigInstructionDataEncoder().encode({
+            transferFeeConfigAuthority: data.transferFeeConfigAuthority?.toBase58() ?? null,
+            withdrawWithheldAuthority: data.withdrawWithheldAuthority?.toBase58() ?? null,
+            transferFeeBasisPoints: data.transferFeeBasisPoints,
+            maximumFee: data.maximumFee,
+        }).length
+    )
+        throw new TokenInvalidInstructionDataError();
     if (
         data.instruction !== TokenInstruction.TransferFeeExtension ||
         data.transferFeeInstruction !== TransferFeeInstruction.InitializeTransferFeeConfig
@@ -144,15 +154,15 @@ export function decodeInitializeTransferFeeConfigInstruction(
 
 /** A decoded, non-validated InitializeTransferFeeConfig instruction */
 export interface DecodedInitializeTransferFeeConfigInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta | undefined;
     };
     data: {
         instruction: TokenInstruction.TransferFeeExtension;
         transferFeeInstruction: TransferFeeInstruction.InitializeTransferFeeConfig;
-        transferFeeConfigAuthority: PublicKey | null;
-        withdrawWithheldAuthority: PublicKey | null;
+        transferFeeConfigAuthority: Address | null;
+        withdrawWithheldAuthority: Address | null;
         transferFeeBasisPoints: number;
         maximumFee: bigint;
     };
@@ -171,13 +181,13 @@ export function decodeInitializeTransferFeeConfigInstructionUnchecked({
     data,
 }: TransactionInstruction): DecodedInitializeTransferFeeConfigInstructionUnchecked {
     const {
-        instruction,
-        transferFeeInstruction,
+        discriminator,
+        transferFeeDiscriminator,
         transferFeeConfigAuthority,
         withdrawWithheldAuthority,
         transferFeeBasisPoints,
         maximumFee,
-    } = initializeTransferFeeConfigInstructionData.decode(data);
+    } = getInitializeTransferFeeConfigInstructionDataDecoder().decode(data);
 
     return {
         programId,
@@ -185,10 +195,10 @@ export function decodeInitializeTransferFeeConfigInstructionUnchecked({
             mint,
         },
         data: {
-            instruction,
-            transferFeeInstruction,
-            transferFeeConfigAuthority,
-            withdrawWithheldAuthority,
+            instruction: discriminator,
+            transferFeeInstruction: transferFeeDiscriminator,
+            transferFeeConfigAuthority: unwrapAddressOption(transferFeeConfigAuthority),
+            withdrawWithheldAuthority: unwrapAddressOption(withdrawWithheldAuthority),
             transferFeeBasisPoints,
             maximumFee,
         },
@@ -203,14 +213,6 @@ export interface TransferCheckedWithFeeInstructionData {
     decimals: number;
     fee: bigint;
 }
-
-export const transferCheckedWithFeeInstructionData = struct<TransferCheckedWithFeeInstructionData>([
-    u8('instruction'),
-    u8('transferFeeInstruction'),
-    u64('amount'),
-    u8('decimals'),
-    u64('fee'),
-]);
 
 /**
  * Construct an TransferCheckedWithFee instruction
@@ -228,30 +230,20 @@ export const transferCheckedWithFeeInstructionData = struct<TransferCheckedWithF
  * @return Instruction to add to a transaction
  */
 export function createTransferCheckedWithFeeInstruction(
-    source: PublicKey,
-    mint: PublicKey,
-    destination: PublicKey,
-    authority: PublicKey,
+    source: Address,
+    mint: Address,
+    destination: Address,
+    authority: Address,
     amount: bigint,
     decimals: number,
     fee: bigint,
-    multiSigners: (Signer | PublicKey)[] = [],
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
-    const data = Buffer.alloc(transferCheckedWithFeeInstructionData.span);
-    transferCheckedWithFeeInstructionData.encode(
-        {
-            instruction: TokenInstruction.TransferFeeExtension,
-            transferFeeInstruction: TransferFeeInstruction.TransferCheckedWithFee,
-            amount,
-            decimals,
-            fee,
-        },
-        data,
-    );
+    const data = Buffer.from(getTransferCheckedWithFeeInstructionDataEncoder().encode({ amount, decimals, fee }));
     const keys = addSigners(
         [
             { pubkey: source, isSigner: false, isWritable: true },
@@ -266,7 +258,7 @@ export function createTransferCheckedWithFeeInstruction(
 
 /** A decoded, valid TransferCheckedWithFee instruction */
 export interface DecodedTransferCheckedWithFeeInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         source: AccountMeta;
         mint: AccountMeta;
@@ -293,10 +285,14 @@ export interface DecodedTransferCheckedWithFeeInstruction {
  */
 export function decodeTransferCheckedWithFeeInstruction(
     instruction: TransactionInstruction,
-    programId: PublicKey,
+    programId: Address,
 ): DecodedTransferCheckedWithFeeInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
-    if (instruction.data.length !== transferCheckedWithFeeInstructionData.span)
+    if (
+        instruction.data.length !==
+        getTransferCheckedWithFeeInstructionDataEncoder().encode({ amount: BigInt(0), decimals: 0, fee: BigInt(0) })
+            .length
+    )
         throw new TokenInvalidInstructionDataError();
 
     const {
@@ -325,7 +321,7 @@ export function decodeTransferCheckedWithFeeInstruction(
 
 /** A decoded, non-validated TransferCheckedWithFees instruction */
 export interface DecodedTransferCheckedWithFeeInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         source: AccountMeta;
         mint: AccountMeta;
@@ -354,8 +350,8 @@ export function decodeTransferCheckedWithFeeInstructionUnchecked({
     keys: [source, mint, destination, authority, ...signers],
     data,
 }: TransactionInstruction): DecodedTransferCheckedWithFeeInstructionUnchecked {
-    const { instruction, transferFeeInstruction, amount, decimals, fee } =
-        transferCheckedWithFeeInstructionData.decode(data);
+    const { discriminator, transferFeeDiscriminator, amount, decimals, fee } =
+        getTransferCheckedWithFeeInstructionDataDecoder().decode(data);
 
     return {
         programId,
@@ -367,8 +363,8 @@ export function decodeTransferCheckedWithFeeInstructionUnchecked({
             signers,
         },
         data: {
-            instruction,
-            transferFeeInstruction,
+            instruction: discriminator,
+            transferFeeInstruction: transferFeeDiscriminator,
             amount,
             decimals,
             fee,
@@ -382,11 +378,6 @@ export interface WithdrawWithheldTokensFromMintInstructionData {
     transferFeeInstruction: TransferFeeInstruction.WithdrawWithheldTokensFromMint;
 }
 
-export const withdrawWithheldTokensFromMintInstructionData = struct<WithdrawWithheldTokensFromMintInstructionData>([
-    u8('instruction'),
-    u8('transferFeeInstruction'),
-]);
-
 /**
  * Construct a WithdrawWithheldTokensFromMint instruction
  *
@@ -399,23 +390,16 @@ export const withdrawWithheldTokensFromMintInstructionData = struct<WithdrawWith
  * @return Instruction to add to a transaction
  */
 export function createWithdrawWithheldTokensFromMintInstruction(
-    mint: PublicKey,
-    destination: PublicKey,
-    authority: PublicKey,
-    signers: (Signer | PublicKey)[] = [],
+    mint: Address,
+    destination: Address,
+    authority: Address,
+    signers: (Signer | Address)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
-    const data = Buffer.alloc(withdrawWithheldTokensFromMintInstructionData.span);
-    withdrawWithheldTokensFromMintInstructionData.encode(
-        {
-            instruction: TokenInstruction.TransferFeeExtension,
-            transferFeeInstruction: TransferFeeInstruction.WithdrawWithheldTokensFromMint,
-        },
-        data,
-    );
+    const data = Buffer.from(getWithdrawWithheldTokensFromMintInstructionDataEncoder().encode({}));
     const keys = addSigners(
         [
             { pubkey: mint, isSigner: false, isWritable: true },
@@ -429,7 +413,7 @@ export function createWithdrawWithheldTokensFromMintInstruction(
 
 /** A decoded, valid WithdrawWithheldTokensFromMint instruction */
 export interface DecodedWithdrawWithheldTokensFromMintInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
         destination: AccountMeta;
@@ -452,10 +436,10 @@ export interface DecodedWithdrawWithheldTokensFromMintInstruction {
  */
 export function decodeWithdrawWithheldTokensFromMintInstruction(
     instruction: TransactionInstruction,
-    programId: PublicKey,
+    programId: Address,
 ): DecodedWithdrawWithheldTokensFromMintInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
-    if (instruction.data.length !== withdrawWithheldTokensFromMintInstructionData.span)
+    if (instruction.data.length !== getWithdrawWithheldTokensFromMintInstructionDataEncoder().encode({}).length)
         throw new TokenInvalidInstructionDataError();
 
     const {
@@ -483,7 +467,7 @@ export function decodeWithdrawWithheldTokensFromMintInstruction(
 
 /** A decoded, valid WithdrawWithheldTokensFromMint instruction */
 export interface DecodedWithdrawWithheldTokensFromMintInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
         destination: AccountMeta;
@@ -508,7 +492,8 @@ export function decodeWithdrawWithheldTokensFromMintInstructionUnchecked({
     keys: [mint, destination, authority, ...signers],
     data,
 }: TransactionInstruction): DecodedWithdrawWithheldTokensFromMintInstructionUnchecked {
-    const { instruction, transferFeeInstruction } = withdrawWithheldTokensFromMintInstructionData.decode(data);
+    const { discriminator, transferFeeDiscriminator } =
+        getWithdrawWithheldTokensFromMintInstructionDataDecoder().decode(data);
 
     return {
         programId,
@@ -519,8 +504,8 @@ export function decodeWithdrawWithheldTokensFromMintInstructionUnchecked({
             signers,
         },
         data: {
-            instruction,
-            transferFeeInstruction,
+            instruction: discriminator,
+            transferFeeInstruction: transferFeeDiscriminator,
         },
     };
 }
@@ -531,13 +516,6 @@ export interface WithdrawWithheldTokensFromAccountsInstructionData {
     transferFeeInstruction: TransferFeeInstruction.WithdrawWithheldTokensFromAccounts;
     numTokenAccounts: number;
 }
-
-export const withdrawWithheldTokensFromAccountsInstructionData =
-    struct<WithdrawWithheldTokensFromAccountsInstructionData>([
-        u8('instruction'),
-        u8('transferFeeInstruction'),
-        u8('numTokenAccounts'),
-    ]);
 
 /**
  * Construct a WithdrawWithheldTokensFromAccounts instruction
@@ -552,24 +530,18 @@ export const withdrawWithheldTokensFromAccountsInstructionData =
  * @return Instruction to add to a transaction
  */
 export function createWithdrawWithheldTokensFromAccountsInstruction(
-    mint: PublicKey,
-    destination: PublicKey,
-    authority: PublicKey,
-    signers: (Signer | PublicKey)[],
-    sources: PublicKey[],
+    mint: Address,
+    destination: Address,
+    authority: Address,
+    signers: (Signer | Address)[],
+    sources: Address[],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
-    const data = Buffer.alloc(withdrawWithheldTokensFromAccountsInstructionData.span);
-    withdrawWithheldTokensFromAccountsInstructionData.encode(
-        {
-            instruction: TokenInstruction.TransferFeeExtension,
-            transferFeeInstruction: TransferFeeInstruction.WithdrawWithheldTokensFromAccounts,
-            numTokenAccounts: sources.length,
-        },
-        data,
+    const data = Buffer.from(
+        getWithdrawWithheldTokensFromAccountsInstructionDataEncoder().encode({ numTokenAccounts: sources.length }),
     );
     const keys = addSigners(
         [
@@ -587,7 +559,7 @@ export function createWithdrawWithheldTokensFromAccountsInstruction(
 
 /** A decoded, valid WithdrawWithheldTokensFromAccounts instruction */
 export interface DecodedWithdrawWithheldTokensFromAccountsInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
         destination: AccountMeta;
@@ -612,10 +584,13 @@ export interface DecodedWithdrawWithheldTokensFromAccountsInstruction {
  */
 export function decodeWithdrawWithheldTokensFromAccountsInstruction(
     instruction: TransactionInstruction,
-    programId: PublicKey,
+    programId: Address,
 ): DecodedWithdrawWithheldTokensFromAccountsInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
-    if (instruction.data.length !== withdrawWithheldTokensFromAccountsInstructionData.span)
+    if (
+        instruction.data.length !==
+        getWithdrawWithheldTokensFromAccountsInstructionDataEncoder().encode({ numTokenAccounts: 0 }).length
+    )
         throw new TokenInvalidInstructionDataError();
 
     const {
@@ -644,7 +619,7 @@ export function decodeWithdrawWithheldTokensFromAccountsInstruction(
 
 /** A decoded, valid WithdrawWithheldTokensFromAccounts instruction */
 export interface DecodedWithdrawWithheldTokensFromAccountsInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
         destination: AccountMeta;
@@ -671,8 +646,8 @@ export function decodeWithdrawWithheldTokensFromAccountsInstructionUnchecked({
     keys,
     data,
 }: TransactionInstruction): DecodedWithdrawWithheldTokensFromAccountsInstructionUnchecked {
-    const { instruction, transferFeeInstruction, numTokenAccounts } =
-        withdrawWithheldTokensFromAccountsInstructionData.decode(data);
+    const { discriminator, transferFeeDiscriminator, numTokenAccounts } =
+        getWithdrawWithheldTokensFromAccountsInstructionDataDecoder().decode(data);
     const [mint, destination, authority, signers, sources] = [
         keys[0],
         keys[1],
@@ -690,8 +665,8 @@ export function decodeWithdrawWithheldTokensFromAccountsInstructionUnchecked({
             sources,
         },
         data: {
-            instruction,
-            transferFeeInstruction,
+            instruction: discriminator,
+            transferFeeInstruction: transferFeeDiscriminator,
             numTokenAccounts,
         },
     };
@@ -704,11 +679,6 @@ export interface HarvestWithheldTokensToMintInstructionData {
     transferFeeInstruction: TransferFeeInstruction.HarvestWithheldTokensToMint;
 }
 
-export const harvestWithheldTokensToMintInstructionData = struct<HarvestWithheldTokensToMintInstructionData>([
-    u8('instruction'),
-    u8('transferFeeInstruction'),
-]);
-
 /**
  * Construct a HarvestWithheldTokensToMint instruction
  *
@@ -719,21 +689,14 @@ export const harvestWithheldTokensToMintInstructionData = struct<HarvestWithheld
  * @return Instruction to add to a transaction
  */
 export function createHarvestWithheldTokensToMintInstruction(
-    mint: PublicKey,
-    sources: PublicKey[],
+    mint: Address,
+    sources: Address[],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
-    const data = Buffer.alloc(harvestWithheldTokensToMintInstructionData.span);
-    harvestWithheldTokensToMintInstructionData.encode(
-        {
-            instruction: TokenInstruction.TransferFeeExtension,
-            transferFeeInstruction: TransferFeeInstruction.HarvestWithheldTokensToMint,
-        },
-        data,
-    );
+    const data = Buffer.from(getHarvestWithheldTokensToMintInstructionDataEncoder().encode({}));
     const keys: AccountMeta[] = [];
     keys.push({ pubkey: mint, isSigner: false, isWritable: true });
     for (const source of sources) {
@@ -744,7 +707,7 @@ export function createHarvestWithheldTokensToMintInstruction(
 
 /** A decoded, valid HarvestWithheldTokensToMint instruction */
 export interface DecodedHarvestWithheldTokensToMintInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
         sources: AccountMeta[] | null;
@@ -765,10 +728,10 @@ export interface DecodedHarvestWithheldTokensToMintInstruction {
  */
 export function decodeHarvestWithheldTokensToMintInstruction(
     instruction: TransactionInstruction,
-    programId: PublicKey,
+    programId: Address,
 ): DecodedHarvestWithheldTokensToMintInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
-    if (instruction.data.length !== harvestWithheldTokensToMintInstructionData.span)
+    if (instruction.data.length !== getHarvestWithheldTokensToMintInstructionDataEncoder().encode({}).length)
         throw new TokenInvalidInstructionDataError();
 
     const {
@@ -794,7 +757,7 @@ export function decodeHarvestWithheldTokensToMintInstruction(
 
 /** A decoded, valid HarvestWithheldTokensToMint instruction */
 export interface DecodedHarvestWithheldTokensToMintInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
         sources: AccountMeta[] | null;
@@ -817,7 +780,8 @@ export function decodeHarvestWithheldTokensToMintInstructionUnchecked({
     keys: [mint, ...sources],
     data,
 }: TransactionInstruction): DecodedHarvestWithheldTokensToMintInstructionUnchecked {
-    const { instruction, transferFeeInstruction } = harvestWithheldTokensToMintInstructionData.decode(data);
+    const { discriminator, transferFeeDiscriminator } =
+        getHarvestWithheldTokensToMintInstructionDataDecoder().decode(data);
     return {
         programId,
         keys: {
@@ -825,8 +789,8 @@ export function decodeHarvestWithheldTokensToMintInstructionUnchecked({
             sources,
         },
         data: {
-            instruction,
-            transferFeeInstruction,
+            instruction: discriminator,
+            transferFeeInstruction: transferFeeDiscriminator,
         },
     };
 }
@@ -839,13 +803,6 @@ export interface SetTransferFeeInstructionData {
     transferFeeBasisPoints: number;
     maximumFee: bigint;
 }
-
-export const setTransferFeeInstructionData = struct<SetTransferFeeInstructionData>([
-    u8('instruction'),
-    u8('transferFeeInstruction'),
-    u16('transferFeeBasisPoints'),
-    u64('maximumFee'),
-]);
 
 /**
  * Construct a SetTransferFeeInstruction instruction
@@ -860,9 +817,9 @@ export const setTransferFeeInstructionData = struct<SetTransferFeeInstructionDat
  * @return Instruction to add to a transaction
  */
 export function createSetTransferFeeInstruction(
-    mint: PublicKey,
-    authority: PublicKey,
-    signers: (Signer | PublicKey)[],
+    mint: Address,
+    authority: Address,
+    signers: (Signer | Address)[],
     transferFeeBasisPoints: number,
     maximumFee: bigint,
     programId = TOKEN_2022_PROGRAM_ID,
@@ -871,15 +828,11 @@ export function createSetTransferFeeInstruction(
         throw new TokenUnsupportedInstructionError();
     }
 
-    const data = Buffer.alloc(setTransferFeeInstructionData.span);
-    setTransferFeeInstructionData.encode(
-        {
-            instruction: TokenInstruction.TransferFeeExtension,
-            transferFeeInstruction: TransferFeeInstruction.SetTransferFee,
+    const data = Buffer.from(
+        getSetTransferFeeInstructionDataEncoder().encode({
             transferFeeBasisPoints: transferFeeBasisPoints,
             maximumFee: maximumFee,
-        },
-        data,
+        }),
     );
     const keys = addSigners([{ pubkey: mint, isSigner: false, isWritable: true }], authority, signers);
 
@@ -888,7 +841,7 @@ export function createSetTransferFeeInstruction(
 
 /** A decoded, valid SetTransferFee instruction */
 export interface DecodedSetTransferFeeInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
         authority: AccountMeta;
@@ -912,10 +865,14 @@ export interface DecodedSetTransferFeeInstruction {
  */
 export function decodeSetTransferFeeInstruction(
     instruction: TransactionInstruction,
-    programId: PublicKey,
+    programId: Address,
 ): DecodedSetTransferFeeInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
-    if (instruction.data.length !== setTransferFeeInstructionData.span) throw new TokenInvalidInstructionDataError();
+    if (
+        instruction.data.length !==
+        getSetTransferFeeInstructionDataEncoder().encode({ transferFeeBasisPoints: 0, maximumFee: BigInt(0) }).length
+    )
+        throw new TokenInvalidInstructionDataError();
 
     const {
         keys: { mint, authority, signers },
@@ -941,7 +898,7 @@ export function decodeSetTransferFeeInstruction(
 
 /** A decoded, valid SetTransferFee instruction */
 export interface DecodedSetTransferFeeInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
         authority: AccountMeta;
@@ -967,8 +924,8 @@ export function decodeSetTransferFeeInstructionUnchecked({
     keys: [mint, authority, ...signers],
     data,
 }: TransactionInstruction): DecodedSetTransferFeeInstructionUnchecked {
-    const { instruction, transferFeeInstruction, transferFeeBasisPoints, maximumFee } =
-        setTransferFeeInstructionData.decode(data);
+    const { discriminator, transferFeeDiscriminator, transferFeeBasisPoints, maximumFee } =
+        getSetTransferFeeInstructionDataDecoder().decode(data);
 
     return {
         programId,
@@ -978,8 +935,8 @@ export function decodeSetTransferFeeInstructionUnchecked({
             signers,
         },
         data: {
-            instruction,
-            transferFeeInstruction,
+            instruction: discriminator,
+            transferFeeInstruction: transferFeeDiscriminator,
             transferFeeBasisPoints,
             maximumFee,
         },

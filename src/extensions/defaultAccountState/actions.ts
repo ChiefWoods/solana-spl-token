@@ -1,4 +1,4 @@
-import type { ConfirmOptions, Connection, PublicKey, Signer, TransactionSignature } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, Address, Signer, TransactionSignature } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { getSigners } from '../../actions/internal.js';
 import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
@@ -23,7 +23,7 @@ import {
 export async function initializeDefaultAccountState(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
+    mint: Address,
     state: AccountState,
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,
@@ -50,9 +50,9 @@ export async function initializeDefaultAccountState(
 export async function updateDefaultAccountState(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
+    mint: Address,
     state: AccountState,
-    freezeAuthority: Signer | PublicKey,
+    freezeAuthority: Signer | Address,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,

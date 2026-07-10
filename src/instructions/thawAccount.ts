@@ -1,5 +1,5 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
+import { getThawAccountInstructionDataDecoder, getThawAccountInstructionDataEncoder } from '@solana-program/token';
+import type { AccountMeta, Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -10,6 +10,7 @@ import {
 } from '../errors.js';
 import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface ThawAccountInstructionData {
@@ -17,7 +18,12 @@ export interface ThawAccountInstructionData {
 }
 
 /** TODO: docs */
-export const thawAccountInstructionData = struct<ThawAccountInstructionData>([u8('instruction')]);
+export const thawAccountInstructionData = createInstructionDataCodec({
+    encoder: getThawAccountInstructionDataEncoder(),
+    decoder: getThawAccountInstructionDataDecoder(),
+    fromPublic: (_value: ThawAccountInstructionData) => ({}),
+    toPublic: ({ discriminator }) => ({ instruction: discriminator }),
+});
 
 /**
  * Construct a ThawAccount instruction
@@ -31,10 +37,10 @@ export const thawAccountInstructionData = struct<ThawAccountInstructionData>([u8
  * @return Instruction to add to a transaction
  */
 export function createThawAccountInstruction(
-    account: PublicKey,
-    mint: PublicKey,
-    authority: PublicKey,
-    multiSigners: (Signer | PublicKey)[] = [],
+    account: Address,
+    mint: Address,
+    authority: Address,
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -54,7 +60,7 @@ export function createThawAccountInstruction(
 
 /** A decoded, valid ThawAccount instruction */
 export interface DecodedThawAccountInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta;
         mint: AccountMeta;
@@ -104,7 +110,7 @@ export function decodeThawAccountInstruction(
 
 /** A decoded, non-validated ThawAccount instruction */
 export interface DecodedThawAccountInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta | undefined;
         mint: AccountMeta | undefined;

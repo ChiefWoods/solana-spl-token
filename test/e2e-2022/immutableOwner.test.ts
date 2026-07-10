@@ -2,8 +2,9 @@ import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 use(chaiAsPromised);
 
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
-import { Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
+import type { Connection, Signer } from '@solana/web3.js';
+
+import { Address, Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 
 import {
     AuthorityType,
@@ -22,15 +23,15 @@ describe('immutableOwner', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Keypair;
-    let account: PublicKey;
-    let mint: PublicKey;
+    let account: Address;
+    let mint: Address;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
     });
     beforeEach(async () => {
-        const mintAuthority = Keypair.generate();
-        const mintKeypair = Keypair.generate();
+        const mintAuthority = await Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = await createMint(
             connection,
             payer,
@@ -41,14 +42,14 @@ describe('immutableOwner', () => {
             undefined,
             TEST_PROGRAM_ID,
         );
-        owner = Keypair.generate();
+        owner = await Keypair.generate();
         const accountLen = getAccountLen(EXTENSIONS);
         const lamports = await connection.getMinimumBalanceForRentExemption(accountLen);
-        const accountKeypair = Keypair.generate();
+        const accountKeypair = await Keypair.generate();
         account = accountKeypair.publicKey;
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: account,
                 space: accountLen,
                 lamports,
@@ -60,7 +61,7 @@ describe('immutableOwner', () => {
         await sendAndConfirmTransaction(connection, transaction, [payer, accountKeypair], undefined);
     });
     it('AccountOwner', async () => {
-        const newOwner = Keypair.generate();
+        const newOwner = await Keypair.generate();
         expect(
             setAuthority(
                 connection,

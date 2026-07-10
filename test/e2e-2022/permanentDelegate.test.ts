@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import type { Connection, Signer } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
+import { Address } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import {
     createAccount,
@@ -23,25 +23,25 @@ const EXTENSIONS = [ExtensionType.PermanentDelegate];
 describe('permanentDelegate', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: PublicKey;
+    let mint: Address;
     let mintAuthority: Keypair;
     let permanentDelegate: Keypair;
-    let account: PublicKey;
-    let destination: PublicKey;
+    let account: Address;
+    let destination: Address;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintAuthority = Keypair.generate();
-        permanentDelegate = Keypair.generate();
+        mintAuthority = await Keypair.generate();
+        permanentDelegate = await Keypair.generate();
     });
     beforeEach(async () => {
-        const mintKeypair = Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = mintKeypair.publicKey;
         const mintLen = getMintLen(EXTENSIONS);
         const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: mint,
                 space: mintLen,
                 lamports,
@@ -54,7 +54,7 @@ describe('permanentDelegate', () => {
         await sendAndConfirmTransaction(connection, transaction, [payer, mintKeypair], undefined);
     });
     it('burn tokens ', async () => {
-        const owner = Keypair.generate();
+        const owner = await Keypair.generate();
         account = await createAccount(connection, payer, mint, owner.publicKey, undefined, undefined, TEST_PROGRAM_ID);
         await mintTo(connection, payer, mint, account, mintAuthority, 5, [], undefined, TEST_PROGRAM_ID);
         await burn(connection, payer, account, mint, permanentDelegate, 2, undefined, undefined, TEST_PROGRAM_ID);
@@ -65,8 +65,8 @@ describe('permanentDelegate', () => {
         }
     });
     it('transfer tokens', async () => {
-        const owner1 = Keypair.generate();
-        const owner2 = Keypair.generate();
+        const owner1 = await Keypair.generate();
+        const owner2 = await Keypair.generate();
         destination = await createAccount(
             connection,
             payer,
@@ -118,7 +118,7 @@ describe('permanentDelegate', () => {
         const permanentDelegateConfig = getPermanentDelegate(mintInfo);
         expect(permanentDelegateConfig).to.not.equal(null);
         if (permanentDelegateConfig !== null) {
-            expect(permanentDelegateConfig.delegate).to.eql(PublicKey.default);
+            expect(permanentDelegateConfig.delegate).to.eql(Address.default);
         }
     });
 });

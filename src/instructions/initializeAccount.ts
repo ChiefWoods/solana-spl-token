@@ -1,5 +1,8 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import type { AccountMeta, PublicKey } from '@solana/web3.js';
+import {
+    getInitializeAccountInstructionDataDecoder,
+    getInitializeAccountInstructionDataEncoder,
+} from '@solana-program/token';
+import type { AccountMeta, Address } from '@solana/web3.js';
 import { SYSVAR_RENT_PUBKEY, TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -9,6 +12,7 @@ import {
     TokenInvalidInstructionTypeError,
 } from '../errors.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface InitializeAccountInstructionData {
@@ -16,7 +20,12 @@ export interface InitializeAccountInstructionData {
 }
 
 /** TODO: docs */
-export const initializeAccountInstructionData = struct<InitializeAccountInstructionData>([u8('instruction')]);
+export const initializeAccountInstructionData = createInstructionDataCodec({
+    encoder: getInitializeAccountInstructionDataEncoder(),
+    decoder: getInitializeAccountInstructionDataDecoder(),
+    fromPublic: (_value: InitializeAccountInstructionData) => ({}),
+    toPublic: ({ discriminator }) => ({ instruction: discriminator }),
+});
 
 /**
  * Construct an InitializeAccount instruction
@@ -29,9 +38,9 @@ export const initializeAccountInstructionData = struct<InitializeAccountInstruct
  * @return Instruction to add to a transaction
  */
 export function createInitializeAccountInstruction(
-    account: PublicKey,
-    mint: PublicKey,
-    owner: PublicKey,
+    account: Address,
+    mint: Address,
+    owner: Address,
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = [
@@ -49,7 +58,7 @@ export function createInitializeAccountInstruction(
 
 /** A decoded, valid InitializeAccount instruction */
 export interface DecodedInitializeAccountInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta;
         mint: AccountMeta;
@@ -99,7 +108,7 @@ export function decodeInitializeAccountInstruction(
 
 /** A decoded, non-validated InitializeAccount instruction */
 export interface DecodedInitializeAccountInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta | undefined;
         mint: AccountMeta | undefined;

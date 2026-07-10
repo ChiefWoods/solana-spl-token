@@ -4,14 +4,14 @@ import { createInterestBearingMint, updateRateInterestBearingMint, TOKEN_2022_PR
 (async () => {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
-    const payer = Keypair.generate();
+    const payer = await Keypair.generate();
     const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
-    const mintAuthority = Keypair.generate();
-    const freezeAuthority = Keypair.generate();
-    const rateAuthority = Keypair.generate();
-    const mintKeypair = Keypair.generate();
+    const mintAuthority = await Keypair.generate();
+    const freezeAuthority = await Keypair.generate();
+    const rateAuthority = await Keypair.generate();
+    const mintKeypair = await Keypair.generate();
     const rate = 10;
     const decimals = 9;
     const mint = await createInterestBearingMint(

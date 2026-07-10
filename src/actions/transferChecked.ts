@@ -1,4 +1,4 @@
-import type { ConfirmOptions, Connection, PublicKey, Signer, TransactionSignature } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, Address, Signer, TransactionSignature } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import { createTransferCheckedInstruction } from '../instructions/transferChecked.js';
@@ -24,10 +24,10 @@ import { getSigners } from './internal.js';
 export async function transferChecked(
     connection: Connection,
     payer: Signer,
-    source: PublicKey,
-    mint: PublicKey,
-    destination: PublicKey,
-    owner: Signer | PublicKey,
+    source: Address,
+    mint: Address,
+    destination: Address,
+    owner: Signer | Address,
     amount: number | bigint,
     decimals: number,
     multiSigners: Signer[] = [],

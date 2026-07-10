@@ -1,11 +1,11 @@
-import type { ConfirmOptions, Connection, Keypair, PublicKey, Signer } from '@solana/web3.js';
-import { sendAndConfirmTransaction, SystemProgram, Transaction } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, Keypair, Signer } from '@solana/web3.js';
+import { sendAndConfirmTransaction, SystemProgram, Transaction, Address } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ID, NATIVE_MINT, TOKEN_PROGRAM_ID } from '../constants.js';
 import { createAssociatedTokenAccountInstruction } from '../instructions/associatedTokenAccount.js';
 import { createInitializeAccountInstruction } from '../instructions/initializeAccount.js';
 import { createSyncNativeInstruction } from '../instructions/syncNative.js';
 import { ACCOUNT_SIZE, getMinimumBalanceForRentExemptAccount } from '../state/account.js';
-import { getAssociatedTokenAddressSync } from '../state/mint.js';
+import { getAssociatedTokenAddress } from '../state/mint.js';
 import { createAccount } from './createAccount.js';
 
 /**
@@ -24,19 +24,21 @@ import { createAccount } from './createAccount.js';
 export async function createWrappedNativeAccount(
     connection: Connection,
     payer: Signer,
-    owner: PublicKey,
+    owner: Address,
     amount: number,
     keypair?: Keypair,
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_PROGRAM_ID,
     nativeMint = NATIVE_MINT,
-): Promise<PublicKey> {
+): Promise<Address> {
+    const payerPublicKey = new Address(payer.address);
+
     // If the amount provided is explicitly 0 or NaN, just create the account without funding it
     if (!amount) return await createAccount(connection, payer, nativeMint, owner, keypair, confirmOptions, programId);
 
     // If a keypair isn't provided, create the account at the owner's ATA for the native mint and return its address
     if (!keypair) {
-        const associatedToken = getAssociatedTokenAddressSync(
+        const associatedToken = await getAssociatedTokenAddress(
             nativeMint,
             owner,
             false,
@@ -46,7 +48,7 @@ export async function createWrappedNativeAccount(
 
         const transaction = new Transaction().add(
             createAssociatedTokenAccountInstruction(
-                payer.publicKey,
+                payerPublicKey,
                 associatedToken,
                 owner,
                 nativeMint,
@@ -54,7 +56,7 @@ export async function createWrappedNativeAccount(
                 ASSOCIATED_TOKEN_PROGRAM_ID,
             ),
             SystemProgram.transfer({
-                fromPubkey: payer.publicKey,
+                fromPubkey: payerPublicKey,
                 toPubkey: associatedToken,
                 lamports: amount,
             }),
@@ -71,14 +73,14 @@ export async function createWrappedNativeAccount(
 
     const transaction = new Transaction().add(
         SystemProgram.createAccount({
-            fromPubkey: payer.publicKey,
+            fromPubkey: payerPublicKey,
             newAccountPubkey: keypair.publicKey,
             space: ACCOUNT_SIZE,
             lamports,
             programId,
         }),
         SystemProgram.transfer({
-            fromPubkey: payer.publicKey,
+            fromPubkey: payerPublicKey,
             toPubkey: keypair.publicKey,
             lamports: amount,
         }),

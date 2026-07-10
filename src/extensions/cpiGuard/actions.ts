@@ -1,4 +1,4 @@
-import type { ConfirmOptions, Connection, PublicKey, Signer, TransactionSignature } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, Address, Signer, TransactionSignature } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { getSigners } from '../../actions/internal.js';
 import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
@@ -20,8 +20,8 @@ import { createDisableCpiGuardInstruction, createEnableCpiGuardInstruction } fro
 export async function enableCpiGuard(
     connection: Connection,
     payer: Signer,
-    account: PublicKey,
-    owner: Signer | PublicKey,
+    account: Address,
+    owner: Signer | Address,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,
@@ -51,8 +51,8 @@ export async function enableCpiGuard(
 export async function disableCpiGuard(
     connection: Connection,
     payer: Signer,
-    account: PublicKey,
-    owner: Signer | PublicKey,
+    account: Address,
+    owner: Signer | Address,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,

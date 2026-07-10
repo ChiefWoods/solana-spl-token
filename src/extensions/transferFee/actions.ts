@@ -1,4 +1,4 @@
-import type { ConfirmOptions, Connection, PublicKey, Signer, TransactionSignature } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, Address, Signer, TransactionSignature } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { getSigners } from '../../actions/internal.js';
 import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
@@ -30,10 +30,10 @@ import {
 export async function transferCheckedWithFee(
     connection: Connection,
     payer: Signer,
-    source: PublicKey,
-    mint: PublicKey,
-    destination: PublicKey,
-    owner: Signer | PublicKey,
+    source: Address,
+    mint: Address,
+    destination: Address,
+    owner: Signer | Address,
     amount: bigint,
     decimals: number,
     fee: bigint,
@@ -77,9 +77,9 @@ export async function transferCheckedWithFee(
 export async function withdrawWithheldTokensFromMint(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    destination: PublicKey,
-    authority: Signer | PublicKey,
+    mint: Address,
+    destination: Address,
+    authority: Signer | Address,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,
@@ -111,11 +111,11 @@ export async function withdrawWithheldTokensFromMint(
 export async function withdrawWithheldTokensFromAccounts(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    destination: PublicKey,
-    authority: Signer | PublicKey,
+    mint: Address,
+    destination: Address,
+    authority: Signer | Address,
     multiSigners: Signer[],
-    sources: PublicKey[],
+    sources: Address[],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,
 ): Promise<TransactionSignature> {
@@ -150,8 +150,8 @@ export async function withdrawWithheldTokensFromAccounts(
 export async function harvestWithheldTokensToMint(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    sources: PublicKey[],
+    mint: Address,
+    sources: Address[],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,
 ): Promise<TransactionSignature> {
@@ -178,8 +178,8 @@ export async function harvestWithheldTokensToMint(
 export async function setTransferFee(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    authority: Signer | PublicKey,
+    mint: Address,
+    authority: Signer | Address,
     multiSigners: Signer[],
     transferFeeBasisPoints: number,
     maximumFee: bigint,

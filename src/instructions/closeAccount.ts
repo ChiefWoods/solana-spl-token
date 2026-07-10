@@ -1,5 +1,5 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
+import { getCloseAccountInstructionDataDecoder, getCloseAccountInstructionDataEncoder } from '@solana-program/token';
+import type { AccountMeta, Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -10,6 +10,7 @@ import {
 } from '../errors.js';
 import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface CloseAccountInstructionData {
@@ -17,7 +18,12 @@ export interface CloseAccountInstructionData {
 }
 
 /** TODO: docs */
-export const closeAccountInstructionData = struct<CloseAccountInstructionData>([u8('instruction')]);
+export const closeAccountInstructionData = createInstructionDataCodec({
+    encoder: getCloseAccountInstructionDataEncoder(),
+    decoder: getCloseAccountInstructionDataDecoder(),
+    fromPublic: (_value: CloseAccountInstructionData) => ({}),
+    toPublic: ({ discriminator }) => ({ instruction: discriminator }),
+});
 
 /**
  * Construct a CloseAccount instruction
@@ -31,10 +37,10 @@ export const closeAccountInstructionData = struct<CloseAccountInstructionData>([
  * @return Instruction to add to a transaction
  */
 export function createCloseAccountInstruction(
-    account: PublicKey,
-    destination: PublicKey,
-    authority: PublicKey,
-    multiSigners: (Signer | PublicKey)[] = [],
+    account: Address,
+    destination: Address,
+    authority: Address,
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -54,7 +60,7 @@ export function createCloseAccountInstruction(
 
 /** A decoded, valid CloseAccount instruction */
 export interface DecodedCloseAccountInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta;
         destination: AccountMeta;
@@ -104,7 +110,7 @@ export function decodeCloseAccountInstruction(
 
 /** A decoded, non-validated CloseAccount instruction */
 export interface DecodedCloseAccountInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta | undefined;
         destination: AccountMeta | undefined;

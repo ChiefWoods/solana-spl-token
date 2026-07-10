@@ -1,9 +1,18 @@
-import { blob, greedy, seq, struct, u32, u8 } from '@solana/buffer-layout';
+import {
+    fixCodecSize,
+    getAddressCodec,
+    getArrayCodec,
+    getBooleanCodec,
+    getBytesCodec,
+    getStructCodec,
+    getU32Codec,
+    getU64Codec,
+    getU8Codec,
+} from '@solana/kit';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
 import type { AccountInfo, AccountMeta, Connection } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
-import { bool, publicKey, u64 } from '@solana/buffer-layout-utils';
+import { Address } from '@solana/web3.js';
 import type { Account } from '../../state/account.js';
 import { TokenTransferHookAccountNotFound } from '../../errors.js';
 import { unpackSeeds } from './seeds.js';
@@ -12,23 +21,27 @@ import { unpackPubkeyData } from './pubkeyData.js';
 /** TransferHook as stored by the program */
 export interface TransferHook {
     /** The transfer hook update authority */
-    authority: PublicKey;
+    authority: Address;
     /** The transfer hook program account */
-    programId: PublicKey;
+    programId: Address;
 }
 
-/** Buffer layout for de/serializing a transfer hook extension */
-export const TransferHookLayout = struct<TransferHook>([publicKey('authority'), publicKey('programId')]);
+/** Codec for de/serializing a transfer hook extension */
+export const TransferHookCodec = getStructCodec([
+    ['authority', getAddressCodec()],
+    ['programId', getAddressCodec()],
+]);
 
-export const TRANSFER_HOOK_SIZE = TransferHookLayout.span;
+/** @deprecated Use {@link TransferHookCodec} */
+export const TransferHookLayout = TransferHookCodec;
+
+export const TRANSFER_HOOK_SIZE = TransferHookCodec.fixedSize;
 
 export function getTransferHook(mint: Mint): TransferHook | null {
     const extensionData = getExtensionData(ExtensionType.TransferHook, mint.tlvData);
-    if (extensionData !== null) {
-        return TransferHookLayout.decode(extensionData);
-    } else {
-        return null;
-    }
+    if (extensionData === null) return null;
+    const { authority, programId } = TransferHookCodec.decode(extensionData);
+    return { authority: new Address(authority), programId: new Address(programId) };
 }
 
 /** TransferHookAccount as stored by the program */
@@ -40,23 +53,22 @@ export interface TransferHookAccount {
     transferring: boolean;
 }
 
-/** Buffer layout for de/serializing a transfer hook account extension */
-export const TransferHookAccountLayout = struct<TransferHookAccount>([bool('transferring')]);
+/** Codec for de/serializing a transfer hook account extension */
+export const TransferHookAccountCodec = getStructCodec([['transferring', getBooleanCodec()]]);
 
-export const TRANSFER_HOOK_ACCOUNT_SIZE = TransferHookAccountLayout.span;
+/** @deprecated Use {@link TransferHookAccountCodec} */
+export const TransferHookAccountLayout = TransferHookAccountCodec;
+
+export const TRANSFER_HOOK_ACCOUNT_SIZE = TransferHookAccountCodec.fixedSize;
 
 export function getTransferHookAccount(account: Account): TransferHookAccount | null {
     const extensionData = getExtensionData(ExtensionType.TransferHookAccount, account.tlvData);
-    if (extensionData !== null) {
-        return TransferHookAccountLayout.decode(extensionData);
-    } else {
-        return null;
-    }
+    return extensionData !== null ? TransferHookAccountCodec.decode(extensionData) : null;
 }
 
-export function getExtraAccountMetaAddress(mint: PublicKey, programId: PublicKey): PublicKey {
-    const seeds = [Buffer.from('extra-account-metas'), mint.toBuffer()];
-    return PublicKey.findProgramAddressSync(seeds, programId)[0];
+export async function getExtraAccountMetaAddress(mint: Address, programId: Address): Promise<Address> {
+    const seeds = [Buffer.from('extra-account-metas'), mint.toBytes()];
+    return (await Address.findProgramAddress(seeds, programId))[0];
 }
 
 /** ExtraAccountMeta as stored by the transfer hook program */
@@ -67,43 +79,56 @@ export interface ExtraAccountMeta {
     isWritable: boolean;
 }
 
-/** Buffer layout for de/serializing an ExtraAccountMeta */
-export const ExtraAccountMetaLayout = struct<ExtraAccountMeta>([
-    u8('discriminator'),
-    blob(32, 'addressConfig'),
-    bool('isSigner'),
-    bool('isWritable'),
+/** Codec for de/serializing an ExtraAccountMeta */
+export const ExtraAccountMetaCodec = getStructCodec([
+    ['discriminator', getU8Codec()],
+    ['addressConfig', fixCodecSize(getBytesCodec(), 32)],
+    ['isSigner', getBooleanCodec()],
+    ['isWritable', getBooleanCodec()],
 ]);
+
+/** @deprecated Use {@link ExtraAccountMetaCodec} */
+export const ExtraAccountMetaLayout = ExtraAccountMetaCodec;
 
 export interface ExtraAccountMetaList {
     count: number;
     extraAccounts: ExtraAccountMeta[];
 }
 
-/** Buffer layout for de/serializing a list of ExtraAccountMeta prefixed by a u32 length */
-export const ExtraAccountMetaListLayout = struct<ExtraAccountMetaList>([
-    u32('count'),
-    seq<ExtraAccountMeta>(ExtraAccountMetaLayout, greedy(ExtraAccountMetaLayout.span), 'extraAccounts'),
+/** Codec for de/serializing a list of ExtraAccountMeta prefixed by a u32 count */
+export const ExtraAccountMetaListCodec = getStructCodec([
+    ['count', getU32Codec()],
+    ['extraAccounts', getArrayCodec(ExtraAccountMetaCodec, { size: 'remainder' })],
 ]);
 
-/** Buffer layout for de/serializing a list of ExtraAccountMetaAccountData prefixed by a u32 length */
+/** @deprecated Use {@link ExtraAccountMetaListCodec} */
+export const ExtraAccountMetaListLayout = ExtraAccountMetaListCodec;
+
 export interface ExtraAccountMetaAccountData {
     instructionDiscriminator: bigint;
     length: number;
     extraAccountsList: ExtraAccountMetaList;
 }
 
-/** Buffer layout for de/serializing an ExtraAccountMetaAccountData */
-export const ExtraAccountMetaAccountDataLayout = struct<ExtraAccountMetaAccountData>([
-    u64('instructionDiscriminator'),
-    u32('length'),
-    ExtraAccountMetaListLayout.replicate('extraAccountsList'),
+/** Codec for de/serializing ExtraAccountMetaAccountData */
+export const ExtraAccountMetaAccountDataCodec = getStructCodec([
+    ['instructionDiscriminator', getU64Codec()],
+    ['length', getU32Codec()],
+    ['extraAccountsList', ExtraAccountMetaListCodec],
 ]);
 
+/** @deprecated Use {@link ExtraAccountMetaAccountDataCodec} */
+export const ExtraAccountMetaAccountDataLayout = ExtraAccountMetaAccountDataCodec;
+
 /** Unpack an extra account metas account and parse the data into a list of ExtraAccountMetas */
-export function getExtraAccountMetas(account: AccountInfo<Buffer>): ExtraAccountMeta[] {
-    const extraAccountsList = ExtraAccountMetaAccountDataLayout.decode(account.data).extraAccountsList;
-    return extraAccountsList.extraAccounts.slice(0, extraAccountsList.count);
+export function getExtraAccountMetas(account: AccountInfo<Uint8Array>): ExtraAccountMeta[] {
+    const { extraAccountsList } = ExtraAccountMetaAccountDataCodec.decode(account.data);
+    return extraAccountsList.extraAccounts.slice(0, extraAccountsList.count).map(meta => ({
+        discriminator: meta.discriminator,
+        addressConfig: Uint8Array.from(meta.addressConfig),
+        isSigner: meta.isSigner,
+        isWritable: meta.isWritable,
+    }));
 }
 
 /** Take an ExtraAccountMeta and construct that into an actual AccountMeta */
@@ -112,11 +137,11 @@ export async function resolveExtraAccountMeta(
     extraMeta: ExtraAccountMeta,
     previousMetas: AccountMeta[],
     instructionData: Buffer,
-    transferHookProgramId: PublicKey,
+    transferHookProgramId: Address,
 ): Promise<AccountMeta> {
     if (extraMeta.discriminator === 0) {
         return {
-            pubkey: new PublicKey(extraMeta.addressConfig),
+            pubkey: new Address(extraMeta.addressConfig),
             isSigner: extraMeta.isSigner,
             isWritable: extraMeta.isWritable,
         };
@@ -129,7 +154,7 @@ export async function resolveExtraAccountMeta(
         };
     }
 
-    let programId = PublicKey.default;
+    let programId = Address.default;
 
     if (extraMeta.discriminator === 1) {
         programId = transferHookProgramId;
@@ -142,7 +167,7 @@ export async function resolveExtraAccountMeta(
     }
 
     const seeds = await unpackSeeds(extraMeta.addressConfig, previousMetas, instructionData, connection);
-    const pubkey = PublicKey.findProgramAddressSync(seeds, programId)[0];
+    const pubkey = (await Address.findProgramAddress(seeds, programId))[0];
 
     return { pubkey, isSigner: extraMeta.isSigner, isWritable: extraMeta.isWritable };
 }

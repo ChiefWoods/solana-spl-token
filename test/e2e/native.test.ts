@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
-import { Keypair, Transaction, SystemProgram, sendAndConfirmTransaction } from '@solana/web3.js';
+import type { Connection, Signer } from '@solana/web3.js';
+import { Address, Keypair, Transaction, SystemProgram, sendAndConfirmTransaction } from '@solana/web3.js';
 import {
     NATIVE_MINT,
     NATIVE_MINT_2022,
@@ -17,9 +17,9 @@ describe('native', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Keypair;
-    let account: PublicKey;
+    let account: Address;
     let amount: number;
-    let nativeMint: PublicKey;
+    let nativeMint: Address;
     before(async () => {
         amount = 1_000_000_000;
         connection = await getConnection();
@@ -32,7 +32,7 @@ describe('native', () => {
         }
     });
     beforeEach(async () => {
-        owner = Keypair.generate();
+        owner = await Keypair.generate();
         account = await createWrappedNativeAccount(
             connection,
             payer,
@@ -50,7 +50,7 @@ describe('native', () => {
         expect(accountInfo.amount).to.eql(BigInt(amount));
     });
     it('syncNative', async () => {
-        let balance = 0;
+        let balance = 0n;
         const preInfo = await connection.getAccountInfo(account);
         expect(preInfo).to.not.equal(null);
         if (preInfo != null) {
@@ -58,12 +58,12 @@ describe('native', () => {
         }
 
         // transfer lamports into the native account
-        const additionalLamports = 100;
+        const additionalLamports = 100n;
         await sendAndConfirmTransaction(
             connection,
             new Transaction().add(
                 SystemProgram.transfer({
-                    fromPubkey: payer.publicKey,
+                    fromPubkey: new Address(payer.address),
                     toPubkey: account,
                     lamports: additionalLamports,
                 }),
@@ -87,16 +87,16 @@ describe('native', () => {
         await syncNative(connection, payer, account, undefined, TEST_PROGRAM_ID);
         const postAccountInfo = await getAccount(connection, account, undefined, TEST_PROGRAM_ID);
         expect(postAccountInfo.isNative).to.equal(true);
-        expect(postAccountInfo.amount).to.eql(BigInt(amount + additionalLamports));
+        expect(postAccountInfo.amount).to.eql(BigInt(amount) + additionalLamports);
     });
     it('closeAccount', async () => {
-        let balance = 0;
+        let balance = 0n;
         const preInfo = await connection.getAccountInfo(account);
         expect(preInfo).to.not.equal(null);
         if (preInfo != null) {
             balance = preInfo.lamports;
         }
-        const destination = Keypair.generate().publicKey;
+        const destination = (await Keypair.generate()).publicKey;
         await closeAccount(connection, payer, account, destination, owner, [], undefined, TEST_PROGRAM_ID);
         const nullInfo = await connection.getAccountInfo(account);
         expect(nullInfo).to.equal(null);

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import type { Connection, Signer } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
+import { Address } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 
 import {
@@ -35,13 +35,13 @@ describe('tokenGroupMember', async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
 
-        groupMint = Keypair.generate();
-        const groupMintAuthority = Keypair.generate();
-        groupUpdateAuthority = Keypair.generate();
+        groupMint = await Keypair.generate();
+        const groupMintAuthority = await Keypair.generate();
+        groupUpdateAuthority = await Keypair.generate();
 
-        memberMint = Keypair.generate();
-        memberMintAuthority = Keypair.generate();
-        memberUpdateAuthority = Keypair.generate();
+        memberMint = await Keypair.generate();
+        memberMintAuthority = await Keypair.generate();
+        memberUpdateAuthority = await Keypair.generate();
 
         const groupMintLen = getMintLen([ExtensionType.GroupPointer]);
         const groupMintLamports = await connection.getMinimumBalanceForRentExemption(groupMintLen);
@@ -54,7 +54,7 @@ describe('tokenGroupMember', async () => {
             connection,
             new Transaction().add(
                 SystemProgram.createAccount({
-                    fromPubkey: payer.publicKey,
+                    fromPubkey: new Address(payer.address),
                     newAccountPubkey: groupMint.publicKey,
                     space: groupMintLen,
                     lamports: groupMintLamports,
@@ -94,7 +94,7 @@ describe('tokenGroupMember', async () => {
             connection,
             new Transaction().add(
                 SystemProgram.createAccount({
-                    fromPubkey: payer.publicKey,
+                    fromPubkey: new Address(payer.address),
                     newAccountPubkey: memberMint.publicKey,
                     space: memberMintLen,
                     lamports: memberMintLamports,

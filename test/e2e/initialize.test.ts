@@ -1,5 +1,5 @@
 import type { Connection, Signer } from '@solana/web3.js';
-import { Transaction, SystemProgram, Keypair, sendAndConfirmTransaction } from '@solana/web3.js';
+import { Address, Transaction, SystemProgram, Keypair, sendAndConfirmTransaction } from '@solana/web3.js';
 import { expect } from 'chai';
 import {
     getMinimumBalanceForRentExemptMint,
@@ -20,15 +20,15 @@ describe('initialize mint', () => {
     beforeEach(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintKeypair = Keypair.generate();
+        mintKeypair = await Keypair.generate();
         lamports = await getMinimumBalanceForRentExemptMint(connection);
     });
     it('works', async () => {
-        const mintAuthority = Keypair.generate().publicKey;
-        const freezeAuthority = Keypair.generate().publicKey;
+        const mintAuthority = (await Keypair.generate()).publicKey;
+        const freezeAuthority = (await Keypair.generate()).publicKey;
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: mintKeypair.publicKey,
                 space: MINT_SIZE,
                 lamports,
@@ -51,10 +51,10 @@ describe('initialize mint', () => {
         expect(mintInfo.freezeAuthority).to.eql(freezeAuthority);
     });
     it('works with null freeze authority', async () => {
-        const mintAuthority = Keypair.generate().publicKey;
+        const mintAuthority = (await Keypair.generate()).publicKey;
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: mintKeypair.publicKey,
                 space: MINT_SIZE,
                 lamports,
@@ -85,15 +85,15 @@ describe('initialize mint 2', () => {
     beforeEach(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintKeypair = Keypair.generate();
+        mintKeypair = await Keypair.generate();
         lamports = await getMinimumBalanceForRentExemptMint(connection);
     });
     it('works', async () => {
-        const mintAuthority = Keypair.generate().publicKey;
-        const freezeAuthority = Keypair.generate().publicKey;
+        const mintAuthority = (await Keypair.generate()).publicKey;
+        const freezeAuthority = (await Keypair.generate()).publicKey;
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: mintKeypair.publicKey,
                 space: MINT_SIZE,
                 lamports,
@@ -116,10 +116,10 @@ describe('initialize mint 2', () => {
         expect(mintInfo.freezeAuthority).to.eql(freezeAuthority);
     });
     it('works with null freeze authority', async () => {
-        const mintAuthority = Keypair.generate().publicKey;
+        const mintAuthority = (await Keypair.generate()).publicKey;
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: mintKeypair.publicKey,
                 space: MINT_SIZE,
                 lamports,

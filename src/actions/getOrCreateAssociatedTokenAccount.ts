@@ -1,5 +1,5 @@
-import type { Commitment, ConfirmOptions, Connection, PublicKey, Signer } from '@solana/web3.js';
-import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
+import type { Commitment, ConfirmOptions, Connection, Signer } from '@solana/web3.js';
+import { sendAndConfirmTransaction, Transaction, Address } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../constants.js';
 import {
     TokenAccountNotFoundError,
@@ -10,7 +10,7 @@ import {
 import { createAssociatedTokenAccountInstruction } from '../instructions/associatedTokenAccount.js';
 import type { Account } from '../state/account.js';
 import { getAccount } from '../state/account.js';
-import { getAssociatedTokenAddressSync } from '../state/mint.js';
+import { getAssociatedTokenAddress } from '../state/mint.js';
 
 /**
  * Retrieve the associated token account, or create it if it doesn't exist
@@ -30,15 +30,15 @@ import { getAssociatedTokenAddressSync } from '../state/mint.js';
 export async function getOrCreateAssociatedTokenAccount(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    owner: PublicKey,
+    mint: Address,
+    owner: Address,
     allowOwnerOffCurve = false,
     commitment?: Commitment,
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_PROGRAM_ID,
     associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID,
 ): Promise<Account> {
-    const associatedToken = getAssociatedTokenAddressSync(
+    const associatedToken = await getAssociatedTokenAddress(
         mint,
         owner,
         allowOwnerOffCurve,
@@ -60,7 +60,7 @@ export async function getOrCreateAssociatedTokenAccount(
             try {
                 const transaction = new Transaction().add(
                     createAssociatedTokenAccountInstruction(
-                        payer.publicKey,
+                        new Address(payer.address),
                         associatedToken,
                         owner,
                         mint,

@@ -1,4 +1,4 @@
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { Keypair, Address } from '@solana/web3.js';
 import { expect, use } from 'chai';
 import {
     ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -30,12 +30,12 @@ import chaiAsPromised from 'chai-as-promised';
 use(chaiAsPromised);
 
 describe('spl-token instructions', () => {
-    it('TransferChecked', () => {
+    it('TransferChecked', async () => {
         const ix = createTransferCheckedInstruction(
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
             1,
             9,
         );
@@ -43,44 +43,49 @@ describe('spl-token instructions', () => {
         expect(ix.keys).to.have.length(4);
     });
 
-    it('InitializeMint', () => {
-        const ix = createInitializeMintInstruction(Keypair.generate().publicKey, 9, Keypair.generate().publicKey, null);
+    it('InitializeMint', async () => {
+        const ix = createInitializeMintInstruction(
+            (await Keypair.generate()).publicKey,
+            9,
+            (await Keypair.generate()).publicKey,
+            null,
+        );
         expect(ix.programId).to.eql(TOKEN_PROGRAM_ID);
         expect(ix.keys).to.have.length(2);
     });
 
-    it('InitializeMint2', () => {
+    it('InitializeMint2', async () => {
         const ix = createInitializeMint2Instruction(
-            Keypair.generate().publicKey,
+            (await Keypair.generate()).publicKey,
             9,
-            Keypair.generate().publicKey,
+            (await Keypair.generate()).publicKey,
             null,
         );
         expect(ix.programId).to.eql(TOKEN_PROGRAM_ID);
         expect(ix.keys).to.have.length(1);
     });
 
-    it('SyncNative', () => {
-        const ix = createSyncNativeInstruction(Keypair.generate().publicKey);
+    it('SyncNative', async () => {
+        const ix = createSyncNativeInstruction((await Keypair.generate()).publicKey);
         expect(ix.programId).to.eql(TOKEN_PROGRAM_ID);
         expect(ix.keys).to.have.length(1);
     });
 
-    it('InitializeAccount2', () => {
+    it('InitializeAccount2', async () => {
         const ix = createInitializeAccount2Instruction(
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
         );
         expect(ix.programId).to.eql(TOKEN_PROGRAM_ID);
         expect(ix.keys).to.have.length(3);
     });
 
-    it('InitializeAccount3', () => {
+    it('InitializeAccount3', async () => {
         const ix = createInitializeAccount3Instruction(
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
         );
         expect(ix.programId).to.eql(TOKEN_PROGRAM_ID);
         expect(ix.keys).to.have.length(2);
@@ -88,12 +93,12 @@ describe('spl-token instructions', () => {
 });
 
 describe('spl-token-2022 instructions', () => {
-    it('TransferChecked', () => {
+    it('TransferChecked', async () => {
         const ix = createTransferCheckedInstruction(
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
             1,
             9,
             [],
@@ -103,11 +108,11 @@ describe('spl-token-2022 instructions', () => {
         expect(ix.keys).to.have.length(4);
     });
 
-    it('InitializeMint', () => {
+    it('InitializeMint', async () => {
         const ix = createInitializeMintInstruction(
-            Keypair.generate().publicKey,
+            (await Keypair.generate()).publicKey,
             9,
-            Keypair.generate().publicKey,
+            (await Keypair.generate()).publicKey,
             null,
             TOKEN_2022_PROGRAM_ID,
         );
@@ -115,11 +120,11 @@ describe('spl-token-2022 instructions', () => {
         expect(ix.keys).to.have.length(2);
     });
 
-    it('InitializeMint2', () => {
+    it('InitializeMint2', async () => {
         const ix = createInitializeMint2Instruction(
-            Keypair.generate().publicKey,
+            (await Keypair.generate()).publicKey,
             9,
-            Keypair.generate().publicKey,
+            (await Keypair.generate()).publicKey,
             null,
             TOKEN_2022_PROGRAM_ID,
         );
@@ -127,14 +132,14 @@ describe('spl-token-2022 instructions', () => {
         expect(ix.keys).to.have.length(1);
     });
 
-    it('SyncNative', () => {
-        const ix = createSyncNativeInstruction(Keypair.generate().publicKey, TOKEN_2022_PROGRAM_ID);
+    it('SyncNative', async () => {
+        const ix = createSyncNativeInstruction((await Keypair.generate()).publicKey, TOKEN_2022_PROGRAM_ID);
         expect(ix.programId).to.eql(TOKEN_2022_PROGRAM_ID);
         expect(ix.keys).to.have.length(1);
     });
 
-    it('Reallocate', () => {
-        const publicKey = Keypair.generate().publicKey;
+    it('Reallocate', async () => {
+        const publicKey = (await Keypair.generate()).publicKey;
         const extensionTypes = [ExtensionType.MintCloseAuthority, ExtensionType.TransferFeeConfig];
         const ix = createReallocateInstruction(publicKey, publicKey, extensionTypes, publicKey);
         expect(ix.programId).to.eql(TOKEN_2022_PROGRAM_ID);
@@ -145,59 +150,59 @@ describe('spl-token-2022 instructions', () => {
         expect(ix.data[3]).to.eql(extensionTypes[1]);
     });
 
-    it('AmountToUiAmount', () => {
-        const ix = createAmountToUiAmountInstruction(Keypair.generate().publicKey, 22, TOKEN_2022_PROGRAM_ID);
+    it('AmountToUiAmount', async () => {
+        const ix = createAmountToUiAmountInstruction((await Keypair.generate()).publicKey, 22, TOKEN_2022_PROGRAM_ID);
         expect(ix.programId).to.eql(TOKEN_2022_PROGRAM_ID);
         expect(ix.keys).to.have.length(1);
     });
 
-    it('UiAmountToAmount', () => {
-        const ix = createUiAmountToAmountInstruction(Keypair.generate().publicKey, '22', TOKEN_2022_PROGRAM_ID);
+    it('UiAmountToAmount', async () => {
+        const ix = createUiAmountToAmountInstruction((await Keypair.generate()).publicKey, '22', TOKEN_2022_PROGRAM_ID);
         expect(ix.programId).to.eql(TOKEN_2022_PROGRAM_ID);
         expect(ix.keys).to.have.length(1);
     });
 });
 
 describe('spl-associated-token-account instructions', () => {
-    it('create', () => {
+    it('create', async () => {
         const ix = createAssociatedTokenAccountInstruction(
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
         );
         expect(ix.programId).to.eql(ASSOCIATED_TOKEN_PROGRAM_ID);
         expect(ix.keys).to.have.length(6);
     });
 
-    it('create idempotent', () => {
+    it('create idempotent', async () => {
         const ix = createAssociatedTokenAccountIdempotentInstruction(
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
         );
         expect(ix.programId).to.eql(ASSOCIATED_TOKEN_PROGRAM_ID);
         expect(ix.keys).to.have.length(6);
     });
 
-    it('create idempotent with derivation', () => {
-        const ix = createAssociatedTokenAccountIdempotentInstructionWithDerivation(
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
+    it('create idempotent with derivation', async () => {
+        const ix = await createAssociatedTokenAccountIdempotentInstructionWithDerivation(
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
         );
         expect(ix.programId).to.eql(ASSOCIATED_TOKEN_PROGRAM_ID);
         expect(ix.keys).to.have.length(6);
     });
 
-    it('create idempotent with derivation same without', () => {
-        const payer = Keypair.generate().publicKey;
-        const owner = Keypair.generate().publicKey;
-        const mint = Keypair.generate().publicKey;
-        const associatedToken = getAssociatedTokenAddressSync(mint, owner, true);
+    it('create idempotent with derivation same without', async () => {
+        const payer = (await Keypair.generate()).publicKey;
+        const owner = (await Keypair.generate()).publicKey;
+        const mint = (await Keypair.generate()).publicKey;
+        const associatedToken = await getAssociatedTokenAddress(mint, owner, true);
         const ix = createAssociatedTokenAccountIdempotentInstruction(payer, associatedToken, owner, mint);
-        const ixDerivation = createAssociatedTokenAccountIdempotentInstructionWithDerivation(payer, owner, mint);
+        const ixDerivation = await createAssociatedTokenAccountIdempotentInstructionWithDerivation(payer, owner, mint);
         expect(ix).to.deep.eq(ixDerivation);
     });
 });
@@ -205,64 +210,50 @@ describe('spl-associated-token-account instructions', () => {
 describe('state', () => {
     it('getAssociatedTokenAddress', async () => {
         const associatedPublicKey = await getAssociatedTokenAddress(
-            new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
-            new PublicKey('B8UwBUUnKwCyKuGMbFKWaG7exYdDk2ozZrPg72NyVbfj'),
+            new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
+            new Address('B8UwBUUnKwCyKuGMbFKWaG7exYdDk2ozZrPg72NyVbfj'),
         );
         expect(associatedPublicKey.toString()).to.eql(
-            new PublicKey('DShWnroshVbeUp28oopA3Pu7oFPDBtC1DBmPECXXAQ9n').toString(),
+            new Address('DShWnroshVbeUp28oopA3Pu7oFPDBtC1DBmPECXXAQ9n').toString(),
         );
         await expect(
-            getAssociatedTokenAddress(
-                new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
-                associatedPublicKey,
-            ),
+            getAssociatedTokenAddress(new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'), associatedPublicKey),
         ).to.be.rejectedWith(TokenOwnerOffCurveError);
 
         const associatedPublicKey2 = await getAssociatedTokenAddress(
-            new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
+            new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
             associatedPublicKey,
             true,
         );
         expect(associatedPublicKey2.toString()).to.eql(
-            new PublicKey('F3DmXZFqkfEWFA7MN2vDPs813GeEWPaT6nLk4PSGuWJd').toString(),
+            new Address('F3DmXZFqkfEWFA7MN2vDPs813GeEWPaT6nLk4PSGuWJd').toString(),
         );
     });
 
-    it('getAssociatedTokenAddressSync matches getAssociatedTokenAddress', async () => {
+    it('getAssociatedTokenAddressSync reports unsupported under web3.js v3', async () => {
         const asyncAssociatedPublicKey = await getAssociatedTokenAddress(
-            new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
-            new PublicKey('B8UwBUUnKwCyKuGMbFKWaG7exYdDk2ozZrPg72NyVbfj'),
+            new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
+            new Address('B8UwBUUnKwCyKuGMbFKWaG7exYdDk2ozZrPg72NyVbfj'),
         );
-        const associatedPublicKey = getAssociatedTokenAddressSync(
-            new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
-            new PublicKey('B8UwBUUnKwCyKuGMbFKWaG7exYdDk2ozZrPg72NyVbfj'),
+        expect(asyncAssociatedPublicKey.toString()).to.eql(
+            new Address('DShWnroshVbeUp28oopA3Pu7oFPDBtC1DBmPECXXAQ9n').toString(),
         );
-        expect(associatedPublicKey.toString()).to.eql(
-            new PublicKey('DShWnroshVbeUp28oopA3Pu7oFPDBtC1DBmPECXXAQ9n').toString(),
-        );
-        expect(asyncAssociatedPublicKey.toString()).to.eql(associatedPublicKey.toString());
 
         expect(function () {
             getAssociatedTokenAddressSync(
-                new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
-                associatedPublicKey,
+                new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
+                new Address('B8UwBUUnKwCyKuGMbFKWaG7exYdDk2ozZrPg72NyVbfj'),
             );
-        }).to.throw(TokenOwnerOffCurveError);
+        }).to.throw('getAssociatedTokenAddressSync is not supported with @solana/web3.js v3');
 
         const asyncAssociatedPublicKey2 = await getAssociatedTokenAddress(
-            new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
+            new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
             asyncAssociatedPublicKey,
             true,
         );
-        const associatedPublicKey2 = getAssociatedTokenAddressSync(
-            new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
-            associatedPublicKey,
-            true,
+        expect(asyncAssociatedPublicKey2.toString()).to.eql(
+            new Address('F3DmXZFqkfEWFA7MN2vDPs813GeEWPaT6nLk4PSGuWJd').toString(),
         );
-        expect(associatedPublicKey2.toString()).to.eql(
-            new PublicKey('F3DmXZFqkfEWFA7MN2vDPs813GeEWPaT6nLk4PSGuWJd').toString(),
-        );
-        expect(asyncAssociatedPublicKey2.toString()).to.eql(associatedPublicKey2.toString());
     });
 });
 

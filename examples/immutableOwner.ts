@@ -20,11 +20,11 @@ import {
 (async () => {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
-    const payer = Keypair.generate();
+    const payer = await Keypair.generate();
     const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
-    const mintAuthority = Keypair.generate();
+    const mintAuthority = await Keypair.generate();
     const decimals = 9;
     const mint = await createMint(
         connection,
@@ -40,8 +40,8 @@ import {
     const accountLen = getAccountLen([ExtensionType.ImmutableOwner]);
     const lamports = await connection.getMinimumBalanceForRentExemption(accountLen);
 
-    const owner = Keypair.generate();
-    const accountKeypair = Keypair.generate();
+    const owner = await Keypair.generate();
+    const accountKeypair = await Keypair.generate();
     const account = accountKeypair.publicKey;
     const transaction = new Transaction().add(
         SystemProgram.createAccount({

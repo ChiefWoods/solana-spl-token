@@ -1,6 +1,5 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { u64 } from '@solana/buffer-layout-utils';
-import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
+import { getApproveInstructionDataDecoder, getApproveInstructionDataEncoder } from '@solana-program/token';
+import type { AccountMeta, Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -11,6 +10,7 @@ import {
 } from '../errors.js';
 import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface ApproveInstructionData {
@@ -19,7 +19,12 @@ export interface ApproveInstructionData {
 }
 
 /** TODO: docs */
-export const approveInstructionData = struct<ApproveInstructionData>([u8('instruction'), u64('amount')]);
+export const approveInstructionData = createInstructionDataCodec({
+    encoder: getApproveInstructionDataEncoder(),
+    decoder: getApproveInstructionDataDecoder(),
+    fromPublic: ({ amount }: ApproveInstructionData) => ({ amount }),
+    toPublic: ({ discriminator, amount }) => ({ instruction: discriminator, amount }),
+});
 
 /**
  * Construct an Approve instruction
@@ -34,11 +39,11 @@ export const approveInstructionData = struct<ApproveInstructionData>([u8('instru
  * @return Instruction to add to a transaction
  */
 export function createApproveInstruction(
-    account: PublicKey,
-    delegate: PublicKey,
-    owner: PublicKey,
+    account: Address,
+    delegate: Address,
+    owner: Address,
     amount: number | bigint,
-    multiSigners: (Signer | PublicKey)[] = [],
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -64,7 +69,7 @@ export function createApproveInstruction(
 
 /** A decoded, valid Approve instruction */
 export interface DecodedApproveInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta;
         delegate: AccountMeta;
@@ -115,7 +120,7 @@ export function decodeApproveInstruction(
 
 /** A decoded, non-validated Approve instruction */
 export interface DecodedApproveInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta | undefined;
         delegate: AccountMeta | undefined;

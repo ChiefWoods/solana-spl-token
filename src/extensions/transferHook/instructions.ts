@@ -1,11 +1,13 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import type { AccountMeta, Commitment, Connection, PublicKey, Signer } from '@solana/web3.js';
+import {
+    getInitializeTransferHookInstructionDataEncoder,
+    getUpdateTransferHookInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { AccountMeta, Commitment, Connection, Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
 import { addSigners } from '../../instructions/internal.js';
-import { TokenInstruction } from '../../instructions/types.js';
-import { publicKey } from '@solana/buffer-layout-utils';
+import type { TokenInstruction } from '../../instructions/types.js';
 import { createTransferCheckedInstruction } from '../../instructions/transferChecked.js';
 import { createTransferCheckedWithFeeInstruction } from '../transferFee/instructions.js';
 import { getMint } from '../../state/mint.js';
@@ -20,17 +22,9 @@ export enum TransferHookInstruction {
 export interface InitializeTransferHookInstructionData {
     instruction: TokenInstruction.TransferHookExtension;
     transferHookInstruction: TransferHookInstruction.Initialize;
-    authority: PublicKey;
-    transferHookProgramId: PublicKey;
+    authority: Address;
+    transferHookProgramId: Address;
 }
-
-/** The struct that represents the instruction data as it is read by the program */
-export const initializeTransferHookInstructionData = struct<InitializeTransferHookInstructionData>([
-    u8('instruction'),
-    u8('transferHookInstruction'),
-    publicKey('authority'),
-    publicKey('transferHookProgramId'),
-]);
 
 /**
  * Construct an InitializeTransferHook instruction
@@ -43,25 +37,20 @@ export const initializeTransferHookInstructionData = struct<InitializeTransferHo
  * @return Instruction to add to a transaction
  */
 export function createInitializeTransferHookInstruction(
-    mint: PublicKey,
-    authority: PublicKey,
-    transferHookProgramId: PublicKey,
-    programId: PublicKey,
+    mint: Address,
+    authority: Address,
+    transferHookProgramId: Address,
+    programId: Address,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
     const keys = [{ pubkey: mint, isSigner: false, isWritable: true }];
-
-    const data = Buffer.alloc(initializeTransferHookInstructionData.span);
-    initializeTransferHookInstructionData.encode(
-        {
-            instruction: TokenInstruction.TransferHookExtension,
-            transferHookInstruction: TransferHookInstruction.Initialize,
-            authority,
-            transferHookProgramId,
-        },
-        data,
+    const data = Buffer.from(
+        getInitializeTransferHookInstructionDataEncoder().encode({
+            authority: authority.toBase58(),
+            programId: transferHookProgramId.toBase58(),
+        }),
     );
 
     return new TransactionInstruction({ keys, programId, data });
@@ -71,15 +60,8 @@ export function createInitializeTransferHookInstruction(
 export interface UpdateTransferHookInstructionData {
     instruction: TokenInstruction.TransferHookExtension;
     transferHookInstruction: TransferHookInstruction.Update;
-    transferHookProgramId: PublicKey;
+    transferHookProgramId: Address;
 }
-
-/** The struct that represents the instruction data as it is read by the program */
-export const updateTransferHookInstructionData = struct<UpdateTransferHookInstructionData>([
-    u8('instruction'),
-    u8('transferHookInstruction'),
-    publicKey('transferHookProgramId'),
-]);
 
 /**
  * Construct an UpdateTransferHook instruction
@@ -93,10 +75,10 @@ export const updateTransferHookInstructionData = struct<UpdateTransferHookInstru
  * @return Instruction to add to a transaction
  */
 export function createUpdateTransferHookInstruction(
-    mint: PublicKey,
-    authority: PublicKey,
-    transferHookProgramId: PublicKey,
-    multiSigners: (Signer | PublicKey)[] = [],
+    mint: Address,
+    authority: Address,
+    transferHookProgramId: Address,
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
@@ -104,14 +86,8 @@ export function createUpdateTransferHookInstruction(
     }
 
     const keys = addSigners([{ pubkey: mint, isSigner: false, isWritable: true }], authority, multiSigners);
-    const data = Buffer.alloc(updateTransferHookInstructionData.span);
-    updateTransferHookInstructionData.encode(
-        {
-            instruction: TokenInstruction.TransferHookExtension,
-            transferHookInstruction: TransferHookInstruction.Update,
-            transferHookProgramId,
-        },
-        data,
+    const data = Buffer.from(
+        getUpdateTransferHookInstructionDataEncoder().encode({ programId: transferHookProgramId.toBase58() }),
     );
 
     return new TransactionInstruction({ keys, programId, data });
@@ -150,12 +126,12 @@ function deEscalateAccountMeta(accountMeta: AccountMeta, accountMetas: AccountMe
  * @returns Instruction to add to a transaction
  */
 export function createExecuteInstruction(
-    programId: PublicKey,
-    source: PublicKey,
-    mint: PublicKey,
-    destination: PublicKey,
-    owner: PublicKey,
-    validateStatePubkey: PublicKey,
+    programId: Address,
+    source: Address,
+    mint: Address,
+    destination: Address,
+    owner: Address,
+    validateStatePubkey: Address,
     amount: bigint,
 ): TransactionInstruction {
     const keys = [source, mint, destination, owner, validateStatePubkey].map(pubkey => ({
@@ -189,15 +165,15 @@ export function createExecuteInstruction(
 export async function addExtraAccountMetasForExecute(
     connection: Connection,
     instruction: TransactionInstruction,
-    programId: PublicKey,
-    source: PublicKey,
-    mint: PublicKey,
-    destination: PublicKey,
-    owner: PublicKey,
+    programId: Address,
+    source: Address,
+    mint: Address,
+    destination: Address,
+    owner: Address,
     amount: number | bigint,
     commitment?: Commitment,
 ) {
-    const validateStatePubkey = getExtraAccountMetaAddress(mint, programId);
+    const validateStatePubkey = await getExtraAccountMetaAddress(mint, programId);
     const validateStateAccount = await connection.getAccountInfo(validateStatePubkey, commitment);
     if (validateStateAccount == null) {
         return instruction;
@@ -226,7 +202,7 @@ export async function addExtraAccountMetasForExecute(
                     connection,
                     extraAccountMeta,
                     executeInstruction.keys,
-                    executeInstruction.data,
+                    Buffer.from(executeInstruction.data),
                     executeInstruction.programId,
                 ),
                 executeInstruction.keys,
@@ -260,13 +236,13 @@ export async function addExtraAccountMetasForExecute(
  */
 export async function createTransferCheckedWithTransferHookInstruction(
     connection: Connection,
-    source: PublicKey,
-    mint: PublicKey,
-    destination: PublicKey,
-    owner: PublicKey,
+    source: Address,
+    mint: Address,
+    destination: Address,
+    owner: Address,
     amount: bigint,
     decimals: number,
-    multiSigners: (Signer | PublicKey)[] = [],
+    multiSigners: (Signer | Address)[] = [],
     commitment?: Commitment,
     programId = TOKEN_PROGRAM_ID,
 ) {
@@ -320,14 +296,14 @@ export async function createTransferCheckedWithTransferHookInstruction(
  */
 export async function createTransferCheckedWithFeeAndTransferHookInstruction(
     connection: Connection,
-    source: PublicKey,
-    mint: PublicKey,
-    destination: PublicKey,
-    owner: PublicKey,
+    source: Address,
+    mint: Address,
+    destination: Address,
+    owner: Address,
     amount: bigint,
     decimals: number,
     fee: bigint,
-    multiSigners: (Signer | PublicKey)[] = [],
+    multiSigners: (Signer | Address)[] = [],
     commitment?: Commitment,
     programId = TOKEN_PROGRAM_ID,
 ) {

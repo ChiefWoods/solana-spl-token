@@ -1,6 +1,5 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { u64 } from '@solana/buffer-layout-utils';
-import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
+import { getTransferInstructionDataDecoder, getTransferInstructionDataEncoder } from '@solana-program/token';
+import type { AccountMeta, Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -11,6 +10,7 @@ import {
 } from '../errors.js';
 import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface TransferInstructionData {
@@ -19,7 +19,12 @@ export interface TransferInstructionData {
 }
 
 /** TODO: docs */
-export const transferInstructionData = struct<TransferInstructionData>([u8('instruction'), u64('amount')]);
+export const transferInstructionData = createInstructionDataCodec({
+    encoder: getTransferInstructionDataEncoder(),
+    decoder: getTransferInstructionDataDecoder(),
+    fromPublic: ({ amount }: TransferInstructionData) => ({ amount }),
+    toPublic: ({ discriminator, amount }) => ({ instruction: discriminator, amount }),
+});
 
 /**
  * Construct a Transfer instruction
@@ -34,11 +39,11 @@ export const transferInstructionData = struct<TransferInstructionData>([u8('inst
  * @return Instruction to add to a transaction
  */
 export function createTransferInstruction(
-    source: PublicKey,
-    destination: PublicKey,
-    owner: PublicKey,
+    source: Address,
+    destination: Address,
+    owner: Address,
     amount: number | bigint,
-    multiSigners: (Signer | PublicKey)[] = [],
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -64,7 +69,7 @@ export function createTransferInstruction(
 
 /** A decoded, valid Transfer instruction */
 export interface DecodedTransferInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         source: AccountMeta;
         destination: AccountMeta;
@@ -115,7 +120,7 @@ export function decodeTransferInstruction(
 
 /** A decoded, non-validated Transfer instruction */
 export interface DecodedTransferInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         source: AccountMeta | undefined;
         destination: AccountMeta | undefined;

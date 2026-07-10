@@ -25,9 +25,9 @@ import {
 } from '@solana/spl-token-metadata';
 
 (async () => {
-    const payer = Keypair.generate();
+    const payer = await Keypair.generate();
 
-    const mint = Keypair.generate();
+    const mint = await Keypair.generate();
     const decimals = 9;
 
     const metadata: TokenMetadata = {

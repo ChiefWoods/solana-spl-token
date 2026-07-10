@@ -2,8 +2,9 @@ import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 use(chaiAsPromised);
 
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
-import { Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
+import type { Connection, Signer } from '@solana/web3.js';
+
+import { Address, Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import {
     ExtensionType,
     burn,
@@ -24,24 +25,24 @@ const EXTENSIONS = [ExtensionType.PermissionedBurn];
 describe('permissioned burn', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: PublicKey;
+    let mint: Address;
     let mintAuthority: Keypair;
     let permissionedAuthority: Keypair;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1_000_000_000);
-        mintAuthority = Keypair.generate();
-        permissionedAuthority = Keypair.generate();
+        mintAuthority = await Keypair.generate();
+        permissionedAuthority = await Keypair.generate();
     });
 
     beforeEach(async () => {
-        const mintKeypair = Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = mintKeypair.publicKey;
         const mintLen = getMintLen(EXTENSIONS);
         const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: mint,
                 space: mintLen,
                 lamports,
@@ -64,7 +65,7 @@ describe('permissioned burn', () => {
     });
 
     it('enforces permissioned authority for burn', async () => {
-        const owner = Keypair.generate();
+        const owner = await Keypair.generate();
         const account = await createAccount(
             connection,
             payer,
@@ -80,7 +81,7 @@ describe('permissioned burn', () => {
             burn(connection, payer, account, mint, owner, 1, [], undefined, TEST_PROGRAM_ID),
         ).to.be.rejectedWith(Error);
 
-        const wrongPermissioned = Keypair.generate();
+        const wrongPermissioned = await Keypair.generate();
         const badBurnTx = new Transaction().add(
             createPermissionedBurnCheckedInstruction(
                 account,

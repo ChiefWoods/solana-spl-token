@@ -1,5 +1,5 @@
 import type { Connection, Signer, TransactionError } from '@solana/web3.js';
-import { PublicKey, Transaction } from '@solana/web3.js';
+import { Address, Transaction } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../constants.js';
 import { createAmountToUiAmountInstruction } from '../instructions/amountToUiAmount.js';
 import { unpackMint } from '../state/mint.js';
@@ -9,7 +9,7 @@ import { getScaledUiAmountConfig } from '../extensions/scaledUiAmount/state.js';
 // Constants for interest calculations
 const ONE_IN_BASIS_POINTS = 10000;
 const SECONDS_PER_YEAR = 60 * 60 * 24 * 365.24;
-const SYSVAR_CLOCK_PUBKEY = new PublicKey('SysvarC1ock11111111111111111111111111111111');
+const SYSVAR_CLOCK_PUBKEY = new Address('SysvarC1ock11111111111111111111111111111111');
 
 /**
  * Amount as a string using mint-prescribed decimals
@@ -25,7 +25,7 @@ const SYSVAR_CLOCK_PUBKEY = new PublicKey('SysvarC1ock11111111111111111111111111
 export async function amountToUiAmount(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
+    mint: Address,
     amount: number | bigint,
     programId = TOKEN_PROGRAM_ID,
 ): Promise<string | TransactionError | null> {
@@ -184,7 +184,7 @@ export function amountToUiAmountForScaledUiAmountMintWithoutSimulation(
  */
 export async function amountToUiAmountForMintWithoutSimulation(
     connection: Connection,
-    mint: PublicKey,
+    mint: Address,
     amount: bigint,
 ): Promise<string> {
     const accountInfo = await connection.getAccountInfo(mint);
@@ -311,7 +311,7 @@ export function uiAmountToAmountForScaledUiAmountMintWithoutSimulation(
  */
 export async function uiAmountToAmountForMintWithoutSimulation(
     connection: Connection,
-    mint: PublicKey,
+    mint: Address,
     uiAmount: string,
 ): Promise<bigint> {
     const accountInfo = await connection.getAccountInfo(mint);

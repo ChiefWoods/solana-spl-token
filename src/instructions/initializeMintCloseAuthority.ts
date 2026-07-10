@@ -1,5 +1,8 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import type { AccountMeta, PublicKey } from '@solana/web3.js';
+import {
+    getInitializeMintCloseAuthorityInstructionDataDecoder,
+    getInitializeMintCloseAuthorityInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { AccountMeta, Address } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions } from '../constants.js';
 import {
@@ -10,19 +13,26 @@ import {
     TokenUnsupportedInstructionError,
 } from '../errors.js';
 import { TokenInstruction } from './types.js';
-import { COptionPublicKeyLayout } from '../serialization.js';
+import { createInstructionDataCodec, nullableAddressToOption, optionToNullableAddress } from './codec.js';
 
 /** TODO: docs */
 export interface InitializeMintCloseAuthorityInstructionData {
     instruction: TokenInstruction.InitializeMintCloseAuthority;
-    closeAuthority: PublicKey | null;
+    closeAuthority: Address | null;
 }
 
 /** TODO: docs */
-export const initializeMintCloseAuthorityInstructionData = struct<InitializeMintCloseAuthorityInstructionData>([
-    u8('instruction'),
-    new COptionPublicKeyLayout('closeAuthority'),
-]);
+export const initializeMintCloseAuthorityInstructionData = createInstructionDataCodec({
+    encoder: getInitializeMintCloseAuthorityInstructionDataEncoder(),
+    decoder: getInitializeMintCloseAuthorityInstructionDataDecoder(),
+    fromPublic: ({ closeAuthority }: InitializeMintCloseAuthorityInstructionData) => ({
+        closeAuthority: nullableAddressToOption(closeAuthority),
+    }),
+    toPublic: ({ discriminator, closeAuthority }) => ({
+        instruction: discriminator,
+        closeAuthority: optionToNullableAddress(closeAuthority),
+    }),
+});
 
 /**
  * Construct an InitializeMintCloseAuthority instruction
@@ -34,9 +44,9 @@ export const initializeMintCloseAuthorityInstructionData = struct<InitializeMint
  * @return Instruction to add to a transaction
  */
 export function createInitializeMintCloseAuthorityInstruction(
-    mint: PublicKey,
-    closeAuthority: PublicKey | null,
-    programId: PublicKey,
+    mint: Address,
+    closeAuthority: Address | null,
+    programId: Address,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
@@ -61,13 +71,13 @@ export function createInitializeMintCloseAuthorityInstruction(
 
 /** A decoded, valid InitializeMintCloseAuthority instruction */
 export interface DecodedInitializeMintCloseAuthorityInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
     };
     data: {
         instruction: TokenInstruction.InitializeMintCloseAuthority;
-        closeAuthority: PublicKey | null;
+        closeAuthority: Address | null;
     };
 }
 
@@ -81,7 +91,7 @@ export interface DecodedInitializeMintCloseAuthorityInstruction {
  */
 export function decodeInitializeMintCloseAuthorityInstruction(
     instruction: TransactionInstruction,
-    programId: PublicKey,
+    programId: Address,
 ): DecodedInitializeMintCloseAuthorityInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
     if (instruction.data.length < initializeMintCloseAuthorityInstructionData.getSpan(instruction.data))
@@ -106,13 +116,13 @@ export function decodeInitializeMintCloseAuthorityInstruction(
 
 /** A decoded, non-validated InitializeMintCloseAuthority instruction */
 export interface DecodedInitializeMintCloseAuthorityInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta | undefined;
     };
     data: {
         instruction: number;
-        closeAuthority: PublicKey | null;
+        closeAuthority: Address | null;
     };
 }
 

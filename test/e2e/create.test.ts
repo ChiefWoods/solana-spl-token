@@ -1,4 +1,4 @@
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
+import type { Connection, Address, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 
 import {
@@ -22,8 +22,8 @@ describe('createMint', () => {
     it('works', async () => {
         const connection = await getConnection();
         const payer = await newAccountWithLamports(connection, 1000000000);
-        const testMintAuthority = Keypair.generate();
-        const mintKeypair = Keypair.generate();
+        const testMintAuthority = await Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         const mint = await createMint(
             connection,
             payer,
@@ -48,12 +48,12 @@ describe('createMint', () => {
 describe('createAccount', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: PublicKey;
+    let mint: Address;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        const mintAuthority = Keypair.generate();
-        const mintKeypair = Keypair.generate();
+        const mintAuthority = await Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = await createMint(
             connection,
             payer,
@@ -66,13 +66,13 @@ describe('createAccount', () => {
         );
     });
     it('auxiliary token account', async () => {
-        const owner = Keypair.generate();
+        const owner = await Keypair.generate();
         const account = await createAccount(
             connection,
             payer,
             mint,
             owner.publicKey,
-            Keypair.generate(),
+            await Keypair.generate(),
             undefined,
             TEST_PROGRAM_ID,
         );
@@ -94,14 +94,14 @@ describe('createAccount', () => {
             payer,
             mint,
             owner.publicKey,
-            Keypair.generate(),
+            await Keypair.generate(),
             undefined,
             TEST_PROGRAM_ID,
         );
         expect(account2).to.not.eql(account);
     });
     it('creates associated token account if it does not exist', async () => {
-        const owner = Keypair.generate();
+        const owner = await Keypair.generate();
         const associatedAddress = await getAssociatedTokenAddress(
             mint,
             owner.publicKey,
@@ -152,7 +152,7 @@ describe('createAccount', () => {
         expect(createdAccountInfo).to.eql(accountInfo);
     });
     it('associated token account', async () => {
-        const owner = Keypair.generate();
+        const owner = await Keypair.generate();
         const associatedAddress = await getAssociatedTokenAddress(
             mint,
             owner.publicKey,

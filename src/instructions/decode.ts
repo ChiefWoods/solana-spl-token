@@ -1,4 +1,4 @@
-import { u8 } from '@solana/buffer-layout';
+import { getU8Decoder } from '@solana/kit';
 import type { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import { TokenInvalidInstructionDataError, TokenInvalidInstructionTypeError } from '../errors.js';
@@ -83,7 +83,7 @@ export function decodeInstruction(
 ): DecodedInstruction {
     if (!instruction.data.length) throw new TokenInvalidInstructionDataError();
 
-    const type = u8().decode(instruction.data);
+    const type = getU8Decoder().decode(instruction.data);
     if (type === TokenInstruction.InitializeMint) return decodeInitializeMintInstruction(instruction, programId);
     if (type === TokenInstruction.InitializeAccount) return decodeInitializeAccountInstruction(instruction, programId);
     if (type === TokenInstruction.InitializeMultisig)

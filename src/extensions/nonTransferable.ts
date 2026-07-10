@@ -1,4 +1,4 @@
-import { struct } from '@solana/buffer-layout';
+import { getUnitCodec } from '@solana/kit';
 import type { Account } from '../state/account.js';
 import type { Mint } from '../state/mint.js';
 import { ExtensionType, getExtensionData } from './extensionType.js';
@@ -9,26 +9,21 @@ export interface NonTransferable {} // eslint-disable-line
 /** Non-transferable token account state as stored by the program */
 export interface NonTransferableAccount {} // eslint-disable-line
 
-/** Buffer layout for de/serializing an account */
-export const NonTransferableLayout = struct<NonTransferable>([]);
+/** Codec for de/serializing a non-transferable extension */
+export const NonTransferableCodec = getUnitCodec();
 
-export const NON_TRANSFERABLE_SIZE = NonTransferableLayout.span;
-export const NON_TRANSFERABLE_ACCOUNT_SIZE = NonTransferableLayout.span;
+/** @deprecated Use {@link NonTransferableCodec} */
+export const NonTransferableLayout = NonTransferableCodec;
+
+export const NON_TRANSFERABLE_SIZE = NonTransferableCodec.fixedSize;
+export const NON_TRANSFERABLE_ACCOUNT_SIZE = NonTransferableCodec.fixedSize;
 
 export function getNonTransferable(mint: Mint): NonTransferable | null {
     const extensionData = getExtensionData(ExtensionType.NonTransferable, mint.tlvData);
-    if (extensionData !== null) {
-        return NonTransferableLayout.decode(extensionData);
-    } else {
-        return null;
-    }
+    return extensionData !== null ? {} : null;
 }
 
 export function getNonTransferableAccount(account: Account): NonTransferableAccount | null {
     const extensionData = getExtensionData(ExtensionType.NonTransferableAccount, account.tlvData);
-    if (extensionData !== null) {
-        return NonTransferableLayout.decode(extensionData);
-    } else {
-        return null;
-    }
+    return extensionData !== null ? {} : null;
 }

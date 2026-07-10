@@ -18,11 +18,11 @@ import {
 (async () => {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
-    const payer = Keypair.generate();
+    const payer = await Keypair.generate();
     const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
-    const mintAuthority = Keypair.generate();
+    const mintAuthority = await Keypair.generate();
     const decimals = 9;
     const mint = await createMint(
         connection,
@@ -35,7 +35,7 @@ import {
         TOKEN_2022_PROGRAM_ID,
     );
 
-    const owner = Keypair.generate();
+    const owner = await Keypair.generate();
     const account = await createAccount(
         connection,
         payer,

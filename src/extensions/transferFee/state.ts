@@ -1,7 +1,5 @@
-import type { Layout } from '@solana/buffer-layout';
-import { struct, u16 } from '@solana/buffer-layout';
-import { publicKey, u64 } from '@solana/buffer-layout-utils';
-import type { PublicKey } from '@solana/web3.js';
+import { getAddressCodec, getStructCodec, getU16Codec, getU64Codec } from '@solana/kit';
+import { Address } from '@solana/web3.js';
 import type { Account } from '../../state/account.js';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
@@ -25,9 +23,9 @@ export interface TransferFee {
 /** Transfer fee extension data for mints. */
 export interface TransferFeeConfig {
     /** Optional authority to set the fee */
-    transferFeeConfigAuthority: PublicKey;
+    transferFeeConfigAuthority: Address;
     /** Withdraw from mint instructions must be signed by this key */
-    withdrawWithheldAuthority: PublicKey;
+    withdrawWithheldAuthority: Address;
     /** Withheld transfer fee tokens that have been moved to the mint for withdrawal */
     withheldAmount: bigint;
     /** Older transfer fee, used if the current epoch < newerTransferFee.epoch */
@@ -36,10 +34,12 @@ export interface TransferFeeConfig {
     newerTransferFee: TransferFee;
 }
 
-/** Buffer layout for de/serializing a transfer fee */
-export function transferFeeLayout(property?: string): Layout<TransferFee> {
-    return struct<TransferFee>([u64('epoch'), u64('maximumFee'), u16('transferFeeBasisPoints')], property);
-}
+/** Codec for de/serializing a transfer fee */
+export const TransferFeeCodec = getStructCodec([
+    ['epoch', getU64Codec()],
+    ['maximumFee', getU64Codec()],
+    ['transferFeeBasisPoints', getU16Codec()],
+]);
 
 /** Calculate the transfer fee */
 export function calculateFee(transferFee: TransferFee, preFeeAmount: bigint): bigint {
@@ -54,16 +54,19 @@ export function calculateFee(transferFee: TransferFee, preFeeAmount: bigint): bi
     }
 }
 
-/** Buffer layout for de/serializing a transfer fee config extension */
-export const TransferFeeConfigLayout = struct<TransferFeeConfig>([
-    publicKey('transferFeeConfigAuthority'),
-    publicKey('withdrawWithheldAuthority'),
-    u64('withheldAmount'),
-    transferFeeLayout('olderTransferFee'),
-    transferFeeLayout('newerTransferFee'),
+/** Codec for de/serializing a transfer fee config extension */
+export const TransferFeeConfigCodec = getStructCodec([
+    ['transferFeeConfigAuthority', getAddressCodec()],
+    ['withdrawWithheldAuthority', getAddressCodec()],
+    ['withheldAmount', getU64Codec()],
+    ['olderTransferFee', TransferFeeCodec],
+    ['newerTransferFee', TransferFeeCodec],
 ]);
 
-export const TRANSFER_FEE_CONFIG_SIZE = TransferFeeConfigLayout.span;
+/** @deprecated Use {@link TransferFeeConfigCodec} */
+export const TransferFeeConfigLayout = TransferFeeConfigCodec;
+
+export const TRANSFER_FEE_CONFIG_SIZE = TransferFeeConfigCodec.fixedSize;
 
 /** Get the fee for given epoch */
 export function getEpochFee(transferFeeConfig: TransferFeeConfig, epoch: bigint): TransferFee {
@@ -85,24 +88,27 @@ export interface TransferFeeAmount {
     /** Withheld transfer fee tokens that can be claimed by the fee authority */
     withheldAmount: bigint;
 }
-/** Buffer layout for de/serializing */
-export const TransferFeeAmountLayout = struct<TransferFeeAmount>([u64('withheldAmount')]);
-export const TRANSFER_FEE_AMOUNT_SIZE = TransferFeeAmountLayout.span;
+
+/** Codec for de/serializing */
+export const TransferFeeAmountCodec = getStructCodec([['withheldAmount', getU64Codec()]]);
+
+/** @deprecated Use {@link TransferFeeAmountCodec} */
+export const TransferFeeAmountLayout = TransferFeeAmountCodec;
+
+export const TRANSFER_FEE_AMOUNT_SIZE = TransferFeeAmountCodec.fixedSize;
 
 export function getTransferFeeConfig(mint: Mint): TransferFeeConfig | null {
     const extensionData = getExtensionData(ExtensionType.TransferFeeConfig, mint.tlvData);
-    if (extensionData !== null) {
-        return TransferFeeConfigLayout.decode(extensionData);
-    } else {
-        return null;
-    }
+    if (extensionData === null) return null;
+    const decoded = TransferFeeConfigCodec.decode(extensionData);
+    return {
+        ...decoded,
+        transferFeeConfigAuthority: new Address(decoded.transferFeeConfigAuthority),
+        withdrawWithheldAuthority: new Address(decoded.withdrawWithheldAuthority),
+    };
 }
 
 export function getTransferFeeAmount(account: Account): TransferFeeAmount | null {
     const extensionData = getExtensionData(ExtensionType.TransferFeeAmount, account.tlvData);
-    if (extensionData !== null) {
-        return TransferFeeAmountLayout.decode(extensionData);
-    } else {
-        return null;
-    }
+    return extensionData !== null ? TransferFeeAmountCodec.decode(extensionData) : null;
 }

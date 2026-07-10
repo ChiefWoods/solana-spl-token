@@ -1,10 +1,13 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { publicKey } from '@solana/buffer-layout-utils';
-import type { Signer } from '@solana/web3.js';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import {
+    getInitializePausableConfigInstructionDataEncoder,
+    getPauseInstructionDataEncoder,
+    getResumeInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { Signer, Address } from '@solana/web3.js';
+import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ID, programSupportsExtensions } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
-import { TokenInstruction } from '../../instructions/types.js';
+import type { TokenInstruction } from '../../instructions/types.js';
 import { addSigners } from '../../instructions/internal.js';
 
 export enum PausableInstruction {
@@ -16,14 +19,8 @@ export enum PausableInstruction {
 export interface InitializePausableConfigInstructionData {
     instruction: TokenInstruction.PausableExtension;
     pausableInstruction: PausableInstruction.Initialize;
-    authority: PublicKey;
+    authority: Address;
 }
-
-export const initializePausableConfigInstructionData = struct<InitializePausableConfigInstructionData>([
-    u8('instruction'),
-    u8('pausableInstruction'),
-    publicKey('authority'),
-]);
 
 /**
  * Construct a InitializePausableConfig instruction
@@ -33,23 +30,16 @@ export const initializePausableConfigInstructionData = struct<InitializePausable
  * @param programId     SPL Token program account
  */
 export function createInitializePausableConfigInstruction(
-    mint: PublicKey,
-    authority: PublicKey | null,
-    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
+    mint: Address,
+    authority: Address | null,
+    programId: Address = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
     const keys = [{ pubkey: mint, isSigner: false, isWritable: true }];
-
-    const data = Buffer.alloc(initializePausableConfigInstructionData.span);
-    initializePausableConfigInstructionData.encode(
-        {
-            instruction: TokenInstruction.PausableExtension,
-            pausableInstruction: PausableInstruction.Initialize,
-            authority: authority ?? PublicKey.default,
-        },
-        data,
+    const data = Buffer.from(
+        getInitializePausableConfigInstructionDataEncoder().encode({ authority: authority?.toBase58() ?? null }),
     );
 
     return new TransactionInstruction({ keys, programId, data: data });
@@ -60,8 +50,6 @@ export interface PauseInstructionData {
     pausableInstruction: PausableInstruction.Pause;
 }
 
-export const pauseInstructionData = struct<PauseInstructionData>([u8('instruction'), u8('pausableInstruction')]);
-
 /**
  * Construct a Pause instruction
  *
@@ -71,24 +59,16 @@ export const pauseInstructionData = struct<PauseInstructionData>([u8('instructio
  * @param programId     SPL Token program account
  */
 export function createPauseInstruction(
-    mint: PublicKey,
-    authority: PublicKey,
-    multiSigners: (Signer | PublicKey)[] = [],
-    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
+    mint: Address,
+    authority: Address,
+    multiSigners: (Signer | Address)[] = [],
+    programId: Address = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
     const keys = addSigners([{ pubkey: mint, isSigner: false, isWritable: true }], authority, multiSigners);
-
-    const data = Buffer.alloc(pauseInstructionData.span);
-    pauseInstructionData.encode(
-        {
-            instruction: TokenInstruction.PausableExtension,
-            pausableInstruction: PausableInstruction.Pause,
-        },
-        data,
-    );
+    const data = Buffer.from(getPauseInstructionDataEncoder().encode({}));
 
     return new TransactionInstruction({ keys, programId, data: data });
 }
@@ -97,8 +77,6 @@ export interface ResumeInstructionData {
     instruction: TokenInstruction.PausableExtension;
     pausableInstruction: PausableInstruction.Resume;
 }
-
-export const resumeInstructionData = struct<ResumeInstructionData>([u8('instruction'), u8('pausableInstruction')]);
 
 /**
  * Construct a Resume instruction
@@ -109,24 +87,16 @@ export const resumeInstructionData = struct<ResumeInstructionData>([u8('instruct
  * @param programId     SPL Token program account
  */
 export function createResumeInstruction(
-    mint: PublicKey,
-    authority: PublicKey,
-    multiSigners: (Signer | PublicKey)[] = [],
-    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
+    mint: Address,
+    authority: Address,
+    multiSigners: (Signer | Address)[] = [],
+    programId: Address = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
     const keys = addSigners([{ pubkey: mint, isSigner: false, isWritable: true }], authority, multiSigners);
-
-    const data = Buffer.alloc(resumeInstructionData.span);
-    resumeInstructionData.encode(
-        {
-            instruction: TokenInstruction.PausableExtension,
-            pausableInstruction: PausableInstruction.Resume,
-        },
-        data,
-    );
+    const data = Buffer.from(getResumeInstructionDataEncoder().encode({}));
 
     return new TransactionInstruction({ keys, programId, data: data });
 }

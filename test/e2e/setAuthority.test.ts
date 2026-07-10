@@ -1,4 +1,4 @@
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
+import type { Connection, Address, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 
 import { AuthorityType, createMint, createAccount, getAccount, getMint, setAuthority } from '../../src';
@@ -12,17 +12,17 @@ const TEST_TOKEN_DECIMALS = 2;
 describe('setAuthority', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: PublicKey;
+    let mint: Address;
     let mintAuthority: Keypair;
     let freezeAuthority: Keypair;
     let owner: Keypair;
-    let account: PublicKey;
+    let account: Address;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintAuthority = Keypair.generate();
-        freezeAuthority = Keypair.generate();
-        const mintKeypair = Keypair.generate();
+        mintAuthority = await Keypair.generate();
+        freezeAuthority = await Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = await createMint(
             connection,
             payer,
@@ -35,19 +35,19 @@ describe('setAuthority', () => {
         );
     });
     beforeEach(async () => {
-        owner = Keypair.generate();
+        owner = await Keypair.generate();
         account = await createAccount(
             connection,
             payer,
             mint,
             owner.publicKey,
-            Keypair.generate(),
+            await Keypair.generate(),
             undefined,
             TEST_PROGRAM_ID,
         );
     });
     it('AccountOwner', async () => {
-        const newOwner = Keypair.generate();
+        const newOwner = await Keypair.generate();
         await setAuthority(
             connection,
             payer,
@@ -102,7 +102,7 @@ describe('setAuthority', () => {
         expect(mintInfo.mintAuthority).to.equal(null);
     });
     it('CloseAuthority', async () => {
-        const closeAuthority = Keypair.generate();
+        const closeAuthority = await Keypair.generate();
         await setAuthority(
             connection,
             payer,

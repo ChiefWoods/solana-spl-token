@@ -1,4 +1,4 @@
-import type { ConfirmOptions, Connection, PublicKey, Signer, TransactionSignature } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, Address, Signer, TransactionSignature } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import { createRevokeInstruction } from '../instructions/revoke.js';
@@ -20,8 +20,8 @@ import { getSigners } from './internal.js';
 export async function revoke(
     connection: Connection,
     payer: Signer,
-    account: PublicKey,
-    owner: Signer | PublicKey,
+    account: Address,
+    owner: Signer | Address,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_PROGRAM_ID,

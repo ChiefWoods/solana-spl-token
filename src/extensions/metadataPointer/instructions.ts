@@ -1,29 +1,25 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { publicKey } from '@solana/buffer-layout-utils';
-import type { Signer } from '@solana/web3.js';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import {
+    getInitializeMetadataPointerInstructionDataEncoder,
+    getUpdateMetadataPointerInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { Signer, Address } from '@solana/web3.js';
+import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ID, programSupportsExtensions } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
-import { TokenInstruction } from '../../instructions/types.js';
 import { addSigners } from '../../instructions/internal.js';
+import type { TokenInstruction } from '../../instructions/types.js';
 
 export enum MetadataPointerInstruction {
     Initialize = 0,
     Update = 1,
 }
 
-export const initializeMetadataPointerData = struct<{
+export interface InitializeMetadataPointerInstructionData {
     instruction: TokenInstruction.MetadataPointerExtension;
     metadataPointerInstruction: number;
-    authority: PublicKey;
-    metadataAddress: PublicKey;
-}>([
-    // prettier-ignore
-    u8('instruction'),
-    u8('metadataPointerInstruction'),
-    publicKey('authority'),
-    publicKey('metadataAddress'),
-]);
+    authority: Address;
+    metadataAddress: Address;
+}
 
 /**
  * Construct an Initialize MetadataPointer instruction
@@ -36,62 +32,47 @@ export const initializeMetadataPointerData = struct<{
  * @return Instruction to add to a transaction
  */
 export function createInitializeMetadataPointerInstruction(
-    mint: PublicKey,
-    authority: PublicKey | null,
-    metadataAddress: PublicKey | null,
-    programId: PublicKey,
+    mint: Address,
+    authority: Address | null,
+    metadataAddress: Address | null,
+    programId: Address,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
     const keys = [{ pubkey: mint, isSigner: false, isWritable: true }];
-
-    const data = Buffer.alloc(initializeMetadataPointerData.span);
-    initializeMetadataPointerData.encode(
-        {
-            instruction: TokenInstruction.MetadataPointerExtension,
-            metadataPointerInstruction: MetadataPointerInstruction.Initialize,
-            authority: authority ?? PublicKey.default,
-            metadataAddress: metadataAddress ?? PublicKey.default,
-        },
-        data,
+    const data = Buffer.from(
+        getInitializeMetadataPointerInstructionDataEncoder().encode({
+            authority: authority?.toBase58() ?? null,
+            metadataAddress: metadataAddress?.toBase58() ?? null,
+        }),
     );
 
     return new TransactionInstruction({ keys, programId, data: data });
 }
 
-export const updateMetadataPointerData = struct<{
+export interface UpdateMetadataPointerInstructionData {
     instruction: TokenInstruction.MetadataPointerExtension;
     metadataPointerInstruction: number;
-    metadataAddress: PublicKey;
-}>([
-    // prettier-ignore
-    u8('instruction'),
-    u8('metadataPointerInstruction'),
-    publicKey('metadataAddress'),
-]);
+    metadataAddress: Address;
+}
 
 export function createUpdateMetadataPointerInstruction(
-    mint: PublicKey,
-    authority: PublicKey,
-    metadataAddress: PublicKey | null,
-    multiSigners: (Signer | PublicKey)[] = [],
-    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
+    mint: Address,
+    authority: Address,
+    metadataAddress: Address | null,
+    multiSigners: (Signer | Address)[] = [],
+    programId: Address = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
 
     const keys = addSigners([{ pubkey: mint, isSigner: false, isWritable: true }], authority, multiSigners);
-
-    const data = Buffer.alloc(updateMetadataPointerData.span);
-    updateMetadataPointerData.encode(
-        {
-            instruction: TokenInstruction.MetadataPointerExtension,
-            metadataPointerInstruction: MetadataPointerInstruction.Update,
-            metadataAddress: metadataAddress ?? PublicKey.default,
-        },
-        data,
+    const data = Buffer.from(
+        getUpdateMetadataPointerInstructionDataEncoder().encode({
+            metadataAddress: metadataAddress?.toBase58() ?? null,
+        }),
     );
 
     return new TransactionInstruction({ keys, programId, data: data });

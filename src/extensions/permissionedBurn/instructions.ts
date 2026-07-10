@@ -1,11 +1,14 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { publicKey, u64 } from '@solana/buffer-layout-utils';
-import type { PublicKey, Signer } from '@solana/web3.js';
+import {
+    getInitializePermissionedBurnInstructionDataEncoder,
+    getPermissionedBurnCheckedInstructionDataEncoder,
+    getPermissionedBurnInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions, TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
 import { addSigners } from '../../instructions/internal.js';
-import { TokenInstruction } from '../../instructions/types.js';
+import type { TokenInstruction } from '../../instructions/types.js';
 
 export enum PermissionedBurnInstruction {
     Initialize = 0,
@@ -16,14 +19,8 @@ export enum PermissionedBurnInstruction {
 interface InitializePermissionedBurnInstructionData {
     instruction: TokenInstruction.PermissionedBurnExtension;
     permissionedBurnInstruction: PermissionedBurnInstruction.Initialize;
-    authority: PublicKey;
+    authority: Address;
 }
-
-const initializePermissionedBurnInstructionData = struct<InitializePermissionedBurnInstructionData>([
-    u8('instruction'),
-    u8('permissionedBurnInstruction'),
-    publicKey('authority'),
-]);
 
 /**
  * Construct a InitializePermissionedBurnConfig instruction
@@ -33,8 +30,8 @@ const initializePermissionedBurnInstructionData = struct<InitializePermissionedB
  * @param programId     SPL Token program account
  */
 export function createInitializePermissionedBurnInstruction(
-    mint: PublicKey,
-    authority: PublicKey,
+    mint: Address,
+    authority: Address,
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
@@ -42,14 +39,8 @@ export function createInitializePermissionedBurnInstruction(
     }
 
     const keys = [{ pubkey: mint, isSigner: false, isWritable: true }];
-    const data = Buffer.alloc(initializePermissionedBurnInstructionData.span);
-    initializePermissionedBurnInstructionData.encode(
-        {
-            instruction: TokenInstruction.PermissionedBurnExtension,
-            permissionedBurnInstruction: PermissionedBurnInstruction.Initialize,
-            authority,
-        },
-        data,
+    const data = Buffer.from(
+        getInitializePermissionedBurnInstructionDataEncoder().encode({ authority: authority.toBase58() }),
     );
 
     return new TransactionInstruction({ keys, programId, data });
@@ -60,12 +51,6 @@ interface PermissionedBurnInstructionData {
     permissionedBurnInstruction: PermissionedBurnInstruction.Burn;
     amount: bigint;
 }
-
-const permissionedBurnInstructionData = struct<PermissionedBurnInstructionData>([
-    u8('instruction'),
-    u8('permissionedBurnInstruction'),
-    u64('amount'),
-]);
 
 /**
  * Construct a permissioned burn instruction
@@ -79,12 +64,12 @@ const permissionedBurnInstructionData = struct<PermissionedBurnInstructionData>(
  * @param programId                     SPL Token program account
  */
 export function createPermissionedBurnInstruction(
-    account: PublicKey,
-    mint: PublicKey,
-    owner: PublicKey,
-    permissionedBurnAuthority: PublicKey,
+    account: Address,
+    mint: Address,
+    owner: Address,
+    permissionedBurnAuthority: Address,
     amount: number | bigint,
-    multiSigners: (Signer | PublicKey)[] = [],
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
@@ -101,15 +86,7 @@ export function createPermissionedBurnInstruction(
         multiSigners,
     );
 
-    const data = Buffer.alloc(permissionedBurnInstructionData.span);
-    permissionedBurnInstructionData.encode(
-        {
-            instruction: TokenInstruction.PermissionedBurnExtension,
-            permissionedBurnInstruction: PermissionedBurnInstruction.Burn,
-            amount: BigInt(amount),
-        },
-        data,
-    );
+    const data = Buffer.from(getPermissionedBurnInstructionDataEncoder().encode({ amount }));
 
     return new TransactionInstruction({ keys, programId, data });
 }
@@ -120,13 +97,6 @@ interface PermissionedBurnCheckedInstructionData {
     amount: bigint;
     decimals: number;
 }
-
-const permissionedBurnCheckedInstructionData = struct<PermissionedBurnCheckedInstructionData>([
-    u8('instruction'),
-    u8('permissionedBurnInstruction'),
-    u64('amount'),
-    u8('decimals'),
-]);
 
 /**
  * Construct a checked permissioned burn instruction
@@ -141,13 +111,13 @@ const permissionedBurnCheckedInstructionData = struct<PermissionedBurnCheckedIns
  * @param programId                     SPL Token program account
  */
 export function createPermissionedBurnCheckedInstruction(
-    account: PublicKey,
-    mint: PublicKey,
-    owner: PublicKey,
-    permissionedBurnAuthority: PublicKey,
+    account: Address,
+    mint: Address,
+    owner: Address,
+    permissionedBurnAuthority: Address,
     amount: number | bigint,
     decimals: number,
-    multiSigners: (Signer | PublicKey)[] = [],
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
@@ -164,16 +134,7 @@ export function createPermissionedBurnCheckedInstruction(
         multiSigners,
     );
 
-    const data = Buffer.alloc(permissionedBurnCheckedInstructionData.span);
-    permissionedBurnCheckedInstructionData.encode(
-        {
-            instruction: TokenInstruction.PermissionedBurnExtension,
-            permissionedBurnInstruction: PermissionedBurnInstruction.BurnChecked,
-            amount: BigInt(amount),
-            decimals,
-        },
-        data,
-    );
+    const data = Buffer.from(getPermissionedBurnCheckedInstructionDataEncoder().encode({ amount, decimals }));
 
     return new TransactionInstruction({ keys, programId, data });
 }

@@ -1,5 +1,5 @@
-import type { Connection, Signer } from '@solana/web3.js';
-import { PublicKey, Keypair } from '@solana/web3.js';
+import type { Connection, Address, Signer } from '@solana/web3.js';
+import { Keypair } from '@solana/web3.js';
 
 import {
     getMint,
@@ -21,8 +21,8 @@ describe('unwrapLamports', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Keypair;
-    let account1: PublicKey;
-    let account2: PublicKey;
+    let account1: Address;
+    let account2: Address;
     let balance: number;
     before(async () => {
         connection = await getConnection();
@@ -36,7 +36,7 @@ describe('unwrapLamports', () => {
         }
     });
     beforeEach(async () => {
-        owner = Keypair.generate();
+        owner = await Keypair.generate();
         balance = 500000000;
         account1 = await createWrappedNativeAccount(
             connection,
@@ -48,7 +48,7 @@ describe('unwrapLamports', () => {
             TEST_PROGRAM_ID,
             NATIVE_MINT_2022,
         );
-        account2 = PublicKey.unique();
+        account2 = (await Keypair.generate()).publicKey;
     });
     it('unwrapLamports with Some', async () => {
         let amount = balance / 2;
@@ -75,7 +75,7 @@ describe('unwrapLamports', () => {
         const sourceAccountInfo = await getAccount(connection, account1, undefined, TEST_PROGRAM_ID);
         const sourceLamports = await connection.getBalance(account1);
         expect(sourceAccountInfo.amount).to.eql(BigInt(balance));
-        expect(sourceLamports).to.eql(wrappedAccountLamports + balance);
+        expect(sourceLamports).to.eql(BigInt(wrappedAccountLamports) + BigInt(balance));
 
         amount = balance + 1;
         expect(
@@ -100,7 +100,7 @@ describe('unwrapLamports', () => {
         const wrappedAccountLamports = await connection.getMinimumBalanceForRentExemption(wrappedAccountSpace);
 
         const destLamports = await connection.getBalance(account2);
-        expect(destLamports).to.eql(balance);
+        expect(destLamports).to.eql(BigInt(balance));
 
         const sourceAccountInfo = await getAccount(connection, account1, undefined, TEST_PROGRAM_ID);
         const sourceLamports = await connection.getBalance(account1);

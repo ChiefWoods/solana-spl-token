@@ -1,6 +1,5 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { u64 } from '@solana/buffer-layout-utils';
-import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
+import { getMintToCheckedInstructionDataDecoder, getMintToCheckedInstructionDataEncoder } from '@solana-program/token';
+import type { AccountMeta, Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -11,6 +10,7 @@ import {
 } from '../errors.js';
 import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface MintToCheckedInstructionData {
@@ -20,11 +20,12 @@ export interface MintToCheckedInstructionData {
 }
 
 /** TODO: docs */
-export const mintToCheckedInstructionData = struct<MintToCheckedInstructionData>([
-    u8('instruction'),
-    u64('amount'),
-    u8('decimals'),
-]);
+export const mintToCheckedInstructionData = createInstructionDataCodec({
+    encoder: getMintToCheckedInstructionDataEncoder(),
+    decoder: getMintToCheckedInstructionDataDecoder(),
+    fromPublic: ({ amount, decimals }: MintToCheckedInstructionData) => ({ amount, decimals }),
+    toPublic: ({ discriminator, amount, decimals }) => ({ instruction: discriminator, amount, decimals }),
+});
 
 /**
  * Construct a MintToChecked instruction
@@ -40,12 +41,12 @@ export const mintToCheckedInstructionData = struct<MintToCheckedInstructionData>
  * @return Instruction to add to a transaction
  */
 export function createMintToCheckedInstruction(
-    mint: PublicKey,
-    destination: PublicKey,
-    authority: PublicKey,
+    mint: Address,
+    destination: Address,
+    authority: Address,
     amount: number | bigint,
     decimals: number,
-    multiSigners: (Signer | PublicKey)[] = [],
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -72,7 +73,7 @@ export function createMintToCheckedInstruction(
 
 /** A decoded, valid MintToChecked instruction */
 export interface DecodedMintToCheckedInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
         destination: AccountMeta;
@@ -124,7 +125,7 @@ export function decodeMintToCheckedInstruction(
 
 /** A decoded, non-validated MintToChecked instruction */
 export interface DecodedMintToCheckedInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta | undefined;
         destination: AccountMeta | undefined;

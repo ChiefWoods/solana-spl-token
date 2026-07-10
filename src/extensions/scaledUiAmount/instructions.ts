@@ -1,8 +1,10 @@
-import { struct, u8, f64 } from '@solana/buffer-layout';
-import { publicKey, u64 } from '@solana/buffer-layout-utils';
-import { TokenInstruction } from '../../instructions/types.js';
-import type { Signer } from '@solana/web3.js';
-import { TransactionInstruction, PublicKey } from '@solana/web3.js';
+import {
+    getInitializeScaledUiAmountMintInstructionDataEncoder,
+    getUpdateMultiplierScaledUiMintInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { TokenInstruction } from '../../instructions/types.js';
+import type { Signer, Address } from '@solana/web3.js';
+import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions, TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
 import { addSigners } from '../../instructions/internal.js';
@@ -15,16 +17,9 @@ export enum ScaledUiAmountInstruction {
 export interface InitializeScaledUiAmountConfigData {
     instruction: TokenInstruction.ScaledUiAmountExtension;
     scaledUiAmountInstruction: ScaledUiAmountInstruction.Initialize;
-    authority: PublicKey | null;
+    authority: Address | null;
     multiplier: number;
 }
-
-export const initializeScaledUiAmountConfigInstructionData = struct<InitializeScaledUiAmountConfigData>([
-    u8('instruction'),
-    u8('scaledUiAmountInstruction'),
-    publicKey('authority'),
-    f64('multiplier'),
-]);
 
 /**
  * Construct an InitializeScaledUiAmountConfig instruction
@@ -37,25 +32,20 @@ export const initializeScaledUiAmountConfigInstructionData = struct<InitializeSc
  * @return Instruction to add to a transaction
  */
 export function createInitializeScaledUiAmountConfigInstruction(
-    mint: PublicKey,
-    authority: PublicKey | null,
+    mint: Address,
+    authority: Address | null,
     multiplier: number,
-    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
+    programId: Address = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
     const keys = [{ pubkey: mint, isSigner: false, isWritable: true }];
-
-    const data = Buffer.alloc(initializeScaledUiAmountConfigInstructionData.span);
-    initializeScaledUiAmountConfigInstructionData.encode(
-        {
-            instruction: TokenInstruction.ScaledUiAmountExtension,
-            scaledUiAmountInstruction: ScaledUiAmountInstruction.Initialize,
-            authority: authority ?? PublicKey.default,
+    const data = Buffer.from(
+        getInitializeScaledUiAmountMintInstructionDataEncoder().encode({
+            authority: authority?.toBase58() ?? null,
             multiplier: multiplier,
-        },
-        data,
+        }),
     );
 
     return new TransactionInstruction({ keys, programId, data });
@@ -67,13 +57,6 @@ export interface UpdateMultiplierData {
     multiplier: number;
     effectiveTimestamp: bigint;
 }
-
-export const updateMultiplierData = struct<UpdateMultiplierData>([
-    u8('instruction'),
-    u8('scaledUiAmountInstruction'),
-    f64('multiplier'),
-    u64('effectiveTimestamp'),
-]);
 
 /**
  * Construct an UpdateMultiplierData instruction
@@ -88,27 +71,22 @@ export const updateMultiplierData = struct<UpdateMultiplierData>([
  * @return Instruction to add to a transaction
  */
 export function createUpdateMultiplierDataInstruction(
-    mint: PublicKey,
-    authority: PublicKey,
+    mint: Address,
+    authority: Address,
     multiplier: number,
     effectiveTimestamp: bigint,
-    multiSigners: (Signer | PublicKey)[] = [],
-    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
+    multiSigners: (Signer | Address)[] = [],
+    programId: Address = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
     const keys = addSigners([{ pubkey: mint, isSigner: false, isWritable: true }], authority, multiSigners);
-
-    const data = Buffer.alloc(updateMultiplierData.span);
-    updateMultiplierData.encode(
-        {
-            instruction: TokenInstruction.ScaledUiAmountExtension,
-            scaledUiAmountInstruction: ScaledUiAmountInstruction.UpdateMultiplier,
+    const data = Buffer.from(
+        getUpdateMultiplierScaledUiMintInstructionDataEncoder().encode({
             multiplier,
             effectiveTimestamp,
-        },
-        data,
+        }),
     );
 
     return new TransactionInstruction({ keys, programId, data });

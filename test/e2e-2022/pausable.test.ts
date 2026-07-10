@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import type { Connection, Signer } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
+import { Address } from '@solana/web3.js';
 import { Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
 
@@ -27,23 +27,23 @@ describe('pausable', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Keypair;
-    let mint: PublicKey;
+    let mint: Address;
     let mintAuthority: Keypair;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        owner = Keypair.generate();
+        owner = await Keypair.generate();
     });
 
     beforeEach(async () => {
-        const mintKeypair = Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = mintKeypair.publicKey;
-        mintAuthority = Keypair.generate();
+        mintAuthority = await Keypair.generate();
         const mintLen = getMintLen(MINT_EXTENSIONS);
         const mintLamports = await connection.getMinimumBalanceForRentExemption(mintLen);
         const mintTransaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: mint,
                 space: mintLen,
                 lamports: mintLamports,
@@ -74,7 +74,7 @@ describe('pausable', () => {
     });
 
     it('initialize account', async () => {
-        const pausableAccountOwner = Keypair.generate().publicKey;
+        const pausableAccountOwner = (await Keypair.generate()).publicKey;
         const pausableAccount = await createAccount(
             connection,
             payer,
@@ -106,7 +106,7 @@ describe('pausable', () => {
         const pausableConfig = getPausableConfig(mintInfo);
         expect(pausableConfig).to.not.equal(null);
         if (pausableConfig !== null) {
-            expect(pausableConfig.authority).to.eql(PublicKey.default);
+            expect(pausableConfig.authority).to.eql(Address.default);
         }
     });
 });

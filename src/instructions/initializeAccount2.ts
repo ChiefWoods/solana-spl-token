@@ -1,6 +1,8 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { publicKey } from '@solana/buffer-layout-utils';
-import type { AccountMeta, PublicKey } from '@solana/web3.js';
+import {
+    getInitializeAccount2InstructionDataDecoder,
+    getInitializeAccount2InstructionDataEncoder,
+} from '@solana-program/token';
+import type { AccountMeta, Address } from '@solana/web3.js';
 import { SYSVAR_RENT_PUBKEY, TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -10,16 +12,19 @@ import {
     TokenInvalidInstructionTypeError,
 } from '../errors.js';
 import { TokenInstruction } from './types.js';
+import { addressFromString, addressToString, createInstructionDataCodec } from './codec.js';
 
 export interface InitializeAccount2InstructionData {
     instruction: TokenInstruction.InitializeAccount2;
-    owner: PublicKey;
+    owner: Address;
 }
 
-export const initializeAccount2InstructionData = struct<InitializeAccount2InstructionData>([
-    u8('instruction'),
-    publicKey('owner'),
-]);
+export const initializeAccount2InstructionData = createInstructionDataCodec({
+    encoder: getInitializeAccount2InstructionDataEncoder(),
+    decoder: getInitializeAccount2InstructionDataDecoder(),
+    fromPublic: ({ owner }: InitializeAccount2InstructionData) => ({ owner: addressToString(owner) }),
+    toPublic: ({ discriminator, owner }) => ({ instruction: discriminator, owner: addressFromString(owner) }),
+});
 
 /**
  * Construct an InitializeAccount2 instruction
@@ -32,9 +37,9 @@ export const initializeAccount2InstructionData = struct<InitializeAccount2Instru
  * @return Instruction to add to a transaction
  */
 export function createInitializeAccount2Instruction(
-    account: PublicKey,
-    mint: PublicKey,
-    owner: PublicKey,
+    account: Address,
+    mint: Address,
+    owner: Address,
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = [
@@ -49,7 +54,7 @@ export function createInitializeAccount2Instruction(
 
 /** A decoded, valid InitializeAccount2 instruction */
 export interface DecodedInitializeAccount2Instruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta;
         mint: AccountMeta;
@@ -57,7 +62,7 @@ export interface DecodedInitializeAccount2Instruction {
     };
     data: {
         instruction: TokenInstruction.InitializeAccount2;
-        owner: PublicKey;
+        owner: Address;
     };
 }
 
@@ -99,7 +104,7 @@ export function decodeInitializeAccount2Instruction(
 
 /** A decoded, non-validated InitializeAccount2 instruction */
 export interface DecodedInitializeAccount2InstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta | undefined;
         mint: AccountMeta | undefined;
@@ -107,7 +112,7 @@ export interface DecodedInitializeAccount2InstructionUnchecked {
     };
     data: {
         instruction: number;
-        owner: PublicKey;
+        owner: Address;
     };
 }
 

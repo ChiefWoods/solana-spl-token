@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import type { Connection, Signer } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
+import { Address } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import { packTokenGroup } from '@solana/spl-token-group';
 
@@ -31,19 +31,19 @@ describe('tokenGroup', async () => {
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintAuthority = Keypair.generate();
-        updateAuthority = Keypair.generate();
+        mintAuthority = await Keypair.generate();
+        updateAuthority = await Keypair.generate();
     });
 
     beforeEach(async () => {
-        mint = Keypair.generate();
+        mint = await Keypair.generate();
 
         const mintLen = getMintLen(EXTENSIONS);
         const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: mint.publicKey,
                 space: mintLen,
                 lamports,
@@ -84,7 +84,7 @@ describe('tokenGroup', async () => {
         const lamports = await connection.getMinimumBalanceForRentExemption(packTokenGroup(tokenGroup).length);
         const transaction = new Transaction().add(
             SystemProgram.transfer({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 toPubkey: mint.publicKey,
                 lamports,
             }),
@@ -145,7 +145,7 @@ describe('tokenGroup', async () => {
         const lamports = await connection.getMinimumBalanceForRentExemption(packTokenGroup(tokenGroup).length);
         const transaction = new Transaction().add(
             SystemProgram.transfer({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 toPubkey: mint.publicKey,
                 lamports,
             }),
@@ -197,7 +197,7 @@ describe('tokenGroup', async () => {
         const lamports = await connection.getMinimumBalanceForRentExemption(packTokenGroup(tokenGroup).length);
         const transaction = new Transaction().add(
             SystemProgram.transfer({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 toPubkey: mint.publicKey,
                 lamports,
             }),
@@ -216,7 +216,7 @@ describe('tokenGroup', async () => {
             TEST_PROGRAM_ID,
         );
 
-        const newUpdateAuthority = Keypair.generate();
+        const newUpdateAuthority = await Keypair.generate();
         await tokenGroupUpdateGroupAuthority(
             connection,
             payer,

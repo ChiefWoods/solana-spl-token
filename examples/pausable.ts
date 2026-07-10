@@ -20,11 +20,11 @@ import {
 (async () => {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
-    const payer = Keypair.generate();
+    const payer = await Keypair.generate();
     const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
-    const mintKeypair = Keypair.generate();
+    const mintKeypair = await Keypair.generate();
     const decimals = 9;
     const mintLen = getMintLen([ExtensionType.PausableConfig]);
     const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);

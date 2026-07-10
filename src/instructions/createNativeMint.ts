@@ -1,9 +1,13 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import type { PublicKey } from '@solana/web3.js';
+import {
+    getCreateNativeMintInstructionDataDecoder,
+    getCreateNativeMintInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { Address } from '@solana/web3.js';
 import { SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { NATIVE_MINT_2022, programSupportsExtensions, TOKEN_2022_PROGRAM_ID } from '../constants.js';
 import { TokenUnsupportedInstructionError } from '../errors.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface CreateNativeMintInstructionData {
@@ -11,7 +15,12 @@ export interface CreateNativeMintInstructionData {
 }
 
 /** TODO: docs */
-export const createNativeMintInstructionData = struct<CreateNativeMintInstructionData>([u8('instruction')]);
+export const createNativeMintInstructionData = createInstructionDataCodec({
+    encoder: getCreateNativeMintInstructionDataEncoder(),
+    decoder: getCreateNativeMintInstructionDataDecoder(),
+    fromPublic: (_value: CreateNativeMintInstructionData) => ({}),
+    toPublic: ({ discriminator }) => ({ instruction: discriminator }),
+});
 
 /**
  * Construct a CreateNativeMint instruction
@@ -24,7 +33,7 @@ export const createNativeMintInstructionData = struct<CreateNativeMintInstructio
  * @return Instruction to add to a transaction
  */
 export function createCreateNativeMintInstruction(
-    payer: PublicKey,
+    payer: Address,
     nativeMintId = NATIVE_MINT_2022,
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {

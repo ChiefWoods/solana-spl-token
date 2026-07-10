@@ -1,6 +1,8 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { publicKey } from '@solana/buffer-layout-utils';
-import type { AccountMeta, PublicKey } from '@solana/web3.js';
+import {
+    getInitializeAccount3InstructionDataDecoder,
+    getInitializeAccount3InstructionDataEncoder,
+} from '@solana-program/token';
+import type { AccountMeta, Address } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -10,16 +12,19 @@ import {
     TokenInvalidInstructionTypeError,
 } from '../errors.js';
 import { TokenInstruction } from './types.js';
+import { addressFromString, addressToString, createInstructionDataCodec } from './codec.js';
 
 export interface InitializeAccount3InstructionData {
     instruction: TokenInstruction.InitializeAccount3;
-    owner: PublicKey;
+    owner: Address;
 }
 
-export const initializeAccount3InstructionData = struct<InitializeAccount3InstructionData>([
-    u8('instruction'),
-    publicKey('owner'),
-]);
+export const initializeAccount3InstructionData = createInstructionDataCodec({
+    encoder: getInitializeAccount3InstructionDataEncoder(),
+    decoder: getInitializeAccount3InstructionDataDecoder(),
+    fromPublic: ({ owner }: InitializeAccount3InstructionData) => ({ owner: addressToString(owner) }),
+    toPublic: ({ discriminator, owner }) => ({ instruction: discriminator, owner: addressFromString(owner) }),
+});
 
 /**
  * Construct an InitializeAccount3 instruction
@@ -32,9 +37,9 @@ export const initializeAccount3InstructionData = struct<InitializeAccount3Instru
  * @return Instruction to add to a transaction
  */
 export function createInitializeAccount3Instruction(
-    account: PublicKey,
-    mint: PublicKey,
-    owner: PublicKey,
+    account: Address,
+    mint: Address,
+    owner: Address,
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = [
@@ -48,14 +53,14 @@ export function createInitializeAccount3Instruction(
 
 /** A decoded, valid InitializeAccount3 instruction */
 export interface DecodedInitializeAccount3Instruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta;
         mint: AccountMeta;
     };
     data: {
         instruction: TokenInstruction.InitializeAccount3;
-        owner: PublicKey;
+        owner: Address;
     };
 }
 
@@ -96,14 +101,14 @@ export function decodeInitializeAccount3Instruction(
 
 /** A decoded, non-validated InitializeAccount3 instruction */
 export interface DecodedInitializeAccount3InstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta | undefined;
         mint: AccountMeta | undefined;
     };
     data: {
         instruction: number;
-        owner: PublicKey;
+        owner: Address;
     };
 }
 

@@ -1,6 +1,5 @@
-import { struct } from '@solana/buffer-layout';
-import { publicKey, bool } from '@solana/buffer-layout-utils';
-import type { PublicKey } from '@solana/web3.js';
+import { getAddressCodec, getBooleanCodec, getStructCodec, getUnitCodec } from '@solana/kit';
+import { Address } from '@solana/web3.js';
 import type { Account } from '../../state/account.js';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
@@ -8,38 +7,41 @@ import { ExtensionType, getExtensionData } from '../extensionType.js';
 /** PausableConfig as stored by the program */
 export interface PausableConfig {
     /** Authority that can pause or resume activity on the mint */
-    authority: PublicKey;
+    authority: Address;
     /** Whether minting / transferring / burning tokens is paused */
     paused: boolean;
 }
 
-/** Buffer layout for de/serializing a pausable config */
-export const PausableConfigLayout = struct<PausableConfig>([publicKey('authority'), bool('paused')]);
+/** Codec for de/serializing a pausable config */
+export const PausableConfigCodec = getStructCodec([
+    ['authority', getAddressCodec()],
+    ['paused', getBooleanCodec()],
+]);
 
-export const PAUSABLE_CONFIG_SIZE = PausableConfigLayout.span;
+/** @deprecated Use {@link PausableConfigCodec} */
+export const PausableConfigLayout = PausableConfigCodec;
+
+export const PAUSABLE_CONFIG_SIZE = PausableConfigCodec.fixedSize;
 
 export function getPausableConfig(mint: Mint): PausableConfig | null {
     const extensionData = getExtensionData(ExtensionType.PausableConfig, mint.tlvData);
-    if (extensionData !== null) {
-        return PausableConfigLayout.decode(extensionData);
-    } else {
-        return null;
-    }
+    if (extensionData === null) return null;
+    const { authority, paused } = PausableConfigCodec.decode(extensionData);
+    return { authority: new Address(authority), paused };
 }
 
 /** Pausable token account state as stored by the program */
 export interface PausableAccount {} // eslint-disable-line
 
-/** Buffer layout for de/serializing a pausable account */
-export const PausableAccountLayout = struct<PausableAccount>([]); // esline-disable-line
+/** Codec for de/serializing a pausable account */
+export const PausableAccountCodec = getUnitCodec();
 
-export const PAUSABLE_ACCOUNT_SIZE = PausableAccountLayout.span;
+/** @deprecated Use {@link PausableAccountCodec} */
+export const PausableAccountLayout = PausableAccountCodec;
+
+export const PAUSABLE_ACCOUNT_SIZE = PausableAccountCodec.fixedSize;
 
 export function getPausableAccount(account: Account): PausableAccount | null {
     const extensionData = getExtensionData(ExtensionType.PausableAccount, account.tlvData);
-    if (extensionData !== null) {
-        return PausableAccountLayout.decode(extensionData);
-    } else {
-        return null;
-    }
+    return extensionData !== null ? {} : null;
 }

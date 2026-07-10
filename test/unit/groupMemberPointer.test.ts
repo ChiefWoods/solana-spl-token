@@ -1,4 +1,4 @@
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { Address, Keypair, TransactionInstruction } from '@solana/web3.js';
 import { expect } from 'chai';
 import type { Mint } from '../../src';
 import {
@@ -13,10 +13,10 @@ const GROUP_MEMBER_ADDRESS_BYTES = Buffer.alloc(32).fill(5);
 const NULL_OPTIONAL_NONZERO_PUBKEY_BYTES = Buffer.alloc(32).fill(0);
 
 describe('SPL Token 2022 GroupMemberPointer Extension', () => {
-    it('can create InitializeGroupMemberPointerInstruction', () => {
-        const mint = PublicKey.unique();
-        const authority = new PublicKey(AUTHORITY_ADDRESS_BYTES);
-        const memberAddress = new PublicKey(GROUP_MEMBER_ADDRESS_BYTES);
+    it('can create InitializeGroupMemberPointerInstruction', async () => {
+        const mint = (await Keypair.generate()).publicKey;
+        const authority = new Address(AUTHORITY_ADDRESS_BYTES);
+        const memberAddress = new Address(GROUP_MEMBER_ADDRESS_BYTES);
         const instruction = createInitializeGroupMemberPointerInstruction(
             mint,
             authority,
@@ -38,10 +38,10 @@ describe('SPL Token 2022 GroupMemberPointer Extension', () => {
             }),
         );
     });
-    it('can create UpdateGroupMemberPointerInstruction', () => {
-        const mint = PublicKey.unique();
-        const authority = PublicKey.unique();
-        const memberAddress = new PublicKey(GROUP_MEMBER_ADDRESS_BYTES);
+    it('can create UpdateGroupMemberPointerInstruction', async () => {
+        const mint = (await Keypair.generate()).publicKey;
+        const authority = (await Keypair.generate()).publicKey;
+        const memberAddress = new Address(GROUP_MEMBER_ADDRESS_BYTES);
         const instruction = createUpdateGroupMemberPointerInstruction(mint, authority, memberAddress);
         expect(instruction).to.deep.equal(
             new TransactionInstruction({
@@ -60,9 +60,9 @@ describe('SPL Token 2022 GroupMemberPointer Extension', () => {
             }),
         );
     });
-    it('can create UpdateGroupMemberPointerInstruction to none', () => {
-        const mint = PublicKey.unique();
-        const authority = PublicKey.unique();
+    it('can create UpdateGroupMemberPointerInstruction to none', async () => {
+        const mint = (await Keypair.generate()).publicKey;
+        const authority = (await Keypair.generate()).publicKey;
         const memberAddress = null;
         const instruction = createUpdateGroupMemberPointerInstruction(mint, authority, memberAddress);
         expect(instruction).to.deep.equal(
@@ -97,8 +97,8 @@ describe('SPL Token 2022 GroupMemberPointer Extension', () => {
         } as Mint;
         const groupPointer = getGroupMemberPointerState(mintInfo);
         expect(groupPointer).to.deep.equal({
-            authority: new PublicKey(AUTHORITY_ADDRESS_BYTES),
-            memberAddress: new PublicKey(GROUP_MEMBER_ADDRESS_BYTES),
+            authority: new Address(AUTHORITY_ADDRESS_BYTES),
+            memberAddress: new Address(GROUP_MEMBER_ADDRESS_BYTES),
         });
     });
     it('can get state with only group address', async () => {
@@ -117,7 +117,7 @@ describe('SPL Token 2022 GroupMemberPointer Extension', () => {
         const groupPointer = getGroupMemberPointerState(mintInfo);
         expect(groupPointer).to.deep.equal({
             authority: null,
-            memberAddress: new PublicKey(GROUP_MEMBER_ADDRESS_BYTES),
+            memberAddress: new Address(GROUP_MEMBER_ADDRESS_BYTES),
         });
     });
     it('can get state with only authority address', async () => {
@@ -135,7 +135,7 @@ describe('SPL Token 2022 GroupMemberPointer Extension', () => {
         } as Mint;
         const groupPointer = getGroupMemberPointerState(mintInfo);
         expect(groupPointer).to.deep.equal({
-            authority: new PublicKey(AUTHORITY_ADDRESS_BYTES),
+            authority: new Address(AUTHORITY_ADDRESS_BYTES),
             memberAddress: null,
         });
     });

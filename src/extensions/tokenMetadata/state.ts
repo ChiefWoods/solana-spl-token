@@ -1,5 +1,5 @@
 import type { Commitment, Connection } from '@solana/web3.js';
-import type { PublicKey } from '@solana/web3.js';
+import type { Address } from '@solana/web3.js';
 import type { TokenMetadata } from '@solana/spl-token-metadata';
 import { Field, unpack } from '@solana/spl-token-metadata';
 
@@ -69,7 +69,7 @@ export function updateTokenMetadata(current: TokenMetadata, key: Field | string,
  */
 export async function getTokenMetadata(
     connection: Connection,
-    address: PublicKey,
+    address: Address,
     commitment?: Commitment,
     programId = TOKEN_2022_PROGRAM_ID,
 ): Promise<TokenMetadata | null> {

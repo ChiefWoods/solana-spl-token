@@ -1,4 +1,4 @@
-import type { ConfirmOptions, Connection, PublicKey, Signer, TransactionSignature } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, Address, Signer, TransactionSignature } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import { createBurnInstruction } from '../instructions/burn.js';
@@ -22,9 +22,9 @@ import { getSigners } from './internal.js';
 export async function burn(
     connection: Connection,
     payer: Signer,
-    account: PublicKey,
-    mint: PublicKey,
-    owner: Signer | PublicKey,
+    account: Address,
+    mint: Address,
+    owner: Signer | Address,
     amount: number | bigint,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,

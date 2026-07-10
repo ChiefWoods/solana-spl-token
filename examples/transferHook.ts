@@ -3,7 +3,7 @@ import {
     sendAndConfirmTransaction,
     Connection,
     Keypair,
-    PublicKey,
+    Address,
     SystemProgram,
     Transaction,
     LAMPORTS_PER_SOL,
@@ -17,25 +17,25 @@ import {
     TOKEN_2022_PROGRAM_ID,
     updateTransferHook,
     transferCheckedWithTransferHook,
-    getAssociatedTokenAddressSync,
+    getAssociatedTokenAddress,
     ASSOCIATED_TOKEN_PROGRAM_ID,
 } from '../src';
 
 (async () => {
-    const payer = Keypair.generate();
+    const payer = await Keypair.generate();
 
-    const mintAuthority = Keypair.generate();
-    const mintKeypair = Keypair.generate();
+    const mintAuthority = await Keypair.generate();
+    const mintKeypair = await Keypair.generate();
     const mint = mintKeypair.publicKey;
 
-    const sender = Keypair.generate();
-    const recipient = Keypair.generate();
+    const sender = await Keypair.generate();
+    const recipient = await Keypair.generate();
 
     const extensions = [ExtensionType.TransferHook];
     const mintLen = getMintLen(extensions);
     const decimals = 9;
-    const transferHookPogramId = new PublicKey('7N4HggYEJAtCLJdnHGCtFqfxcB5rhQCsQTze3ftYstVj');
-    const newTransferHookProgramId = new PublicKey('7N4HggYEJAtCLJdnHGCtFqfxcB5rhQCsQTze3ftYstVj');
+    const transferHookPogramId = new Address('7N4HggYEJAtCLJdnHGCtFqfxcB5rhQCsQTze3ftYstVj');
+    const newTransferHookProgramId = new Address('7N4HggYEJAtCLJdnHGCtFqfxcB5rhQCsQTze3ftYstVj');
 
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
@@ -67,14 +67,14 @@ import {
         TOKEN_2022_PROGRAM_ID,
     );
 
-    const senderAta = getAssociatedTokenAddressSync(
+    const senderAta = await getAssociatedTokenAddress(
         mint,
         sender.publicKey,
         false,
         TOKEN_2022_PROGRAM_ID,
         ASSOCIATED_TOKEN_PROGRAM_ID,
     );
-    const recipientAta = getAssociatedTokenAddressSync(
+    const recipientAta = await getAssociatedTokenAddress(
         mint,
         recipient.publicKey,
         false,

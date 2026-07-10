@@ -1,6 +1,7 @@
 import { expect } from 'chai';
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
-import { Keypair, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
+import type { Connection, Signer } from '@solana/web3.js';
+
+import { Address, Keypair, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 
 import { ExtensionType, createAccount, createMint, createReallocateInstruction, getAccountLen } from '../../src';
 
@@ -11,15 +12,15 @@ describe('reallocate', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Keypair;
-    let account: PublicKey;
-    let mint: PublicKey;
+    let account: Address;
+    let mint: Address;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
     });
     beforeEach(async () => {
-        const mintAuthority = Keypair.generate();
-        const mintKeypair = Keypair.generate();
+        const mintAuthority = await Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = await createMint(
             connection,
             payer,
@@ -30,14 +31,14 @@ describe('reallocate', () => {
             undefined,
             TEST_PROGRAM_ID,
         );
-        owner = Keypair.generate();
+        owner = await Keypair.generate();
         account = await createAccount(connection, payer, mint, owner.publicKey, undefined, undefined, TEST_PROGRAM_ID);
     });
     it('works', async () => {
         const transaction = new Transaction().add(
             createReallocateInstruction(
                 account,
-                payer.publicKey,
+                new Address(payer.address),
                 EXTENSIONS,
                 owner.publicKey,
                 undefined,

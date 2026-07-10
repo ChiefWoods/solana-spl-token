@@ -1,6 +1,5 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { u64 } from '@solana/buffer-layout-utils';
-import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
+import { getBurnInstructionDataDecoder, getBurnInstructionDataEncoder } from '@solana-program/token';
+import type { AccountMeta, Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -11,6 +10,7 @@ import {
 } from '../errors.js';
 import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface BurnInstructionData {
@@ -19,7 +19,12 @@ export interface BurnInstructionData {
 }
 
 /** TODO: docs */
-export const burnInstructionData = struct<BurnInstructionData>([u8('instruction'), u64('amount')]);
+export const burnInstructionData = createInstructionDataCodec({
+    encoder: getBurnInstructionDataEncoder(),
+    decoder: getBurnInstructionDataDecoder(),
+    fromPublic: ({ amount }: BurnInstructionData) => ({ amount }),
+    toPublic: ({ discriminator, amount }) => ({ instruction: discriminator, amount }),
+});
 
 /**
  * Construct a Burn instruction
@@ -34,11 +39,11 @@ export const burnInstructionData = struct<BurnInstructionData>([u8('instruction'
  * @return Instruction to add to a transaction
  */
 export function createBurnInstruction(
-    account: PublicKey,
-    mint: PublicKey,
-    owner: PublicKey,
+    account: Address,
+    mint: Address,
+    owner: Address,
     amount: number | bigint,
-    multiSigners: (Signer | PublicKey)[] = [],
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -64,7 +69,7 @@ export function createBurnInstruction(
 
 /** A decoded, valid Burn instruction */
 export interface DecodedBurnInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta;
         mint: AccountMeta;
@@ -115,7 +120,7 @@ export function decodeBurnInstruction(
 
 /** A decoded, non-validated Burn instruction */
 export interface DecodedBurnInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta | undefined;
         mint: AccountMeta | undefined;

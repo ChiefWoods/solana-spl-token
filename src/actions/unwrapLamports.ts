@@ -1,4 +1,4 @@
-import type { ConfirmOptions, Connection, PublicKey, Signer, TransactionSignature } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, Address, Signer, TransactionSignature } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ID } from '../constants.js';
 import { getSigners } from './internal.js';
@@ -22,9 +22,9 @@ import { createUnwrapLamportsInstruction } from '../instructions/unwrapLamports.
 export async function unwrapLamports(
     connection: Connection,
     payer: Signer,
-    source: PublicKey,
-    destination: PublicKey,
-    owner: Signer | PublicKey,
+    source: Address,
+    destination: Address,
+    owner: Signer | Address,
     amount: bigint | null,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,

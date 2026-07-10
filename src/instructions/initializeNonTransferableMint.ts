@@ -1,9 +1,13 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import type { PublicKey } from '@solana/web3.js';
+import {
+    getInitializeNonTransferableMintInstructionDataDecoder,
+    getInitializeNonTransferableMintInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { Address } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions } from '../constants.js';
 import { TokenUnsupportedInstructionError } from '../errors.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** Deserialized instruction for the initiation of an immutable owner account */
 export interface InitializeNonTransferableMintInstructionData {
@@ -11,9 +15,12 @@ export interface InitializeNonTransferableMintInstructionData {
 }
 
 /** The struct that represents the instruction data as it is read by the program */
-export const initializeNonTransferableMintInstructionData = struct<InitializeNonTransferableMintInstructionData>([
-    u8('instruction'),
-]);
+export const initializeNonTransferableMintInstructionData = createInstructionDataCodec({
+    encoder: getInitializeNonTransferableMintInstructionDataEncoder(),
+    decoder: getInitializeNonTransferableMintInstructionDataDecoder(),
+    fromPublic: (_value: InitializeNonTransferableMintInstructionData) => ({}),
+    toPublic: ({ discriminator }) => ({ instruction: discriminator }),
+});
 
 /**
  * Construct an InitializeNonTransferableMint instruction
@@ -24,8 +31,8 @@ export const initializeNonTransferableMintInstructionData = struct<InitializeNon
  * @return Instruction to add to a transaction
  */
 export function createInitializeNonTransferableMintInstruction(
-    mint: PublicKey,
-    programId: PublicKey,
+    mint: Address,
+    programId: Address,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();

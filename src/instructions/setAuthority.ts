@@ -1,6 +1,8 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { publicKey } from '@solana/buffer-layout-utils';
-import type { AccountMeta, Signer, PublicKey } from '@solana/web3.js';
+import {
+    getSetAuthorityInstructionDataDecoder,
+    getSetAuthorityInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { AccountMeta, Signer, Address } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -11,7 +13,7 @@ import {
 } from '../errors.js';
 import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
-import { COptionPublicKeyLayout } from '../serialization.js';
+import { createInstructionDataCodec, nullableAddressToOption, optionToNullableAddress } from './codec.js';
 
 /** Authority types defined by the program */
 export enum AuthorityType {
@@ -39,15 +41,23 @@ export enum AuthorityType {
 export interface SetAuthorityInstructionData {
     instruction: TokenInstruction.SetAuthority;
     authorityType: AuthorityType;
-    newAuthority: PublicKey | null;
+    newAuthority: Address | null;
 }
 
 /** TODO: docs */
-export const setAuthorityInstructionData = struct<SetAuthorityInstructionData>([
-    u8('instruction'),
-    u8('authorityType'),
-    new COptionPublicKeyLayout('newAuthority'),
-]);
+export const setAuthorityInstructionData = createInstructionDataCodec({
+    encoder: getSetAuthorityInstructionDataEncoder(),
+    decoder: getSetAuthorityInstructionDataDecoder(),
+    fromPublic: ({ authorityType, newAuthority }: SetAuthorityInstructionData) => ({
+        authorityType,
+        newAuthority: nullableAddressToOption(newAuthority),
+    }),
+    toPublic: ({ discriminator, authorityType, newAuthority }) => ({
+        instruction: discriminator,
+        authorityType: authorityType as unknown as AuthorityType,
+        newAuthority: optionToNullableAddress(newAuthority),
+    }),
+});
 
 /**
  * Construct a SetAuthority instruction
@@ -62,11 +72,11 @@ export const setAuthorityInstructionData = struct<SetAuthorityInstructionData>([
  * @return Instruction to add to a transaction
  */
 export function createSetAuthorityInstruction(
-    account: PublicKey,
-    currentAuthority: PublicKey,
+    account: Address,
+    currentAuthority: Address,
     authorityType: AuthorityType,
-    newAuthority: PublicKey | null,
-    multiSigners: (Signer | PublicKey)[] = [],
+    newAuthority: Address | null,
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners([{ pubkey: account, isSigner: false, isWritable: true }], currentAuthority, multiSigners);
@@ -90,7 +100,7 @@ export function createSetAuthorityInstruction(
 
 /** A decoded, valid SetAuthority instruction */
 export interface DecodedSetAuthorityInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta;
         currentAuthority: AccountMeta;
@@ -99,7 +109,7 @@ export interface DecodedSetAuthorityInstruction {
     data: {
         instruction: TokenInstruction.SetAuthority;
         authorityType: AuthorityType;
-        newAuthority: PublicKey | null;
+        newAuthority: Address | null;
     };
 }
 
@@ -141,7 +151,7 @@ export function decodeSetAuthorityInstruction(
 
 /** A decoded, non-validated SetAuthority instruction */
 export interface DecodedSetAuthorityInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta | undefined;
         currentAuthority: AccountMeta | undefined;
@@ -150,7 +160,7 @@ export interface DecodedSetAuthorityInstructionUnchecked {
     data: {
         instruction: number;
         authorityType: AuthorityType;
-        newAuthority: PublicKey | null;
+        newAuthority: Address | null;
     };
 }
 

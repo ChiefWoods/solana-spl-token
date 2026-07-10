@@ -1,5 +1,5 @@
-import { Keypair } from '@solana/web3.js';
 import { expect } from 'chai';
+import { Keypair } from '@solana/web3.js';
 import {
     createInitializeMintCloseAuthorityInstruction,
     createInitializePermanentDelegateInstruction,
@@ -7,19 +7,19 @@ import {
 } from '../../src';
 
 describe('spl-token-2022 instructions', () => {
-    it('InitializeMintCloseAuthority', () => {
+    it('InitializeMintCloseAuthority', async () => {
         const ix = createInitializeMintCloseAuthorityInstruction(
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
             TOKEN_2022_PROGRAM_ID,
         );
         expect(ix.programId).to.eql(TOKEN_2022_PROGRAM_ID);
         expect(ix.keys).to.have.length(1);
     });
-    it('InitializePermanentDelegate', () => {
+    it('InitializePermanentDelegate', async () => {
         const ix = createInitializePermanentDelegateInstruction(
-            Keypair.generate().publicKey,
-            Keypair.generate().publicKey,
+            (await Keypair.generate()).publicKey,
+            (await Keypair.generate()).publicKey,
             TOKEN_2022_PROGRAM_ID,
         );
         expect(ix.programId).to.eql(TOKEN_2022_PROGRAM_ID);

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import type { AccountMeta, Connection, Signer } from '@solana/web3.js';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { Address, TransactionInstruction } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import {
     createInitializeMintInstruction,
@@ -13,12 +13,12 @@ import {
     AuthorityType,
     setAuthority,
     createAssociatedTokenAccountInstruction,
-    getAssociatedTokenAddressSync,
+    getAssociatedTokenAddress,
     ASSOCIATED_TOKEN_PROGRAM_ID,
     createMintToCheckedInstruction,
     getExtraAccountMetaAddress,
-    ExtraAccountMetaListLayout,
-    ExtraAccountMetaLayout,
+    ExtraAccountMetaListCodec,
+    ExtraAccountMetaCodec,
     transferCheckedWithTransferHook,
     createAssociatedTokenAccountIdempotent,
 } from '../../src';
@@ -30,30 +30,32 @@ const EXTENSIONS = [ExtensionType.TransferHook];
 describe('transferHook', () => {
     let connection: Connection;
     let payer: Signer;
-    let payerAta: PublicKey;
-    let destinationAuthority: PublicKey;
-    let destinationAta: PublicKey;
+    let payerAddress: Address;
+    let payerAta: Address;
+    let destinationAuthority: Address;
+    let destinationAta: Address;
     let transferHookAuthority: Keypair;
-    let pdaExtraAccountMeta: PublicKey;
-    let mint: PublicKey;
+    let pdaExtraAccountMeta: Address;
+    let mint: Address;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        destinationAuthority = Keypair.generate().publicKey;
-        transferHookAuthority = Keypair.generate();
+        payerAddress = new Address(payer.address);
+        destinationAuthority = (await Keypair.generate()).publicKey;
+        transferHookAuthority = await Keypair.generate();
     });
     beforeEach(async () => {
-        const mintKeypair = Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = mintKeypair.publicKey;
-        pdaExtraAccountMeta = getExtraAccountMetaAddress(mint, TRANSFER_HOOK_TEST_PROGRAM_ID);
-        payerAta = getAssociatedTokenAddressSync(
+        pdaExtraAccountMeta = await getExtraAccountMetaAddress(mint, TRANSFER_HOOK_TEST_PROGRAM_ID);
+        payerAta = await getAssociatedTokenAddress(
             mint,
-            payer.publicKey,
+            new Address(payer.address),
             false,
             TEST_PROGRAM_ID,
             ASSOCIATED_TOKEN_PROGRAM_ID,
         );
-        destinationAta = getAssociatedTokenAddressSync(
+        destinationAta = await getAssociatedTokenAddress(
             mint,
             destinationAuthority,
             false,
@@ -64,7 +66,7 @@ describe('transferHook', () => {
         const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: payerAddress,
                 newAccountPubkey: mint,
                 space: mintLen,
                 lamports,
@@ -76,7 +78,7 @@ describe('transferHook', () => {
                 TRANSFER_HOOK_TEST_PROGRAM_ID,
                 TEST_PROGRAM_ID,
             ),
-            createInitializeMintInstruction(mint, TEST_TOKEN_DECIMALS, payer.publicKey, null, TEST_PROGRAM_ID),
+            createInitializeMintInstruction(mint, TEST_TOKEN_DECIMALS, payerAddress, null, TEST_PROGRAM_ID),
         );
 
         await sendAndConfirmTransaction(connection, transaction, [payer, mintKeypair], undefined);
@@ -91,7 +93,7 @@ describe('transferHook', () => {
         }
     });
     it('can be updated', async () => {
-        const newTransferHookProgramId = Keypair.generate().publicKey;
+        const newTransferHookProgramId = (await Keypair.generate()).publicKey;
         await updateTransferHook(
             connection,
             payer,
@@ -126,31 +128,31 @@ describe('transferHook', () => {
         const transferHook = getTransferHook(mintInfo);
         expect(transferHook).to.not.equal(null);
         if (transferHook !== null) {
-            expect(transferHook.authority).to.eql(PublicKey.default);
+            expect(transferHook.authority).to.eql(Address.default);
         }
     });
     it('transferChecked', async () => {
-        const extraAccount = Keypair.generate().publicKey;
+        const extraAccount = (await Keypair.generate()).publicKey;
         const keys: AccountMeta[] = [
             { pubkey: pdaExtraAccountMeta, isSigner: false, isWritable: true },
             { pubkey: mint, isSigner: false, isWritable: false },
-            { pubkey: payer.publicKey, isSigner: true, isWritable: false },
+            { pubkey: payerAddress, isSigner: true, isWritable: false },
             { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
         ];
 
-        const data = Buffer.alloc(8 + 4 + ExtraAccountMetaLayout.span);
+        const data = Buffer.alloc(8 + 4 + ExtraAccountMetaCodec.fixedSize);
         const discriminator = createHash('sha256')
             .update('spl-transfer-hook-interface:initialize-extra-account-metas')
             .digest()
             .subarray(0, 8);
         discriminator.copy(data);
-        ExtraAccountMetaListLayout.encode(
+        ExtraAccountMetaListCodec.write(
             {
                 count: 1,
                 extraAccounts: [
                     {
                         discriminator: 0,
-                        addressConfig: extraAccount.toBuffer(),
+                        addressConfig: extraAccount.toBytes(),
                         isSigner: false,
                         isWritable: false,
                     },
@@ -169,14 +171,14 @@ describe('transferHook', () => {
         const setupTransaction = new Transaction().add(
             initExtraAccountMetaInstruction,
             SystemProgram.transfer({
-                fromPubkey: payer.publicKey,
+                fromPubkey: payerAddress,
                 toPubkey: pdaExtraAccountMeta,
                 lamports: 10000000,
             }),
             createAssociatedTokenAccountInstruction(
-                payer.publicKey,
+                payerAddress,
                 payerAta,
-                payer.publicKey,
+                payerAddress,
                 mint,
                 TEST_PROGRAM_ID,
                 ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -184,7 +186,7 @@ describe('transferHook', () => {
             createMintToCheckedInstruction(
                 mint,
                 payerAta,
-                payer.publicKey,
+                payerAddress,
                 5 * 10 ** TEST_TOKEN_DECIMALS,
                 TEST_TOKEN_DECIMALS,
                 [],

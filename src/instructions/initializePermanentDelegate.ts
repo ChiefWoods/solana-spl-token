@@ -1,7 +1,9 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { publicKey } from '@solana/buffer-layout-utils';
+import {
+    getInitializePermanentDelegateInstructionDataDecoder,
+    getInitializePermanentDelegateInstructionDataEncoder,
+} from '@solana-program/token-2022';
 import type { AccountMeta } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
+import { Address } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions } from '../constants.js';
 import {
@@ -12,18 +14,21 @@ import {
     TokenUnsupportedInstructionError,
 } from '../errors.js';
 import { TokenInstruction } from './types.js';
+import { addressFromString, addressToString, createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface InitializePermanentDelegateInstructionData {
     instruction: TokenInstruction.InitializePermanentDelegate;
-    delegate: PublicKey;
+    delegate: Address;
 }
 
 /** TODO: docs */
-export const initializePermanentDelegateInstructionData = struct<InitializePermanentDelegateInstructionData>([
-    u8('instruction'),
-    publicKey('delegate'),
-]);
+export const initializePermanentDelegateInstructionData = createInstructionDataCodec({
+    encoder: getInitializePermanentDelegateInstructionDataEncoder(),
+    decoder: getInitializePermanentDelegateInstructionDataDecoder(),
+    fromPublic: ({ delegate }: InitializePermanentDelegateInstructionData) => ({ delegate: addressToString(delegate) }),
+    toPublic: ({ discriminator, delegate }) => ({ instruction: discriminator, delegate: addressFromString(delegate) }),
+});
 
 /**
  * Construct an InitializePermanentDelegate instruction
@@ -35,9 +40,9 @@ export const initializePermanentDelegateInstructionData = struct<InitializePerma
  * @return Instruction to add to a transaction
  */
 export function createInitializePermanentDelegateInstruction(
-    mint: PublicKey,
-    permanentDelegate: PublicKey | null,
-    programId: PublicKey,
+    mint: Address,
+    permanentDelegate: Address | null,
+    programId: Address,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
@@ -48,7 +53,7 @@ export function createInitializePermanentDelegateInstruction(
     initializePermanentDelegateInstructionData.encode(
         {
             instruction: TokenInstruction.InitializePermanentDelegate,
-            delegate: permanentDelegate || new PublicKey(0),
+            delegate: permanentDelegate || new Address(0),
         },
         data,
     );
@@ -58,13 +63,13 @@ export function createInitializePermanentDelegateInstruction(
 
 /** A decoded, valid InitializePermanentDelegate instruction */
 export interface DecodedInitializePermanentDelegateInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
     };
     data: {
         instruction: TokenInstruction.InitializePermanentDelegate;
-        delegate: PublicKey | null;
+        delegate: Address | null;
     };
 }
 
@@ -78,7 +83,7 @@ export interface DecodedInitializePermanentDelegateInstruction {
  */
 export function decodeInitializePermanentDelegateInstruction(
     instruction: TransactionInstruction,
-    programId: PublicKey,
+    programId: Address,
 ): DecodedInitializePermanentDelegateInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
     if (instruction.data.length !== initializePermanentDelegateInstructionData.span)
@@ -102,13 +107,13 @@ export function decodeInitializePermanentDelegateInstruction(
 
 /** A decoded, non-validated InitializePermanentDelegate instruction */
 export interface DecodedInitializePermanentDelegateInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta | undefined;
     };
     data: {
         instruction: number;
-        delegate: PublicKey | null;
+        delegate: Address | null;
     };
 }
 

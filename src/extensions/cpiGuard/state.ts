@@ -1,5 +1,4 @@
-import { struct } from '@solana/buffer-layout';
-import { bool } from '@solana/buffer-layout-utils';
+import { getBooleanCodec, getStructCodec } from '@solana/kit';
 import type { Account } from '../../state/account.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
 
@@ -9,16 +8,15 @@ export interface CpiGuard {
     lockCpi: boolean;
 }
 
-/** Buffer layout for de/serializing a CPI Guard extension */
-export const CpiGuardLayout = struct<CpiGuard>([bool('lockCpi')]);
+/** Codec for de/serializing a CPI Guard extension */
+export const CpiGuardCodec = getStructCodec([['lockCpi', getBooleanCodec()]]);
 
-export const CPI_GUARD_SIZE = CpiGuardLayout.span;
+/** @deprecated Use {@link CpiGuardCodec} */
+export const CpiGuardLayout = CpiGuardCodec;
+
+export const CPI_GUARD_SIZE = CpiGuardCodec.fixedSize;
 
 export function getCpiGuard(account: Account): CpiGuard | null {
     const extensionData = getExtensionData(ExtensionType.CpiGuard, account.tlvData);
-    if (extensionData !== null) {
-        return CpiGuardLayout.decode(extensionData);
-    } else {
-        return null;
-    }
+    return extensionData !== null ? CpiGuardCodec.decode(extensionData) : null;
 }

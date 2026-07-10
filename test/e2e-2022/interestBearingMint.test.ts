@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import type { Connection, Signer } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
+import { Address } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 import {
     AuthorityType,
@@ -19,7 +19,7 @@ const TEST_UPDATE_RATE = 50;
 describe('interestBearingMint', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: PublicKey;
+    let mint: Address;
     let rateAuthority: Keypair;
     let mintAuthority: Keypair;
     let freezeAuthority: Keypair;
@@ -28,13 +28,13 @@ describe('interestBearingMint', () => {
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        rateAuthority = Keypair.generate();
-        mintAuthority = Keypair.generate();
-        freezeAuthority = Keypair.generate();
+        rateAuthority = await Keypair.generate();
+        mintAuthority = await Keypair.generate();
+        freezeAuthority = await Keypair.generate();
     });
 
     it('initialize and update rate', async () => {
-        mintKeypair = Keypair.generate();
+        mintKeypair = await Keypair.generate();
         mint = mintKeypair.publicKey;
         await createInterestBearingMint(
             connection,
@@ -97,7 +97,7 @@ describe('interestBearingMint', () => {
         const rateConfigState = getInterestBearingMintConfigState(mintInfo);
         expect(rateConfigState).to.not.equal(null);
         if (rateConfigState !== null) {
-            expect(rateConfigState.rateAuthority).to.eql(PublicKey.default);
+            expect(rateConfigState.rateAuthority).to.eql(Address.default);
         }
     });
 });

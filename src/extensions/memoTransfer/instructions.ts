@@ -1,10 +1,13 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import type { PublicKey, Signer } from '@solana/web3.js';
+import {
+    getDisableMemoTransfersInstructionDataEncoder,
+    getEnableMemoTransfersInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions, TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
 import { addSigners } from '../../instructions/internal.js';
-import { TokenInstruction } from '../../instructions/types.js';
+import type { TokenInstruction } from '../../instructions/types.js';
 
 export enum MemoTransferInstruction {
     Enable = 0,
@@ -17,12 +20,6 @@ export interface MemoTransferInstructionData {
     memoTransferInstruction: MemoTransferInstruction;
 }
 
-/** TODO: docs */
-export const memoTransferInstructionData = struct<MemoTransferInstructionData>([
-    u8('instruction'),
-    u8('memoTransferInstruction'),
-]);
-
 /**
  * Construct an EnableRequiredMemoTransfers instruction
  *
@@ -34,9 +31,9 @@ export const memoTransferInstructionData = struct<MemoTransferInstructionData>([
  * @return Instruction to add to a transaction
  */
 export function createEnableRequiredMemoTransfersInstruction(
-    account: PublicKey,
-    authority: PublicKey,
-    multiSigners: (Signer | PublicKey)[] = [],
+    account: Address,
+    authority: Address,
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     return createMemoTransferInstruction(MemoTransferInstruction.Enable, account, authority, multiSigners, programId);
@@ -53,9 +50,9 @@ export function createEnableRequiredMemoTransfersInstruction(
  * @return Instruction to add to a transaction
  */
 export function createDisableRequiredMemoTransfersInstruction(
-    account: PublicKey,
-    authority: PublicKey,
-    multiSigners: (Signer | PublicKey)[] = [],
+    account: Address,
+    authority: Address,
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     return createMemoTransferInstruction(MemoTransferInstruction.Disable, account, authority, multiSigners, programId);
@@ -63,23 +60,21 @@ export function createDisableRequiredMemoTransfersInstruction(
 
 function createMemoTransferInstruction(
     memoTransferInstruction: MemoTransferInstruction,
-    account: PublicKey,
-    authority: PublicKey,
-    multiSigners: (Signer | PublicKey)[],
-    programId: PublicKey,
+    account: Address,
+    authority: Address,
+    multiSigners: (Signer | Address)[],
+    programId: Address,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
 
     const keys = addSigners([{ pubkey: account, isSigner: false, isWritable: true }], authority, multiSigners);
-    const data = Buffer.alloc(memoTransferInstructionData.span);
-    memoTransferInstructionData.encode(
-        {
-            instruction: TokenInstruction.MemoTransferExtension,
-            memoTransferInstruction,
-        },
-        data,
+    const data = Buffer.from(
+        (memoTransferInstruction === MemoTransferInstruction.Enable
+            ? getEnableMemoTransfersInstructionDataEncoder()
+            : getDisableMemoTransfersInstructionDataEncoder()
+        ).encode({}),
     );
 
     return new TransactionInstruction({ keys, programId, data });

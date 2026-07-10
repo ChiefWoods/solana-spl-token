@@ -1,5 +1,5 @@
-import type { ConfirmOptions, Connection, Keypair, PublicKey, Signer } from '@solana/web3.js';
-import { sendAndConfirmTransaction, SystemProgram, Transaction } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, Keypair, Signer } from '@solana/web3.js';
+import { sendAndConfirmTransaction, SystemProgram, Transaction, Address } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import { getAccountLenForMint } from '../extensions/extensionType.js';
 import { createInitializeAccountInstruction } from '../instructions/initializeAccount.js';
@@ -22,12 +22,12 @@ import { createAssociatedTokenAccount } from './createAssociatedTokenAccount.js'
 export async function createAccount(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    owner: PublicKey,
+    mint: Address,
+    owner: Address,
     keypair?: Keypair,
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_PROGRAM_ID,
-): Promise<PublicKey> {
+): Promise<Address> {
     // If a keypair isn't provided, create the associated token account and return its address
     if (!keypair) return await createAssociatedTokenAccount(connection, payer, mint, owner, confirmOptions, programId);
 
@@ -38,7 +38,7 @@ export async function createAccount(
 
     const transaction = new Transaction().add(
         SystemProgram.createAccount({
-            fromPubkey: payer.publicKey,
+            fromPubkey: new Address(payer.address),
             newAccountPubkey: keypair.publicKey,
             space,
             lamports,

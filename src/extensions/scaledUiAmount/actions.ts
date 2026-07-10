@@ -1,4 +1,4 @@
-import type { ConfirmOptions, Connection, PublicKey, Signer, TransactionSignature } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, Address, Signer, TransactionSignature } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { getSigners } from '../../actions/internal.js';
 import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
@@ -22,8 +22,8 @@ import { createUpdateMultiplierDataInstruction } from './instructions.js';
 export async function updateMultiplier(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    owner: Signer | PublicKey,
+    mint: Address,
+    owner: Signer | Address,
     multiplier: number,
     effectiveTimestamp: bigint,
     multiSigners: Signer[] = [],

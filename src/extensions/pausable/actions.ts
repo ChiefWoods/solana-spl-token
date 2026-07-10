@@ -1,4 +1,4 @@
-import type { ConfirmOptions, Connection, PublicKey, Signer, TransactionSignature } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, Address, Signer, TransactionSignature } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { getSigners } from '../../actions/internal.js';
 import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
@@ -20,8 +20,8 @@ import { createPauseInstruction, createResumeInstruction } from './instructions.
 export async function pause(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    owner: Signer | PublicKey,
+    mint: Address,
+    owner: Signer | Address,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,
@@ -49,8 +49,8 @@ export async function pause(
 export async function resume(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    owner: Signer | PublicKey,
+    mint: Address,
+    owner: Signer | Address,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,

@@ -3,7 +3,7 @@ import chaiAsPromised from 'chai-as-promised';
 use(chaiAsPromised);
 
 import type { Connection, Signer } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
+import { Address } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import {
     createAccount,
@@ -25,26 +25,26 @@ const EXTENSIONS = [ExtensionType.MintCloseAuthority];
 describe('closeMint', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: PublicKey;
+    let mint: Address;
     let mintAuthority: Keypair;
     let closeAuthority: Keypair;
-    let account: PublicKey;
-    let destination: PublicKey;
+    let account: Address;
+    let destination: Address;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintAuthority = Keypair.generate();
-        closeAuthority = Keypair.generate();
+        mintAuthority = await Keypair.generate();
+        closeAuthority = await Keypair.generate();
     });
     beforeEach(async () => {
-        const mintKeypair = Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = mintKeypair.publicKey;
         const mintLen = getMintLen(EXTENSIONS);
         const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: mint,
                 space: mintLen,
                 lamports,
@@ -57,8 +57,8 @@ describe('closeMint', () => {
         await sendAndConfirmTransaction(connection, transaction, [payer, mintKeypair], undefined);
     });
     it('failsWithNonZeroAmount', async () => {
-        const owner = Keypair.generate();
-        destination = Keypair.generate().publicKey;
+        const owner = await Keypair.generate();
+        destination = (await Keypair.generate()).publicKey;
         account = await createAccount(connection, payer, mint, owner.publicKey, undefined, undefined, TEST_PROGRAM_ID);
         const amount = BigInt(1000);
         await mintTo(connection, payer, mint, account, mintAuthority, amount, [], undefined, TEST_PROGRAM_ID);
@@ -67,7 +67,7 @@ describe('closeMint', () => {
         ).to.be.rejectedWith(Error);
     });
     it('works', async () => {
-        destination = Keypair.generate().publicKey;
+        destination = (await Keypair.generate()).publicKey;
         const accountInfo = await connection.getAccountInfo(mint);
         let rentExemptAmount;
         expect(accountInfo).to.not.equal(null);
@@ -102,7 +102,7 @@ describe('closeMint', () => {
         const mintCloseAuthority = getMintCloseAuthority(mintInfo);
         expect(mintCloseAuthority).to.not.equal(null);
         if (mintCloseAuthority !== null) {
-            expect(mintCloseAuthority.closeAuthority).to.eql(PublicKey.default);
+            expect(mintCloseAuthority.closeAuthority).to.eql(Address.default);
         }
     });
 });

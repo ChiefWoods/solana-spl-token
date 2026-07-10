@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import type { Connection, Signer } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
-import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
+
+import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 
 import {
     AuthorityType,
@@ -24,24 +24,24 @@ describe('GroupMember pointer', () => {
     let payer: Signer;
     let mint: Keypair;
     let mintAuthority: Keypair;
-    let memberAddress: PublicKey;
+    let memberAddress: Address;
 
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintAuthority = Keypair.generate();
+        mintAuthority = await Keypair.generate();
     });
 
     beforeEach(async () => {
-        mint = Keypair.generate();
-        memberAddress = PublicKey.unique();
+        mint = await Keypair.generate();
+        memberAddress = (await Keypair.generate()).publicKey;
 
         const mintLen = getMintLen(EXTENSIONS);
         const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: mint.publicKey,
                 space: mintLen,
                 lamports,
@@ -76,7 +76,7 @@ describe('GroupMember pointer', () => {
     });
 
     it('can update to new address', async () => {
-        const newGroupMemberAddress = PublicKey.unique();
+        const newGroupMemberAddress = (await Keypair.generate()).publicKey;
         const transaction = new Transaction().add(
             createUpdateGroupMemberPointerInstruction(
                 mint.publicKey,
@@ -98,7 +98,7 @@ describe('GroupMember pointer', () => {
     });
 
     it('can update authority', async () => {
-        const newAuthority = PublicKey.unique();
+        const newAuthority = (await Keypair.generate()).publicKey;
         const transaction = new Transaction().add(
             createSetAuthorityInstruction(
                 mint.publicKey,

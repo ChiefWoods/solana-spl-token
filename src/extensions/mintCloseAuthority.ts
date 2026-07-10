@@ -1,24 +1,24 @@
-import { struct } from '@solana/buffer-layout';
-import { publicKey } from '@solana/buffer-layout-utils';
-import type { PublicKey } from '@solana/web3.js';
+import { getAddressCodec, getStructCodec } from '@solana/kit';
+import { Address } from '@solana/web3.js';
 import type { Mint } from '../state/mint.js';
 import { ExtensionType, getExtensionData } from './extensionType.js';
 
 /** MintCloseAuthority as stored by the program */
 export interface MintCloseAuthority {
-    closeAuthority: PublicKey;
+    closeAuthority: Address;
 }
 
-/** Buffer layout for de/serializing a mint */
-export const MintCloseAuthorityLayout = struct<MintCloseAuthority>([publicKey('closeAuthority')]);
+/** Codec for de/serializing a mint close authority extension */
+export const MintCloseAuthorityCodec = getStructCodec([['closeAuthority', getAddressCodec()]]);
 
-export const MINT_CLOSE_AUTHORITY_SIZE = MintCloseAuthorityLayout.span;
+/** @deprecated Use {@link MintCloseAuthorityCodec} */
+export const MintCloseAuthorityLayout = MintCloseAuthorityCodec;
+
+export const MINT_CLOSE_AUTHORITY_SIZE = MintCloseAuthorityCodec.fixedSize;
 
 export function getMintCloseAuthority(mint: Mint): MintCloseAuthority | null {
     const extensionData = getExtensionData(ExtensionType.MintCloseAuthority, mint.tlvData);
-    if (extensionData !== null) {
-        return MintCloseAuthorityLayout.decode(extensionData);
-    } else {
-        return null;
-    }
+    if (extensionData === null) return null;
+    const { closeAuthority } = MintCloseAuthorityCodec.decode(extensionData);
+    return { closeAuthority: new Address(closeAuthority) };
 }

@@ -1,6 +1,8 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { u64 } from '@solana/buffer-layout-utils';
-import type { AccountMeta, PublicKey } from '@solana/web3.js';
+import {
+    getAmountToUiAmountInstructionDataDecoder,
+    getAmountToUiAmountInstructionDataEncoder,
+} from '@solana-program/token';
+import type { AccountMeta, Address } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -10,6 +12,7 @@ import {
     TokenInvalidInstructionTypeError,
 } from '../errors.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface AmountToUiAmountInstructionData {
@@ -18,10 +21,12 @@ export interface AmountToUiAmountInstructionData {
 }
 
 /** TODO: docs */
-export const amountToUiAmountInstructionData = struct<AmountToUiAmountInstructionData>([
-    u8('instruction'),
-    u64('amount'),
-]);
+export const amountToUiAmountInstructionData = createInstructionDataCodec({
+    encoder: getAmountToUiAmountInstructionDataEncoder(),
+    decoder: getAmountToUiAmountInstructionDataDecoder(),
+    fromPublic: ({ amount }: AmountToUiAmountInstructionData) => ({ amount }),
+    toPublic: ({ discriminator, amount }) => ({ instruction: discriminator, amount }),
+});
 
 /**
  * Construct a AmountToUiAmount instruction
@@ -33,7 +38,7 @@ export const amountToUiAmountInstructionData = struct<AmountToUiAmountInstructio
  * @return Instruction to add to a transaction
  */
 export function createAmountToUiAmountInstruction(
-    mint: PublicKey,
+    mint: Address,
     amount: number | bigint,
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
@@ -53,7 +58,7 @@ export function createAmountToUiAmountInstruction(
 
 /** A decoded, valid AmountToUiAmount instruction */
 export interface DecodedAmountToUiAmountInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
     };
@@ -96,7 +101,7 @@ export function decodeAmountToUiAmountInstruction(
 
 /** A decoded, non-validated AmountToUiAmount instruction */
 export interface DecodedAmountToUiAmountInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta | undefined;
     };

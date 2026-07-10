@@ -1,5 +1,5 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
+import { getFreezeAccountInstructionDataDecoder, getFreezeAccountInstructionDataEncoder } from '@solana-program/token';
+import type { AccountMeta, Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -10,6 +10,7 @@ import {
 } from '../errors.js';
 import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface FreezeAccountInstructionData {
@@ -17,7 +18,12 @@ export interface FreezeAccountInstructionData {
 }
 
 /** TODO: docs */
-export const freezeAccountInstructionData = struct<FreezeAccountInstructionData>([u8('instruction')]);
+export const freezeAccountInstructionData = createInstructionDataCodec({
+    encoder: getFreezeAccountInstructionDataEncoder(),
+    decoder: getFreezeAccountInstructionDataDecoder(),
+    fromPublic: (_value: FreezeAccountInstructionData) => ({}),
+    toPublic: ({ discriminator }) => ({ instruction: discriminator }),
+});
 
 /**
  * Construct a FreezeAccount instruction
@@ -31,10 +37,10 @@ export const freezeAccountInstructionData = struct<FreezeAccountInstructionData>
  * @return Instruction to add to a transaction
  */
 export function createFreezeAccountInstruction(
-    account: PublicKey,
-    mint: PublicKey,
-    authority: PublicKey,
-    multiSigners: (Signer | PublicKey)[] = [],
+    account: Address,
+    mint: Address,
+    authority: Address,
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -54,7 +60,7 @@ export function createFreezeAccountInstruction(
 
 /** A decoded, valid FreezeAccount instruction */
 export interface DecodedFreezeAccountInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta;
         mint: AccountMeta;
@@ -104,7 +110,7 @@ export function decodeFreezeAccountInstruction(
 
 /** A decoded, non-validated FreezeAccount instruction */
 export interface DecodedFreezeAccountInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta | undefined;
         mint: AccountMeta | undefined;

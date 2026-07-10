@@ -1,10 +1,13 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import type { PublicKey, Signer } from '@solana/web3.js';
+import {
+    getInitializeDefaultAccountStateInstructionDataEncoder,
+    getUpdateDefaultAccountStateInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions, TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
 import { addSigners } from '../../instructions/internal.js';
-import { TokenInstruction } from '../../instructions/types.js';
+import type { TokenInstruction } from '../../instructions/types.js';
 import type { AccountState } from '../../state/account.js';
 
 export enum DefaultAccountStateInstruction {
@@ -19,13 +22,6 @@ export interface DefaultAccountStateInstructionData {
     accountState: AccountState;
 }
 
-/** TODO: docs */
-export const defaultAccountStateInstructionData = struct<DefaultAccountStateInstructionData>([
-    u8('instruction'),
-    u8('defaultAccountStateInstruction'),
-    u8('accountState'),
-]);
-
 /**
  * Construct an InitializeDefaultAccountState instruction
  *
@@ -36,7 +32,7 @@ export const defaultAccountStateInstructionData = struct<DefaultAccountStateInst
  * @return Instruction to add to a transaction
  */
 export function createInitializeDefaultAccountStateInstruction(
-    mint: PublicKey,
+    mint: Address,
     accountState: AccountState,
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
@@ -44,15 +40,7 @@ export function createInitializeDefaultAccountStateInstruction(
         throw new TokenUnsupportedInstructionError();
     }
     const keys = [{ pubkey: mint, isSigner: false, isWritable: true }];
-    const data = Buffer.alloc(defaultAccountStateInstructionData.span);
-    defaultAccountStateInstructionData.encode(
-        {
-            instruction: TokenInstruction.DefaultAccountStateExtension,
-            defaultAccountStateInstruction: DefaultAccountStateInstruction.Initialize,
-            accountState,
-        },
-        data,
-    );
+    const data = Buffer.from(getInitializeDefaultAccountStateInstructionDataEncoder().encode({ state: accountState }));
 
     return new TransactionInstruction({ keys, programId, data });
 }
@@ -69,10 +57,10 @@ export function createInitializeDefaultAccountStateInstruction(
  * @return Instruction to add to a transaction
  */
 export function createUpdateDefaultAccountStateInstruction(
-    mint: PublicKey,
+    mint: Address,
     accountState: AccountState,
-    freezeAuthority: PublicKey,
-    multiSigners: (Signer | PublicKey)[] = [],
+    freezeAuthority: Address,
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
@@ -80,15 +68,7 @@ export function createUpdateDefaultAccountStateInstruction(
     }
 
     const keys = addSigners([{ pubkey: mint, isSigner: false, isWritable: true }], freezeAuthority, multiSigners);
-    const data = Buffer.alloc(defaultAccountStateInstructionData.span);
-    defaultAccountStateInstructionData.encode(
-        {
-            instruction: TokenInstruction.DefaultAccountStateExtension,
-            defaultAccountStateInstruction: DefaultAccountStateInstruction.Update,
-            accountState,
-        },
-        data,
-    );
+    const data = Buffer.from(getUpdateDefaultAccountStateInstructionDataEncoder().encode({ state: accountState }));
 
     return new TransactionInstruction({ keys, programId, data });
 }

@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 import type { Connection } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
+import { Address } from '@solana/web3.js';
 import {
     amountToUiAmountForMintWithoutSimulation,
     amountToUiAmountForScaledUiAmountMintWithoutSimulation,
     uiAmountToAmountForMintWithoutSimulation,
     uiAmountToAmountForScaledUiAmountMintWithoutSimulation,
 } from '../../src/actions/amountToUiAmount';
-import { AccountLayout, AccountType, ScaledUiAmountConfigLayout, TOKEN_2022_PROGRAM_ID } from '../../src';
+import { AccountLayout, AccountType, SCALED_UI_AMOUNT_CONFIG_SIZE, TOKEN_2022_PROGRAM_ID } from '../../src';
 import { MintLayout } from '../../src/state/mint';
 import { ExtensionType } from '../../src/extensions/extensionType';
 
@@ -36,12 +36,12 @@ class MockConnection {
         };
     }
 
-    getAccountInfo = async (address: PublicKey) => {
+    getAccountInfo = async (address: Address) => {
         return this.getParsedAccountInfo(address);
     };
 
     // used to get the clock timestamp
-    getParsedAccountInfo = async (address: PublicKey) => {
+    getParsedAccountInfo = async (address: Address) => {
         if (address.toString() === 'SysvarC1ock11111111111111111111111111111111') {
             return {
                 value: {
@@ -77,12 +77,12 @@ function createMockMintData(
     MintLayout.encode(
         {
             mintAuthorityOption: 1,
-            mintAuthority: new PublicKey(new Uint8Array(32).fill(1)),
+            mintAuthority: new Address(new Uint8Array(32).fill(1)),
             supply: BigInt(1000000),
             decimals: decimals,
             isInitialized: true,
             freezeAuthorityOption: 1,
-            freezeAuthority: new PublicKey(new Uint8Array(32).fill(1)),
+            freezeAuthority: new Address(new Uint8Array(32).fill(1)),
         },
         mintData,
     );
@@ -96,7 +96,7 @@ function createMockMintData(
     }
 
     // write extension data using the ScaledUiAmountConfigLayout
-    const extensionData = Buffer.alloc(ScaledUiAmountConfigLayout.span);
+    const extensionData = Buffer.alloc(SCALED_UI_AMOUNT_CONFIG_SIZE);
     const rateAuthority = new Uint8Array(32).fill(1); // rate authority
     Buffer.from(rateAuthority).copy(extensionData, 0);
     extensionData.writeDoubleLE(config.multiplier || 0, 32); // multiplier (f64)
@@ -119,7 +119,7 @@ function createMockMintData(
 
 describe('Scaled UI Amount Extension', () => {
     let connection: MockConnection;
-    const mint = new PublicKey('So11111111111111111111111111111111111111112');
+    const mint = new Address('So11111111111111111111111111111111111111112');
 
     beforeEach(() => {
         connection = new MockConnection() as unknown as MockConnection;

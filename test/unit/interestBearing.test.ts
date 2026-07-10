@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 import type { Connection } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
+import { Address } from '@solana/web3.js';
 import {
     amountToUiAmountForMintWithoutSimulation,
     uiAmountToAmountForMintWithoutSimulation,
 } from '../../src/actions/amountToUiAmount';
-import { AccountLayout, InterestBearingMintConfigStateLayout, TOKEN_2022_PROGRAM_ID } from '../../src';
+import { AccountLayout, INTEREST_BEARING_MINT_CONFIG_STATE_SIZE, TOKEN_2022_PROGRAM_ID } from '../../src';
 import { MintLayout } from '../../src/state/mint';
 import { ExtensionType } from '../../src/extensions/extensionType';
 import { AccountType } from '../../src/extensions/accountType';
@@ -34,12 +34,12 @@ class MockConnection {
         };
     }
 
-    getAccountInfo = async (address: PublicKey) => {
+    getAccountInfo = async (address: Address) => {
         return this.getParsedAccountInfo(address);
     };
 
     // used to get the clock timestamp
-    getParsedAccountInfo = async (address: PublicKey) => {
+    getParsedAccountInfo = async (address: Address) => {
         if (address.toString() === 'SysvarC1ock11111111111111111111111111111111') {
             return {
                 value: {
@@ -82,12 +82,12 @@ function createMockMintData(
     MintLayout.encode(
         {
             mintAuthorityOption: 1,
-            mintAuthority: new PublicKey(new Uint8Array(32).fill(1)),
+            mintAuthority: new Address(new Uint8Array(32).fill(1)),
             supply: BigInt(1000000),
             decimals: decimals,
             isInitialized: true,
             freezeAuthorityOption: 1,
-            freezeAuthority: new PublicKey(new Uint8Array(32).fill(1)),
+            freezeAuthority: new Address(new Uint8Array(32).fill(1)),
         },
         mintData,
     );
@@ -101,7 +101,7 @@ function createMockMintData(
     }
 
     // write extension data using the InterestBearingMintConfigStateLayout
-    const extensionData = Buffer.alloc(InterestBearingMintConfigStateLayout.span);
+    const extensionData = Buffer.alloc(INTEREST_BEARING_MINT_CONFIG_STATE_SIZE);
     const rateAuthority = new Uint8Array(32).fill(1); // rate authority
     Buffer.from(rateAuthority).copy(extensionData, 0);
     extensionData.writeBigUInt64LE(BigInt(0), 32); // initialization timestamp
@@ -125,7 +125,7 @@ function createMockMintData(
 
 describe('amountToUiAmountForMintWithoutSimulation', () => {
     let connection: MockConnection;
-    const mint = new PublicKey('So11111111111111111111111111111111111111112');
+    const mint = new Address('So11111111111111111111111111111111111111112');
 
     beforeEach(() => {
         connection = new MockConnection() as unknown as MockConnection;
@@ -235,7 +235,7 @@ describe('amountToUiAmountForMintWithoutSimulation', () => {
 
 describe('amountToUiAmountForMintWithoutSimulation', () => {
     let connection: MockConnection;
-    const mint = new PublicKey('So11111111111111111111111111111111111111112');
+    const mint = new Address('So11111111111111111111111111111111111111112');
 
     beforeEach(() => {
         connection = new MockConnection() as unknown as MockConnection;

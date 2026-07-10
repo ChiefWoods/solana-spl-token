@@ -1,4 +1,4 @@
-import type { ConfirmOptions, Connection, PublicKey, Signer, TransactionSignature } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, Address, Signer, TransactionSignature } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import { createMintToCheckedInstruction } from '../instructions/mintToChecked.js';
@@ -23,9 +23,9 @@ import { getSigners } from './internal.js';
 export async function mintToChecked(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    destination: PublicKey,
-    authority: Signer | PublicKey,
+    mint: Address,
+    destination: Address,
+    authority: Signer | Address,
     amount: number | bigint,
     decimals: number,
     multiSigners: Signer[] = [],

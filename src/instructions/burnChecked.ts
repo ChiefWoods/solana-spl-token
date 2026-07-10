@@ -1,6 +1,5 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { u64 } from '@solana/buffer-layout-utils';
-import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
+import { getBurnCheckedInstructionDataDecoder, getBurnCheckedInstructionDataEncoder } from '@solana-program/token';
+import type { AccountMeta, Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -11,6 +10,7 @@ import {
 } from '../errors.js';
 import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface BurnCheckedInstructionData {
@@ -20,11 +20,12 @@ export interface BurnCheckedInstructionData {
 }
 
 /** TODO: docs */
-export const burnCheckedInstructionData = struct<BurnCheckedInstructionData>([
-    u8('instruction'),
-    u64('amount'),
-    u8('decimals'),
-]);
+export const burnCheckedInstructionData = createInstructionDataCodec({
+    encoder: getBurnCheckedInstructionDataEncoder(),
+    decoder: getBurnCheckedInstructionDataDecoder(),
+    fromPublic: ({ amount, decimals }: BurnCheckedInstructionData) => ({ amount, decimals }),
+    toPublic: ({ discriminator, amount, decimals }) => ({ instruction: discriminator, amount, decimals }),
+});
 
 /**
  * Construct a BurnChecked instruction
@@ -40,12 +41,12 @@ export const burnCheckedInstructionData = struct<BurnCheckedInstructionData>([
  * @return Instruction to add to a transaction
  */
 export function createBurnCheckedInstruction(
-    account: PublicKey,
-    mint: PublicKey,
-    owner: PublicKey,
+    account: Address,
+    mint: Address,
+    owner: Address,
     amount: number | bigint,
     decimals: number,
-    multiSigners: (Signer | PublicKey)[] = [],
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -72,7 +73,7 @@ export function createBurnCheckedInstruction(
 
 /** A decoded, valid BurnChecked instruction */
 export interface DecodedBurnCheckedInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta;
         mint: AccountMeta;
@@ -124,7 +125,7 @@ export function decodeBurnCheckedInstruction(
 
 /** A decoded, non-validated BurnChecked instruction */
 export interface DecodedBurnCheckedInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta | undefined;
         mint: AccountMeta | undefined;

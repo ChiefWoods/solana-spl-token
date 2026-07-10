@@ -18,11 +18,11 @@ import {
 } from '../src';
 
 (async () => {
-    const payer = Keypair.generate();
+    const payer = await Keypair.generate();
 
-    const mintAuthority = Keypair.generate();
-    const freezeAuthority = Keypair.generate();
-    const mintKeypair = Keypair.generate();
+    const mintAuthority = await Keypair.generate();
+    const freezeAuthority = await Keypair.generate();
+    const mintKeypair = await Keypair.generate();
     const mint = mintKeypair.publicKey;
 
     const extensions = [ExtensionType.DefaultAccountState];

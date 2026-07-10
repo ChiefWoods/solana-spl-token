@@ -1,6 +1,7 @@
 import { expect } from 'chai';
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
-import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
+import type { Connection, Signer } from '@solana/web3.js';
+
+import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import {
     AccountState,
     createAccount,
@@ -21,24 +22,24 @@ const EXTENSIONS = [ExtensionType.DefaultAccountState];
 describe('defaultAccountState', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: PublicKey;
+    let mint: Address;
     let mintAuthority: Keypair;
     let freezeAuthority: Keypair;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintAuthority = Keypair.generate();
-        freezeAuthority = Keypair.generate();
+        mintAuthority = await Keypair.generate();
+        freezeAuthority = await Keypair.generate();
     });
     beforeEach(async () => {
-        const mintKeypair = Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = mintKeypair.publicKey;
         const mintLen = getMintLen(EXTENSIONS);
         const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: mint,
                 space: mintLen,
                 lamports,
@@ -63,7 +64,7 @@ describe('defaultAccountState', () => {
         if (defaultAccountState !== null) {
             expect(defaultAccountState.state).to.eql(TEST_STATE);
         }
-        const owner = Keypair.generate();
+        const owner = await Keypair.generate();
         const account = await createAccount(
             connection,
             payer,
@@ -88,7 +89,7 @@ describe('defaultAccountState', () => {
             undefined,
             TEST_PROGRAM_ID,
         );
-        const owner = Keypair.generate();
+        const owner = await Keypair.generate();
         const account = await createAccount(
             connection,
             payer,

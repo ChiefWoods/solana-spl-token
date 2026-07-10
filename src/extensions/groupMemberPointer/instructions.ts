@@ -1,29 +1,25 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { publicKey } from '@solana/buffer-layout-utils';
-import type { Signer } from '@solana/web3.js';
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import {
+    getInitializeGroupMemberPointerInstructionDataEncoder,
+    getUpdateGroupMemberPointerInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { Signer, Address } from '@solana/web3.js';
+import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ID, programSupportsExtensions } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
-import { TokenInstruction } from '../../instructions/types.js';
 import { addSigners } from '../../instructions/internal.js';
+import type { TokenInstruction } from '../../instructions/types.js';
 
 export enum GroupMemberPointerInstruction {
     Initialize = 0,
     Update = 1,
 }
 
-export const initializeGroupMemberPointerData = struct<{
+export interface InitializeGroupMemberPointerInstructionData {
     instruction: TokenInstruction.GroupMemberPointerExtension;
     groupMemberPointerInstruction: number;
-    authority: PublicKey;
-    memberAddress: PublicKey;
-}>([
-    // prettier-ignore
-    u8('instruction'),
-    u8('groupMemberPointerInstruction'),
-    publicKey('authority'),
-    publicKey('memberAddress'),
-]);
+    authority: Address;
+    memberAddress: Address;
+}
 
 /**
  * Construct an Initialize GroupMemberPointer instruction
@@ -36,63 +32,48 @@ export const initializeGroupMemberPointerData = struct<{
  * @return Instruction to add to a transaction
  */
 export function createInitializeGroupMemberPointerInstruction(
-    mint: PublicKey,
-    authority: PublicKey | null,
-    memberAddress: PublicKey | null,
-    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
+    mint: Address,
+    authority: Address | null,
+    memberAddress: Address | null,
+    programId: Address = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
     const keys = [{ pubkey: mint, isSigner: false, isWritable: true }];
-
-    const data = Buffer.alloc(initializeGroupMemberPointerData.span);
-    initializeGroupMemberPointerData.encode(
-        {
-            instruction: TokenInstruction.GroupMemberPointerExtension,
-            groupMemberPointerInstruction: GroupMemberPointerInstruction.Initialize,
-            authority: authority ?? PublicKey.default,
-            memberAddress: memberAddress ?? PublicKey.default,
-        },
-        data,
+    const data = Buffer.from(
+        getInitializeGroupMemberPointerInstructionDataEncoder().encode({
+            authority: authority?.toBase58() ?? null,
+            memberAddress: memberAddress?.toBase58() ?? null,
+        }),
     );
 
-    return new TransactionInstruction({ keys, programId, data: data });
+    return new TransactionInstruction({ keys, programId, data });
 }
 
-export const updateGroupMemberPointerData = struct<{
+export interface UpdateGroupMemberPointerInstructionData {
     instruction: TokenInstruction.GroupMemberPointerExtension;
     groupMemberPointerInstruction: number;
-    memberAddress: PublicKey;
-}>([
-    // prettier-ignore
-    u8('instruction'),
-    u8('groupMemberPointerInstruction'),
-    publicKey('memberAddress'),
-]);
+    memberAddress: Address;
+}
 
 export function createUpdateGroupMemberPointerInstruction(
-    mint: PublicKey,
-    authority: PublicKey,
-    memberAddress: PublicKey | null,
-    multiSigners: (Signer | PublicKey)[] = [],
-    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
+    mint: Address,
+    authority: Address,
+    memberAddress: Address | null,
+    multiSigners: (Signer | Address)[] = [],
+    programId: Address = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
     }
 
     const keys = addSigners([{ pubkey: mint, isSigner: false, isWritable: true }], authority, multiSigners);
-
-    const data = Buffer.alloc(updateGroupMemberPointerData.span);
-    updateGroupMemberPointerData.encode(
-        {
-            instruction: TokenInstruction.GroupMemberPointerExtension,
-            groupMemberPointerInstruction: GroupMemberPointerInstruction.Update,
-            memberAddress: memberAddress ?? PublicKey.default,
-        },
-        data,
+    const data = Buffer.from(
+        getUpdateGroupMemberPointerInstructionDataEncoder().encode({
+            memberAddress: memberAddress?.toBase58() ?? null,
+        }),
     );
 
-    return new TransactionInstruction({ keys, programId, data: data });
+    return new TransactionInstruction({ keys, programId, data });
 }

@@ -18,14 +18,14 @@ import {
 (async () => {
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
-    const payer = Keypair.generate();
+    const payer = await Keypair.generate();
     const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
     await connection.confirmTransaction({ signature: airdropSignature, ...(await connection.getLatestBlockhash()) });
 
-    const mintAuthority = Keypair.generate();
+    const mintAuthority = await Keypair.generate();
     const decimals = 9;
 
-    const mintKeypair = Keypair.generate();
+    const mintKeypair = await Keypair.generate();
     const mint = mintKeypair.publicKey;
     const mintLen = getMintLen([ExtensionType.NonTransferable]);
     const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);

@@ -20,12 +20,12 @@ import {
 } from '../src';
 
 (async () => {
-    const payer = Keypair.generate();
+    const payer = await Keypair.generate();
 
-    const mintAuthority = Keypair.generate();
-    const mintKeypair = Keypair.generate();
+    const mintAuthority = await Keypair.generate();
+    const mintKeypair = await Keypair.generate();
     const mint = mintKeypair.publicKey;
-    const permanentDelegate = Keypair.generate();
+    const permanentDelegate = await Keypair.generate();
 
     const extensions = [ExtensionType.PermanentDelegate];
     const mintLen = getMintLen(extensions);
@@ -51,7 +51,7 @@ import {
     await sendAndConfirmTransaction(connection, mintTransaction, [payer, mintKeypair], undefined);
 
     const mintAmount = BigInt(1_000_000_000);
-    const owner = Keypair.generate();
+    const owner = await Keypair.generate();
     const sourceAccount = await createAccount(
         connection,
         payer,
@@ -73,7 +73,7 @@ import {
         TOKEN_2022_PROGRAM_ID,
     );
 
-    const accountKeypair = Keypair.generate();
+    const accountKeypair = await Keypair.generate();
     const destinationAccount = await createAccount(
         connection,
         payer,

@@ -1,5 +1,6 @@
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
-import { Keypair, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
+import type { Connection, Signer } from '@solana/web3.js';
+
+import { Address, Keypair, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import { expect } from 'chai';
 
 import {
@@ -8,7 +9,7 @@ import {
     getAccount,
     createAssociatedTokenAccount,
     createAssociatedTokenAccountInstruction,
-    getAssociatedTokenAddressSync,
+    getAssociatedTokenAddress,
     mintTo,
     recoverNested,
 } from '../../src';
@@ -19,19 +20,19 @@ describe('recoverNested', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Signer;
-    let mint: PublicKey;
-    let associatedToken: PublicKey;
-    let nestedMint: PublicKey;
+    let mint: Address;
+    let associatedToken: Address;
+    let nestedMint: Address;
     const nestedMintAmount = 1;
-    let nestedAssociatedToken: PublicKey;
+    let nestedAssociatedToken: Address;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 10000000000);
-        owner = Keypair.generate();
+        owner = await Keypair.generate();
 
         // mint
-        const mintAuthority = Keypair.generate();
-        const mintKeypair = Keypair.generate();
+        const mintAuthority = await Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = await createMint(
             connection,
             payer,
@@ -47,14 +48,14 @@ describe('recoverNested', () => {
             connection,
             payer,
             mint,
-            owner.publicKey,
+            new Address(owner.address),
             undefined,
             TEST_PROGRAM_ID,
         );
 
         // nested mint
-        const nestedMintAuthority = Keypair.generate();
-        const nestedMintKeypair = Keypair.generate();
+        const nestedMintAuthority = await Keypair.generate();
+        const nestedMintKeypair = await Keypair.generate();
         nestedMint = await createMint(
             connection,
             payer,
@@ -66,7 +67,7 @@ describe('recoverNested', () => {
             TEST_PROGRAM_ID,
         );
 
-        nestedAssociatedToken = getAssociatedTokenAddressSync(
+        nestedAssociatedToken = await getAssociatedTokenAddress(
             nestedMint,
             associatedToken,
             true,
@@ -75,7 +76,7 @@ describe('recoverNested', () => {
         );
         const transaction = new Transaction().add(
             createAssociatedTokenAccountInstruction(
-                payer.publicKey,
+                new Address(payer.address),
                 nestedAssociatedToken,
                 associatedToken,
                 nestedMint,
@@ -104,7 +105,7 @@ describe('recoverNested', () => {
             connection,
             payer,
             nestedMint,
-            owner.publicKey,
+            new Address(owner.address),
             undefined,
             TEST_PROGRAM_ID,
         );
@@ -116,7 +117,7 @@ describe('recoverNested', () => {
         const accountInfo = await getAccount(connection, destinationAssociatedToken, undefined, TEST_PROGRAM_ID);
         expect(accountInfo).to.not.equal(null);
         expect(accountInfo.mint).to.eql(nestedMint);
-        expect(accountInfo.owner).to.eql(owner.publicKey);
+        expect(accountInfo.owner).to.eql(new Address(owner.address));
         expect(accountInfo.amount).to.eql(BigInt(nestedMintAmount));
     });
 });

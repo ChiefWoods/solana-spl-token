@@ -1,5 +1,5 @@
-import type { ConfirmOptions, Connection, PublicKey, Signer, TransactionSignature } from '@solana/web3.js';
-import { sendAndConfirmTransaction, SystemProgram, Transaction } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, Signer, TransactionSignature } from '@solana/web3.js';
+import { sendAndConfirmTransaction, SystemProgram, Transaction, Address } from '@solana/web3.js';
 import type { Field, TokenMetadata } from '@solana/spl-token-metadata';
 import {
     createInitializeInstruction,
@@ -19,7 +19,7 @@ import { unpackMint } from '../../state/index.js';
 
 async function getAdditionalRentForNewMetadata(
     connection: Connection,
-    address: PublicKey,
+    address: Address,
     tokenMetadata: TokenMetadata,
     programId = TOKEN_2022_PROGRAM_ID,
 ): Promise<number> {
@@ -43,12 +43,12 @@ async function getAdditionalRentForNewMetadata(
 
     const newRentExemptMinimum = await connection.getMinimumBalanceForRentExemption(newAccountLen);
 
-    return newRentExemptMinimum - info.lamports;
+    return Number(newRentExemptMinimum - info.lamports);
 }
 
 async function getAdditionalRentForUpdatedMetadata(
     connection: Connection,
-    address: PublicKey,
+    address: Address,
     field: string | Field,
     value: string,
     programId = TOKEN_2022_PROGRAM_ID,
@@ -81,7 +81,7 @@ async function getAdditionalRentForUpdatedMetadata(
 
     const newRentExemptMinimum = await connection.getMinimumBalanceForRentExemption(newAccountLen);
 
-    return newRentExemptMinimum - info.lamports;
+    return Number(newRentExemptMinimum - info.lamports);
 }
 
 /**
@@ -104,9 +104,9 @@ async function getAdditionalRentForUpdatedMetadata(
 export async function tokenMetadataInitialize(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    updateAuthority: PublicKey,
-    mintAuthority: PublicKey | Signer,
+    mint: Address,
+    updateAuthority: Address,
+    mintAuthority: Address | Signer,
     name: string,
     symbol: string,
     uri: string,
@@ -153,9 +153,9 @@ export async function tokenMetadataInitialize(
 export async function tokenMetadataInitializeWithRentTransfer(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    updateAuthority: PublicKey,
-    mintAuthority: PublicKey | Signer,
+    mint: Address,
+    updateAuthority: Address,
+    mintAuthority: Address | Signer,
     name: string,
     symbol: string,
     uri: string,
@@ -182,7 +182,9 @@ export async function tokenMetadataInitializeWithRentTransfer(
     );
 
     if (lamports > 0) {
-        transaction.add(SystemProgram.transfer({ fromPubkey: payer.publicKey, toPubkey: mint, lamports: lamports }));
+        transaction.add(
+            SystemProgram.transfer({ fromPubkey: new Address(payer.address), toPubkey: mint, lamports: lamports }),
+        );
     }
 
     transaction.add(
@@ -223,8 +225,8 @@ export async function tokenMetadataInitializeWithRentTransfer(
 export async function tokenMetadataUpdateField(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    updateAuthority: PublicKey | Signer,
+    mint: Address,
+    updateAuthority: Address | Signer,
     field: string | Field,
     value: string,
     multiSigners: Signer[] = [],
@@ -269,8 +271,8 @@ export async function tokenMetadataUpdateField(
 export async function tokenMetadataUpdateFieldWithRentTransfer(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    updateAuthority: PublicKey | Signer,
+    mint: Address,
+    updateAuthority: Address | Signer,
     field: string | Field,
     value: string,
     multiSigners: Signer[] = [],
@@ -284,7 +286,9 @@ export async function tokenMetadataUpdateFieldWithRentTransfer(
     const lamports = await getAdditionalRentForUpdatedMetadata(connection, mint, field, value, programId);
 
     if (lamports > 0) {
-        transaction.add(SystemProgram.transfer({ fromPubkey: payer.publicKey, toPubkey: mint, lamports: lamports }));
+        transaction.add(
+            SystemProgram.transfer({ fromPubkey: new Address(payer.address), toPubkey: mint, lamports: lamports }),
+        );
     }
 
     transaction.add(
@@ -320,8 +324,8 @@ export async function tokenMetadataUpdateFieldWithRentTransfer(
 export async function tokenMetadataRemoveKey(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    updateAuthority: PublicKey | Signer,
+    mint: Address,
+    updateAuthority: Address | Signer,
     key: string,
     idempotent: boolean,
     multiSigners: Signer[] = [],
@@ -360,9 +364,9 @@ export async function tokenMetadataRemoveKey(
 export async function tokenMetadataUpdateAuthority(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    updateAuthority: PublicKey | Signer,
-    newAuthority: PublicKey | null,
+    mint: Address,
+    updateAuthority: Address | Signer,
+    newAuthority: Address | null,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,

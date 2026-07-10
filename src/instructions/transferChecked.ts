@@ -1,6 +1,8 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { u64 } from '@solana/buffer-layout-utils';
-import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
+import {
+    getTransferCheckedInstructionDataDecoder,
+    getTransferCheckedInstructionDataEncoder,
+} from '@solana-program/token';
+import type { AccountMeta, Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -11,6 +13,7 @@ import {
 } from '../errors.js';
 import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface TransferCheckedInstructionData {
@@ -20,11 +23,12 @@ export interface TransferCheckedInstructionData {
 }
 
 /** TODO: docs */
-export const transferCheckedInstructionData = struct<TransferCheckedInstructionData>([
-    u8('instruction'),
-    u64('amount'),
-    u8('decimals'),
-]);
+export const transferCheckedInstructionData = createInstructionDataCodec({
+    encoder: getTransferCheckedInstructionDataEncoder(),
+    decoder: getTransferCheckedInstructionDataDecoder(),
+    fromPublic: ({ amount, decimals }: TransferCheckedInstructionData) => ({ amount, decimals }),
+    toPublic: ({ discriminator, amount, decimals }) => ({ instruction: discriminator, amount, decimals }),
+});
 
 /**
  * Construct a TransferChecked instruction
@@ -41,13 +45,13 @@ export const transferCheckedInstructionData = struct<TransferCheckedInstructionD
  * @return Instruction to add to a transaction
  */
 export function createTransferCheckedInstruction(
-    source: PublicKey,
-    mint: PublicKey,
-    destination: PublicKey,
-    owner: PublicKey,
+    source: Address,
+    mint: Address,
+    destination: Address,
+    owner: Address,
     amount: number | bigint,
     decimals: number,
-    multiSigners: (Signer | PublicKey)[] = [],
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -75,7 +79,7 @@ export function createTransferCheckedInstruction(
 
 /** A decoded, valid TransferChecked instruction */
 export interface DecodedTransferCheckedInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         source: AccountMeta;
         mint: AccountMeta;
@@ -129,7 +133,7 @@ export function decodeTransferCheckedInstruction(
 
 /** A decoded, non-validated TransferChecked instruction */
 export interface DecodedTransferCheckedInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         source: AccountMeta | undefined;
         mint: AccountMeta | undefined;

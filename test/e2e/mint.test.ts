@@ -1,4 +1,4 @@
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
+import type { Connection, Address, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 
 import { createMint, getMint, createAccount, getAccount, mintTo, mintToChecked } from '../../src';
@@ -12,15 +12,15 @@ const TEST_TOKEN_DECIMALS = 2;
 describe('mint', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: PublicKey;
+    let mint: Address;
     let mintAuthority: Keypair;
     let owner: Keypair;
-    let account: PublicKey;
+    let account: Address;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintAuthority = Keypair.generate();
-        const mintKeypair = Keypair.generate();
+        mintAuthority = await Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = await createMint(
             connection,
             payer,
@@ -31,7 +31,7 @@ describe('mint', () => {
             undefined,
             TEST_PROGRAM_ID,
         );
-        owner = Keypair.generate();
+        owner = await Keypair.generate();
         account = await createAccount(connection, payer, mint, owner.publicKey, undefined, undefined, TEST_PROGRAM_ID);
     });
     it('mintTo', async () => {

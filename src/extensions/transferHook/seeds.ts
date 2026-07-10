@@ -52,7 +52,7 @@ function unpackSeedAccountKey(seeds: Uint8Array, previousMetas: AccountMeta[]): 
         throw new TokenTransferHookInvalidSeed();
     }
     return {
-        data: previousMetas[index].pubkey.toBuffer(),
+        data: Buffer.from(previousMetas[index].pubkey.toBytes()),
         packedLength: DISCRIMINATOR_SPAN + ACCOUNT_KEY_INDEX_SPAN,
     };
 }
@@ -77,7 +77,7 @@ async function unpackSeedAccountData(
         throw new TokenTransferHookInvalidSeed();
     }
     return {
-        data: accountInfo.data.subarray(dataIndex, dataIndex + length),
+        data: Buffer.from(accountInfo.data.subarray(dataIndex, dataIndex + length)),
         packedLength:
             DISCRIMINATOR_SPAN + ACCOUNT_DATA_ACCOUNT_INDEX_SPAN + ACCOUNT_DATA_OFFSET_SPAN + ACCOUNT_DATA_LENGTH_SPAN,
     };

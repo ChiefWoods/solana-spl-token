@@ -6,7 +6,7 @@ import { createMint, getOrCreateAssociatedTokenAccount, mintTo, transfer } from 
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
     // Generate a new wallet keypair and airdrop SOL
-    const fromWallet = Keypair.generate();
+    const fromWallet = await Keypair.generate();
     const fromAirdropSignature = await connection.requestAirdrop(fromWallet.publicKey, LAMPORTS_PER_SOL);
 
     // Wait for airdrop confirmation
@@ -16,7 +16,7 @@ import { createMint, getOrCreateAssociatedTokenAccount, mintTo, transfer } from 
     });
 
     // Generate a new wallet to receive newly minted token
-    const toWallet = Keypair.generate();
+    const toWallet = await Keypair.generate();
 
     // Create new token mint
     const mint = await createMint(connection, fromWallet, fromWallet.publicKey, null, 9);

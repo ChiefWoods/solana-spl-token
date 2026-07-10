@@ -1,5 +1,5 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import type { AccountMeta, PublicKey } from '@solana/web3.js';
+import { getSyncNativeInstructionDataDecoder, getSyncNativeInstructionDataEncoder } from '@solana-program/token';
+import type { AccountMeta, Address } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -9,6 +9,7 @@ import {
     TokenInvalidInstructionTypeError,
 } from '../errors.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface SyncNativeInstructionData {
@@ -16,7 +17,12 @@ export interface SyncNativeInstructionData {
 }
 
 /** TODO: docs */
-export const syncNativeInstructionData = struct<SyncNativeInstructionData>([u8('instruction')]);
+export const syncNativeInstructionData = createInstructionDataCodec({
+    encoder: getSyncNativeInstructionDataEncoder(),
+    decoder: getSyncNativeInstructionDataDecoder(),
+    fromPublic: (_value: SyncNativeInstructionData) => ({}),
+    toPublic: ({ discriminator }) => ({ instruction: discriminator }),
+});
 
 /**
  * Construct a SyncNative instruction
@@ -26,7 +32,7 @@ export const syncNativeInstructionData = struct<SyncNativeInstructionData>([u8('
  *
  * @return Instruction to add to a transaction
  */
-export function createSyncNativeInstruction(account: PublicKey, programId = TOKEN_PROGRAM_ID): TransactionInstruction {
+export function createSyncNativeInstruction(account: Address, programId = TOKEN_PROGRAM_ID): TransactionInstruction {
     const keys = [{ pubkey: account, isSigner: false, isWritable: true }];
 
     const data = Buffer.alloc(syncNativeInstructionData.span);
@@ -37,7 +43,7 @@ export function createSyncNativeInstruction(account: PublicKey, programId = TOKE
 
 /** A decoded, valid SyncNative instruction */
 export interface DecodedSyncNativeInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta;
     };
@@ -81,7 +87,7 @@ export function decodeSyncNativeInstruction(
 
 /** A decoded, non-validated SyncNative instruction */
 export interface DecodedSyncNativeInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta | undefined;
     };

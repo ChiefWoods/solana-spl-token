@@ -1,5 +1,5 @@
 import { expect, use } from 'chai';
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
+import type { Connection, Address, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 import { createMint, createAccount, closeAccount, mintTo } from '../../src';
 import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
@@ -10,18 +10,18 @@ const TEST_TOKEN_DECIMALS = 2;
 describe('close', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: PublicKey;
+    let mint: Address;
     let mintAuthority: Keypair;
     let freezeAuthority: Keypair;
     let owner: Keypair;
-    let account: PublicKey;
-    let destination: PublicKey;
+    let account: Address;
+    let destination: Address;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintAuthority = Keypair.generate();
-        freezeAuthority = Keypair.generate();
-        const mintKeypair = Keypair.generate();
+        mintAuthority = await Keypair.generate();
+        freezeAuthority = await Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = await createMint(
             connection,
             payer,
@@ -34,8 +34,8 @@ describe('close', () => {
         );
     });
     beforeEach(async () => {
-        owner = Keypair.generate();
-        destination = Keypair.generate().publicKey;
+        owner = await Keypair.generate();
+        destination = (await Keypair.generate()).publicKey;
         account = await createAccount(connection, payer, mint, owner.publicKey, undefined, undefined, TEST_PROGRAM_ID);
     });
     it('failsWithNonZeroAmount', async () => {

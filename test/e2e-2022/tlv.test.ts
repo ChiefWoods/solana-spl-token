@@ -1,6 +1,7 @@
 import { expect } from 'chai';
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
-import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
+import type { Connection, Signer } from '@solana/web3.js';
+
+import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 
 import type { Account, Mint } from '../../src';
 import {
@@ -27,14 +28,14 @@ describe('tlv test', () => {
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        owner = Keypair.generate();
+        owner = await Keypair.generate();
     });
 
     // test that the parser gracefully handles accounts with arbitrary extra bytes
     it('parses account with extra bytes', async () => {
         const initTestAccount = async (extraBytes: number) => {
-            const mintKeypair = Keypair.generate();
-            const accountKeypair = Keypair.generate();
+            const mintKeypair = await Keypair.generate();
+            const accountKeypair = await Keypair.generate();
             const account = accountKeypair.publicKey;
             const accountLen = getAccountLen([]) + extraBytes;
             const lamports = await connection.getMinimumBalanceForRentExemption(accountLen);
@@ -52,7 +53,7 @@ describe('tlv test', () => {
 
             const transaction = new Transaction().add(
                 SystemProgram.createAccount({
-                    fromPubkey: payer.publicKey,
+                    fromPubkey: new Address(payer.address),
                     newAccountPubkey: account,
                     space: accountLen,
                     lamports,
@@ -73,7 +74,7 @@ describe('tlv test', () => {
 
             promises.push(
                 initTestAccount(i)
-                    .then((account: PublicKey) => getAccount(connection, account, undefined, TEST_PROGRAM_ID))
+                    .then((account: Address) => getAccount(connection, account, undefined, TEST_PROGRAM_ID))
                     .then((accountInfo: Account) => {
                         for (const extension of ACCOUNT_EXTENSIONS) {
                             // realistically this will never fail with a non-null value, it will just throw

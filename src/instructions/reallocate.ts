@@ -1,11 +1,11 @@
-import { seq, struct, u16, u8 } from '@solana/buffer-layout';
-import type { PublicKey, Signer } from '@solana/web3.js';
+import { getReallocateInstructionDataEncoder } from '@solana-program/token-2022';
+import type { Address, Signer } from '@solana/web3.js';
 import { SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions, TOKEN_2022_PROGRAM_ID } from '../constants.js';
 import { TokenUnsupportedInstructionError } from '../errors.js';
 import type { ExtensionType } from '../extensions/extensionType.js';
 import { addSigners } from './internal.js';
-import { TokenInstruction } from './types.js';
+import type { TokenInstruction } from './types.js';
 
 /** TODO: docs */
 export interface ReallocateInstructionData {
@@ -26,11 +26,11 @@ export interface ReallocateInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createReallocateInstruction(
-    account: PublicKey,
-    payer: PublicKey,
+    account: Address,
+    payer: Address,
     extensionTypes: ExtensionType[],
-    owner: PublicKey,
-    multiSigners: (Signer | PublicKey)[] = [],
+    owner: Address,
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
@@ -43,12 +43,11 @@ export function createReallocateInstruction(
     ];
     const keys = addSigners(baseKeys, owner, multiSigners);
 
-    const reallocateInstructionData = struct<ReallocateInstructionData>([
-        u8('instruction'),
-        seq(u16(), extensionTypes.length, 'extensionTypes'),
-    ]);
-    const data = Buffer.alloc(reallocateInstructionData.span);
-    reallocateInstructionData.encode({ instruction: TokenInstruction.Reallocate, extensionTypes }, data);
+    const data = Buffer.from(
+        getReallocateInstructionDataEncoder().encode({
+            newExtensionTypes: extensionTypes,
+        }),
+    );
 
     return new TransactionInstruction({ keys, programId, data });
 }

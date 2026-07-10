@@ -1,6 +1,7 @@
 import { expect } from 'chai';
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
-import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
+import type { Connection, Signer } from '@solana/web3.js';
+
+import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import {
     createAccount,
     createMint,
@@ -23,18 +24,18 @@ describe('cpiGuard', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Keypair;
-    let account: PublicKey;
+    let account: Address;
 
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        owner = Keypair.generate();
+        owner = await Keypair.generate();
     });
 
     beforeEach(async () => {
-        const mintKeypair = Keypair.generate();
-        const mintAuthority = Keypair.generate();
-        const accountKeypair = Keypair.generate();
+        const mintKeypair = await Keypair.generate();
+        const mintAuthority = await Keypair.generate();
+        const accountKeypair = await Keypair.generate();
         account = accountKeypair.publicKey;
         const accountLen = getAccountLen(EXTENSIONS);
         const lamports = await connection.getMinimumBalanceForRentExemption(accountLen);
@@ -52,7 +53,7 @@ describe('cpiGuard', () => {
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: account,
                 space: accountLen,
                 lamports,

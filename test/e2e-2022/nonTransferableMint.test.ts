@@ -2,8 +2,9 @@ import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 use(chaiAsPromised);
 
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
-import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
+import type { Connection, Signer } from '@solana/web3.js';
+
+import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import {
     createInitializeMintInstruction,
     createInitializeNonTransferableMintInstruction,
@@ -24,22 +25,22 @@ const EXTENSIONS = [ExtensionType.NonTransferable];
 describe('nonTransferable', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: PublicKey;
+    let mint: Address;
     let mintAuthority: Keypair;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintAuthority = Keypair.generate();
+        mintAuthority = await Keypair.generate();
     });
     beforeEach(async () => {
-        const mintKeypair = Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = mintKeypair.publicKey;
         const mintLen = getMintLen(EXTENSIONS);
         const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: mint,
                 space: mintLen,
                 lamports,
@@ -56,15 +57,15 @@ describe('nonTransferable', () => {
         const nonTransferable = getNonTransferable(mintInfo);
         expect(nonTransferable).to.not.equal(null);
 
-        const owner = Keypair.generate();
+        const owner = await Keypair.generate();
         const accountLen = getAccountLen([ExtensionType.ImmutableOwner, ExtensionType.NonTransferableAccount]);
         const lamports = await connection.getMinimumBalanceForRentExemption(accountLen);
 
-        const sourceKeypair = Keypair.generate();
+        const sourceKeypair = await Keypair.generate();
         const source = sourceKeypair.publicKey;
         let transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: source,
                 space: accountLen,
                 lamports,
@@ -75,11 +76,11 @@ describe('nonTransferable', () => {
         );
         await sendAndConfirmTransaction(connection, transaction, [payer, sourceKeypair], undefined);
 
-        const destinationKeypair = Keypair.generate();
+        const destinationKeypair = await Keypair.generate();
         const destination = destinationKeypair.publicKey;
         transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: destination,
                 space: accountLen,
                 lamports,

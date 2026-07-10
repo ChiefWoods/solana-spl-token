@@ -1,5 +1,8 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import type { AccountMeta, PublicKey } from '@solana/web3.js';
+import {
+    getInitializeImmutableOwnerInstructionDataDecoder,
+    getInitializeImmutableOwnerInstructionDataEncoder,
+} from '@solana-program/token';
+import type { AccountMeta, Address } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import {
     TokenInvalidInstructionDataError,
@@ -8,6 +11,7 @@ import {
     TokenInvalidInstructionTypeError,
 } from '../errors.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** Deserialized instruction for the initiation of an immutable owner account */
 export interface InitializeImmutableOwnerInstructionData {
@@ -15,9 +19,12 @@ export interface InitializeImmutableOwnerInstructionData {
 }
 
 /** The struct that represents the instruction data as it is read by the program */
-export const initializeImmutableOwnerInstructionData = struct<InitializeImmutableOwnerInstructionData>([
-    u8('instruction'),
-]);
+export const initializeImmutableOwnerInstructionData = createInstructionDataCodec({
+    encoder: getInitializeImmutableOwnerInstructionDataEncoder(),
+    decoder: getInitializeImmutableOwnerInstructionDataDecoder(),
+    fromPublic: (_value: InitializeImmutableOwnerInstructionData) => ({}),
+    toPublic: ({ discriminator }) => ({ instruction: discriminator }),
+});
 
 /**
  * Construct an InitializeImmutableOwner instruction
@@ -28,8 +35,8 @@ export const initializeImmutableOwnerInstructionData = struct<InitializeImmutabl
  * @return Instruction to add to a transaction
  */
 export function createInitializeImmutableOwnerInstruction(
-    account: PublicKey,
-    programId: PublicKey,
+    account: Address,
+    programId: Address,
 ): TransactionInstruction {
     const keys = [{ pubkey: account, isSigner: false, isWritable: true }];
 
@@ -46,7 +53,7 @@ export function createInitializeImmutableOwnerInstruction(
 
 /** A decoded, valid InitializeImmutableOwner instruction */
 export interface DecodedInitializeImmutableOwnerInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta;
     };
@@ -65,7 +72,7 @@ export interface DecodedInitializeImmutableOwnerInstruction {
  */
 export function decodeInitializeImmutableOwnerInstruction(
     instruction: TransactionInstruction,
-    programId: PublicKey,
+    programId: Address,
 ): DecodedInitializeImmutableOwnerInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
     if (instruction.data.length !== initializeImmutableOwnerInstructionData.span)
@@ -89,7 +96,7 @@ export function decodeInitializeImmutableOwnerInstruction(
 
 /** A decoded, non-validated InitializeImmutableOwner instruction */
 export interface DecodedInitializeImmutableOwnerInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta | undefined;
     };

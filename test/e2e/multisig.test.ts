@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
+import type { Connection, Address, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 
 import {
@@ -23,23 +23,23 @@ const N = 5;
 describe('multisig', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: PublicKey;
+    let mint: Address;
     let mintAuthority: Keypair;
-    let account1: PublicKey;
-    let account2: PublicKey;
+    let account1: Address;
+    let account2: Address;
     let amount: bigint;
-    let multisig: PublicKey;
+    let multisig: Address;
     let signers: Keypair[];
-    let signerPublicKeys: PublicKey[];
+    let signerPublicKeys: Address[];
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintAuthority = Keypair.generate();
-        const mintKeypair = Keypair.generate();
+        mintAuthority = await Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         signers = [];
         signerPublicKeys = [];
         for (let i = 0; i < N; ++i) {
-            const signer = Keypair.generate();
+            const signer = await Keypair.generate();
             signers.push(signer);
             signerPublicKeys.push(signer.publicKey);
         }
@@ -61,7 +61,7 @@ describe('multisig', () => {
             payer,
             mint,
             multisig,
-            Keypair.generate(),
+            await Keypair.generate(),
             undefined,
             TEST_PROGRAM_ID,
         );
@@ -70,7 +70,7 @@ describe('multisig', () => {
             payer,
             mint,
             multisig,
-            Keypair.generate(),
+            await Keypair.generate(),
             undefined,
             TEST_PROGRAM_ID,
         );
@@ -93,14 +93,14 @@ describe('multisig', () => {
         expect(accountInfo.amount).to.eql(amount);
     });
     it('approve', async () => {
-        const delegate = Keypair.generate().publicKey;
+        const delegate = (await Keypair.generate()).publicKey;
         await approve(connection, payer, account1, delegate, multisig, amount, signers, undefined, TEST_PROGRAM_ID);
         const approvedAccountInfo = await getAccount(connection, account1, undefined, TEST_PROGRAM_ID);
         expect(approvedAccountInfo.delegatedAmount).to.eql(amount);
         expect(approvedAccountInfo.delegate).to.eql(delegate);
     });
     it('setAuthority', async () => {
-        const newOwner = Keypair.generate().publicKey;
+        const newOwner = (await Keypair.generate()).publicKey;
         await setAuthority(
             connection,
             payer,

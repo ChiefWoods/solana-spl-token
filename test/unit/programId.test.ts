@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { PublicKey } from '@solana/web3.js';
+import { Address } from '@solana/web3.js';
 import {
     AccountState,
     createCreateNativeMintInstruction,
@@ -19,11 +19,11 @@ import {
 } from '../../src';
 
 describe('unsupported extensions in spl-token', () => {
-    const mint = new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z');
-    const account = new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z');
-    const authority = new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z');
-    const payer = new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z');
-    const transferHookProgramId = new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z');
+    const mint = new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z');
+    const account = new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z');
+    const authority = new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z');
+    const payer = new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z');
+    const transferHookProgramId = new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z');
     it('initializeMintCloseAuthority', () => {
         expect(function () {
             createInitializeMintCloseAuthorityInstruction(mint, null, TOKEN_PROGRAM_ID);

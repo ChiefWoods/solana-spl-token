@@ -1,5 +1,8 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
+import {
+    getUnwrapLamportsInstructionDataDecoder,
+    getUnwrapLamportsInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { AccountMeta, Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import {
     TokenInvalidInstructionDataError,
@@ -9,7 +12,7 @@ import {
 } from '../errors.js';
 import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
-import { COptionU64Layout } from '../serialization.js';
+import { createInstructionDataCodec, optionToNullableBigInt } from './codec.js';
 
 /** TODO: docs */
 export interface UnwrapLamportsInstructionData {
@@ -18,10 +21,15 @@ export interface UnwrapLamportsInstructionData {
 }
 
 /** TODO: docs */
-export const unwrapLamportsInstructionData = struct<UnwrapLamportsInstructionData>([
-    u8('instruction'),
-    new COptionU64Layout('amount'),
-]);
+export const unwrapLamportsInstructionData = createInstructionDataCodec({
+    encoder: getUnwrapLamportsInstructionDataEncoder(),
+    decoder: getUnwrapLamportsInstructionDataDecoder(),
+    fromPublic: ({ amount }: UnwrapLamportsInstructionData) => ({ amount }),
+    toPublic: ({ discriminator, amount }) => ({
+        instruction: discriminator,
+        amount: optionToNullableBigInt(amount),
+    }),
+});
 
 /**
  * Construct a UnwrapLamports instruction
@@ -36,12 +44,12 @@ export const unwrapLamportsInstructionData = struct<UnwrapLamportsInstructionDat
  * @return Instruction to add to a transaction
  */
 export function createUnwrapLamportsInstruction(
-    source: PublicKey,
-    destination: PublicKey,
-    owner: PublicKey,
+    source: Address,
+    destination: Address,
+    owner: Address,
     amount: bigint | null,
-    multiSigners: (Signer | PublicKey)[] = [],
-    programId: PublicKey,
+    multiSigners: (Signer | Address)[] = [],
+    programId: Address,
 ): TransactionInstruction {
     const keys = addSigners(
         [
@@ -66,7 +74,7 @@ export function createUnwrapLamportsInstruction(
 
 /** A decoded, valid UnwrapLamports instruction */
 export interface DecodedUnwrapLamportsInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         source: AccountMeta;
         destination: AccountMeta;
@@ -89,7 +97,7 @@ export interface DecodedUnwrapLamportsInstruction {
  */
 export function decodeUnwrapLamportsInstruction(
     instruction: TransactionInstruction,
-    programId: PublicKey,
+    programId: Address,
 ): DecodedUnwrapLamportsInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
     if (instruction.data.length < unwrapLamportsInstructionData.getSpan(instruction.data))
@@ -116,7 +124,7 @@ export function decodeUnwrapLamportsInstruction(
 
 /** A decoded, non-validated UnwrapLamports instruction */
 export interface DecodedUnwrapLamportsInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         source: AccountMeta | undefined;
         destination: AccountMeta | undefined;

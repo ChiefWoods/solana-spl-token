@@ -1,10 +1,12 @@
-import { s16, struct, u8 } from '@solana/buffer-layout';
-import { publicKey } from '@solana/buffer-layout-utils';
-import type { PublicKey, Signer } from '@solana/web3.js';
+import {
+    getInitializeInterestBearingMintInstructionDataEncoder,
+    getUpdateRateInterestBearingMintInstructionDataEncoder,
+} from '@solana-program/token-2022';
+import type { Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import { addSigners } from '../../instructions/internal.js';
-import { TokenInstruction } from '../../instructions/types.js';
+import type { TokenInstruction } from '../../instructions/types.js';
 
 export enum InterestBearingMintInstruction {
     Initialize = 0,
@@ -14,7 +16,7 @@ export enum InterestBearingMintInstruction {
 export interface InterestBearingMintInitializeInstructionData {
     instruction: TokenInstruction.InterestBearingMintExtension;
     interestBearingMintInstruction: InterestBearingMintInstruction.Initialize;
-    rateAuthority: PublicKey;
+    rateAuthority: Address;
     rate: number;
 }
 
@@ -23,20 +25,6 @@ export interface InterestBearingMintUpdateRateInstructionData {
     interestBearingMintInstruction: InterestBearingMintInstruction.UpdateRate;
     rate: number;
 }
-
-export const interestBearingMintInitializeInstructionData = struct<InterestBearingMintInitializeInstructionData>([
-    u8('instruction'),
-    u8('interestBearingMintInstruction'),
-    // TODO: Make this an optional public key
-    publicKey('rateAuthority'),
-    s16('rate'),
-]);
-
-export const interestBearingMintUpdateRateInstructionData = struct<InterestBearingMintUpdateRateInstructionData>([
-    u8('instruction'),
-    u8('interestBearingMintInstruction'),
-    s16('rate'),
-]);
 
 /**
  * Construct an InitializeInterestBearingMint instruction
@@ -49,21 +37,17 @@ export const interestBearingMintUpdateRateInstructionData = struct<InterestBeari
  * @return Instruction to add to a transaction
  */
 export function createInitializeInterestBearingMintInstruction(
-    mint: PublicKey,
-    rateAuthority: PublicKey,
+    mint: Address,
+    rateAuthority: Address,
     rate: number,
     programId = TOKEN_2022_PROGRAM_ID,
 ) {
     const keys = [{ pubkey: mint, isSigner: false, isWritable: true }];
-    const data = Buffer.alloc(interestBearingMintInitializeInstructionData.span);
-    interestBearingMintInitializeInstructionData.encode(
-        {
-            instruction: TokenInstruction.InterestBearingMintExtension,
-            interestBearingMintInstruction: InterestBearingMintInstruction.Initialize,
-            rateAuthority,
+    const data = Buffer.from(
+        getInitializeInterestBearingMintInstructionDataEncoder().encode({
+            rateAuthority: rateAuthority.toBase58(),
             rate,
-        },
-        data,
+        }),
     );
     return new TransactionInstruction({ keys, programId, data });
 }
@@ -80,10 +64,10 @@ export function createInitializeInterestBearingMintInstruction(
  * @return Instruction to add to a transaction
  */
 export function createUpdateRateInterestBearingMintInstruction(
-    mint: PublicKey,
-    rateAuthority: PublicKey,
+    mint: Address,
+    rateAuthority: Address,
     rate: number,
-    multiSigners: (Signer | PublicKey)[] = [],
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ) {
     const keys = addSigners(
@@ -94,14 +78,6 @@ export function createUpdateRateInterestBearingMintInstruction(
         rateAuthority,
         multiSigners,
     );
-    const data = Buffer.alloc(interestBearingMintUpdateRateInstructionData.span);
-    interestBearingMintUpdateRateInstructionData.encode(
-        {
-            instruction: TokenInstruction.InterestBearingMintExtension,
-            interestBearingMintInstruction: InterestBearingMintInstruction.UpdateRate,
-            rate,
-        },
-        data,
-    );
+    const data = Buffer.from(getUpdateRateInterestBearingMintInstructionDataEncoder().encode({ rate }));
     return new TransactionInstruction({ keys, programId, data });
 }

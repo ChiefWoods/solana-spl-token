@@ -1,5 +1,4 @@
-import { struct } from '@solana/buffer-layout';
-import { bool } from '@solana/buffer-layout-utils';
+import { getBooleanCodec, getStructCodec } from '@solana/kit';
 import type { Account } from '../../state/account.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
 
@@ -9,16 +8,15 @@ export interface MemoTransfer {
     requireIncomingTransferMemos: boolean;
 }
 
-/** Buffer layout for de/serializing a memo transfer extension */
-export const MemoTransferLayout = struct<MemoTransfer>([bool('requireIncomingTransferMemos')]);
+/** Codec for de/serializing a memo transfer extension */
+export const MemoTransferCodec = getStructCodec([['requireIncomingTransferMemos', getBooleanCodec()]]);
 
-export const MEMO_TRANSFER_SIZE = MemoTransferLayout.span;
+/** @deprecated Use {@link MemoTransferCodec} */
+export const MemoTransferLayout = MemoTransferCodec;
+
+export const MEMO_TRANSFER_SIZE = MemoTransferCodec.fixedSize;
 
 export function getMemoTransfer(account: Account): MemoTransfer | null {
     const extensionData = getExtensionData(ExtensionType.MemoTransfer, account.tlvData);
-    if (extensionData !== null) {
-        return MemoTransferLayout.decode(extensionData);
-    } else {
-        return null;
-    }
+    return extensionData !== null ? MemoTransferCodec.decode(extensionData) : null;
 }

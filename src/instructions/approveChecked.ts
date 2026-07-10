@@ -1,6 +1,8 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { u64 } from '@solana/buffer-layout-utils';
-import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
+import {
+    getApproveCheckedInstructionDataDecoder,
+    getApproveCheckedInstructionDataEncoder,
+} from '@solana-program/token';
+import type { AccountMeta, Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -11,6 +13,7 @@ import {
 } from '../errors.js';
 import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
+import { createInstructionDataCodec } from './codec.js';
 
 /** TODO: docs */
 export interface ApproveCheckedInstructionData {
@@ -20,11 +23,12 @@ export interface ApproveCheckedInstructionData {
 }
 
 /** TODO: docs */
-export const approveCheckedInstructionData = struct<ApproveCheckedInstructionData>([
-    u8('instruction'),
-    u64('amount'),
-    u8('decimals'),
-]);
+export const approveCheckedInstructionData = createInstructionDataCodec({
+    encoder: getApproveCheckedInstructionDataEncoder(),
+    decoder: getApproveCheckedInstructionDataDecoder(),
+    fromPublic: ({ amount, decimals }: ApproveCheckedInstructionData) => ({ amount, decimals }),
+    toPublic: ({ discriminator, amount, decimals }) => ({ instruction: discriminator, amount, decimals }),
+});
 
 /**
  * Construct an ApproveChecked instruction
@@ -41,13 +45,13 @@ export const approveCheckedInstructionData = struct<ApproveCheckedInstructionDat
  * @return Instruction to add to a transaction
  */
 export function createApproveCheckedInstruction(
-    account: PublicKey,
-    mint: PublicKey,
-    delegate: PublicKey,
-    owner: PublicKey,
+    account: Address,
+    mint: Address,
+    delegate: Address,
+    owner: Address,
     amount: number | bigint,
     decimals: number,
-    multiSigners: (Signer | PublicKey)[] = [],
+    multiSigners: (Signer | Address)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -75,7 +79,7 @@ export function createApproveCheckedInstruction(
 
 /** A decoded, valid ApproveChecked instruction */
 export interface DecodedApproveCheckedInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta;
         mint: AccountMeta;
@@ -129,7 +133,7 @@ export function decodeApproveCheckedInstruction(
 
 /** A decoded, non-validated ApproveChecked instruction */
 export interface DecodedApproveCheckedInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         account: AccountMeta | undefined;
         mint: AccountMeta | undefined;

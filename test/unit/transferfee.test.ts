@@ -7,14 +7,14 @@ import {
     TOKEN_2022_PROGRAM_ID,
 } from '../../src';
 import { expect } from 'chai';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { Keypair, Address } from '@solana/web3.js';
 
 describe('transferFee', () => {
     describe('encoding/decoding `InitializeTransferFeeConfig` instructions', () => {
-        it('should encode and decode with both authorities', () => {
-            const mint = Keypair.generate().publicKey;
-            const transferFeeConfigAuthority = Keypair.generate().publicKey;
-            const withdrawWithheldAuthority = Keypair.generate().publicKey;
+        it('should encode and decode with both authorities', async () => {
+            const mint = (await Keypair.generate()).publicKey;
+            const transferFeeConfigAuthority = (await Keypair.generate()).publicKey;
+            const withdrawWithheldAuthority = (await Keypair.generate()).publicKey;
             const instruction = createInitializeTransferFeeConfigInstruction(
                 mint,
                 transferFeeConfigAuthority,
@@ -29,9 +29,9 @@ describe('transferFee', () => {
             expect(decoded.data.transferFeeBasisPoints).to.eql(100);
             expect(decoded.data.maximumFee).to.eql(100n);
         });
-        it('should encode and decode with no transfer fee config authority', () => {
-            const mint = Keypair.generate().publicKey;
-            const withdrawWithheldAuthority = Keypair.generate().publicKey;
+        it('should encode and decode with no transfer fee config authority', async () => {
+            const mint = (await Keypair.generate()).publicKey;
+            const withdrawWithheldAuthority = (await Keypair.generate()).publicKey;
             const instruction = createInitializeTransferFeeConfigInstruction(
                 mint,
                 null,
@@ -46,9 +46,9 @@ describe('transferFee', () => {
             expect(decoded.data.transferFeeBasisPoints).to.eql(100);
             expect(decoded.data.maximumFee).to.eql(100n);
         });
-        it('should encode and decode with no withdraw withheld authority', () => {
-            const mint = Keypair.generate().publicKey;
-            const transferFeeConfigAuthority = Keypair.generate().publicKey;
+        it('should encode and decode with no withdraw withheld authority', async () => {
+            const mint = (await Keypair.generate()).publicKey;
+            const transferFeeConfigAuthority = (await Keypair.generate()).publicKey;
             const instruction = createInitializeTransferFeeConfigInstruction(
                 mint,
                 transferFeeConfigAuthority,
@@ -63,8 +63,8 @@ describe('transferFee', () => {
             expect(decoded.data.transferFeeBasisPoints).to.eql(100);
             expect(decoded.data.maximumFee).to.eql(100n);
         });
-        it('should encode and decode with no authorities', () => {
-            const mint = Keypair.generate().publicKey;
+        it('should encode and decode with no authorities', async () => {
+            const mint = (await Keypair.generate()).publicKey;
             const instruction = createInitializeTransferFeeConfigInstruction(mint, null, null, 100, 100n);
             expect(instruction.data.length).to.eql(14);
             const decoded = decodeInitializeTransferFeeConfigInstruction(instruction, TOKEN_2022_PROGRAM_ID);
@@ -133,8 +133,8 @@ describe('transferFee', () => {
 
     describe('calculateEpochFee', () => {
         const transferFeeConfig = {
-            transferFeeConfigAuthority: PublicKey.default,
-            withdrawWithheldAuthority: PublicKey.default,
+            transferFeeConfigAuthority: Address.default,
+            withdrawWithheldAuthority: Address.default,
             withheldAmount: 500n,
             olderTransferFee: {
                 epoch: 1n,

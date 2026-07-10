@@ -1,4 +1,4 @@
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
+import type { Connection, Address, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 
 import {
@@ -22,18 +22,18 @@ const TEST_TOKEN_DECIMALS = 2;
 describe('transfer', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: PublicKey;
+    let mint: Address;
     let mintAuthority: Keypair;
     let owner1: Keypair;
-    let account1: PublicKey;
+    let account1: Address;
     let owner2: Keypair;
-    let account2: PublicKey;
+    let account2: Address;
     let amount: bigint;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintAuthority = Keypair.generate();
-        const mintKeypair = Keypair.generate();
+        mintAuthority = await Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = await createMint(
             connection,
             payer,
@@ -46,7 +46,7 @@ describe('transfer', () => {
         );
     });
     beforeEach(async () => {
-        owner1 = Keypair.generate();
+        owner1 = await Keypair.generate();
         account1 = await createAccount(
             connection,
             payer,
@@ -56,7 +56,7 @@ describe('transfer', () => {
             undefined,
             TEST_PROGRAM_ID,
         );
-        owner2 = Keypair.generate();
+        owner2 = await Keypair.generate();
         account2 = await createAccount(
             connection,
             payer,
@@ -116,7 +116,7 @@ describe('transfer', () => {
         ).to.be.rejectedWith(Error);
     });
     it('approveRevoke', async () => {
-        const delegate = Keypair.generate();
+        const delegate = await Keypair.generate();
         const delegatedAmount = amount / BigInt(2);
         await approve(
             connection,
@@ -138,7 +138,7 @@ describe('transfer', () => {
         expect(revokedAccountInfo.delegate).to.equal(null);
     });
     it('delegateTransfer', async () => {
-        const delegate = Keypair.generate();
+        const delegate = await Keypair.generate();
         const delegatedAmount = amount / BigInt(2);
         await approveChecked(
             connection,

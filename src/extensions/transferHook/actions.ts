@@ -1,5 +1,5 @@
 import type { ConfirmOptions, Connection, Signer, TransactionSignature } from '@solana/web3.js';
-import type { PublicKey } from '@solana/web3.js';
+import type { Address } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { getSigners } from '../../actions/internal.js';
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../../constants.js';
@@ -26,9 +26,9 @@ import {
 export async function initializeTransferHook(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    authority: PublicKey,
-    transferHookProgramId: PublicKey,
+    mint: Address,
+    authority: Address,
+    transferHookProgramId: Address,
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,
 ): Promise<TransactionSignature> {
@@ -56,9 +56,9 @@ export async function initializeTransferHook(
 export async function updateTransferHook(
     connection: Connection,
     payer: Signer,
-    mint: PublicKey,
-    transferHookProgramId: PublicKey,
-    authority: Signer | PublicKey,
+    mint: Address,
+    transferHookProgramId: Address,
+    authority: Signer | Address,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,
@@ -92,10 +92,10 @@ export async function updateTransferHook(
 export async function transferCheckedWithTransferHook(
     connection: Connection,
     payer: Signer,
-    source: PublicKey,
-    mint: PublicKey,
-    destination: PublicKey,
-    authority: Signer | PublicKey,
+    source: Address,
+    mint: Address,
+    destination: Address,
+    authority: Signer | Address,
     amount: bigint,
     decimals: number,
     multiSigners: Signer[] = [],
@@ -143,10 +143,10 @@ export async function transferCheckedWithTransferHook(
 export async function transferCheckedWithFeeAndTransferHook(
     connection: Connection,
     payer: Signer,
-    source: PublicKey,
-    mint: PublicKey,
-    destination: PublicKey,
-    authority: Signer | PublicKey,
+    source: Address,
+    mint: Address,
+    destination: Address,
+    authority: Signer | Address,
     amount: bigint,
     decimals: number,
     fee: bigint,

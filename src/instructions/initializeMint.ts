@@ -1,6 +1,8 @@
-import { struct, u8 } from '@solana/buffer-layout';
-import { publicKey } from '@solana/buffer-layout-utils';
-import type { AccountMeta, PublicKey } from '@solana/web3.js';
+import {
+    getInitializeMintInstructionDataDecoder,
+    getInitializeMintInstructionDataEncoder,
+} from '@solana-program/token';
+import type { AccountMeta, Address } from '@solana/web3.js';
 import { SYSVAR_RENT_PUBKEY, TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -10,23 +12,38 @@ import {
     TokenInvalidInstructionTypeError,
 } from '../errors.js';
 import { TokenInstruction } from './types.js';
-import { COptionPublicKeyLayout } from '../serialization.js';
+import {
+    addressFromString,
+    addressToString,
+    createInstructionDataCodec,
+    nullableAddressToOption,
+    optionToNullableAddress,
+} from './codec.js';
 
 /** TODO: docs */
 export interface InitializeMintInstructionData {
     instruction: TokenInstruction.InitializeMint;
     decimals: number;
-    mintAuthority: PublicKey;
-    freezeAuthority: PublicKey | null;
+    mintAuthority: Address;
+    freezeAuthority: Address | null;
 }
 
 /** TODO: docs */
-export const initializeMintInstructionData = struct<InitializeMintInstructionData>([
-    u8('instruction'),
-    u8('decimals'),
-    publicKey('mintAuthority'),
-    new COptionPublicKeyLayout('freezeAuthority'),
-]);
+export const initializeMintInstructionData = createInstructionDataCodec({
+    encoder: getInitializeMintInstructionDataEncoder(),
+    decoder: getInitializeMintInstructionDataDecoder(),
+    fromPublic: ({ decimals, mintAuthority, freezeAuthority }: InitializeMintInstructionData) => ({
+        decimals,
+        mintAuthority: addressToString(mintAuthority),
+        freezeAuthority: nullableAddressToOption(freezeAuthority),
+    }),
+    toPublic: ({ discriminator, decimals, mintAuthority, freezeAuthority }) => ({
+        instruction: discriminator,
+        decimals,
+        mintAuthority: addressFromString(mintAuthority),
+        freezeAuthority: optionToNullableAddress(freezeAuthority),
+    }),
+});
 
 /**
  * Construct an InitializeMint instruction
@@ -40,10 +57,10 @@ export const initializeMintInstructionData = struct<InitializeMintInstructionDat
  * @return Instruction to add to a transaction
  */
 export function createInitializeMintInstruction(
-    mint: PublicKey,
+    mint: Address,
     decimals: number,
-    mintAuthority: PublicKey,
-    freezeAuthority: PublicKey | null,
+    mintAuthority: Address,
+    freezeAuthority: Address | null,
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = [
@@ -71,7 +88,7 @@ export function createInitializeMintInstruction(
 
 /** A decoded, valid InitializeMint instruction */
 export interface DecodedInitializeMintInstruction {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta;
         rent: AccountMeta;
@@ -79,8 +96,8 @@ export interface DecodedInitializeMintInstruction {
     data: {
         instruction: TokenInstruction.InitializeMint;
         decimals: number;
-        mintAuthority: PublicKey;
-        freezeAuthority: PublicKey | null;
+        mintAuthority: Address;
+        freezeAuthority: Address | null;
     };
 }
 
@@ -121,7 +138,7 @@ export function decodeInitializeMintInstruction(
 
 /** A decoded, non-validated InitializeMint instruction */
 export interface DecodedInitializeMintInstructionUnchecked {
-    programId: PublicKey;
+    programId: Address;
     keys: {
         mint: AccountMeta | undefined;
         rent: AccountMeta | undefined;
@@ -129,8 +146,8 @@ export interface DecodedInitializeMintInstructionUnchecked {
     data: {
         instruction: number;
         decimals: number;
-        mintAuthority: PublicKey;
-        freezeAuthority: PublicKey | null;
+        mintAuthority: Address;
+        freezeAuthority: Address | null;
     };
 }
 

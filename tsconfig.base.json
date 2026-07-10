@@ -2,6 +2,7 @@
     "include": [],
     "compilerOptions": {
         "target": "ESNext",
+        "lib": ["ES2022", "DOM"],
         "module": "ESNext",
         "moduleResolution": "Node",
         "esModuleInterop": true,
@@ -9,6 +10,7 @@
         "noEmitOnError": true,
         "resolveJsonModule": true,
         "strict": true,
+        "skipLibCheck": true,
         "stripInternal": true,
         "ignoreDeprecations": "6.0"
     }

@@ -1,7 +1,12 @@
-import { struct, u32, u8 } from '@solana/buffer-layout';
-import { bool, publicKey, u64 } from '@solana/buffer-layout-utils';
+import {
+    getMintDecoder,
+    getMintEncoder,
+    getMintSize,
+    type Mint as CodamaMint,
+    type MintArgs,
+} from '@solana-program/token';
 import type { AccountInfo, Commitment, Connection } from '@solana/web3.js';
-import { PublicKey } from '@solana/web3.js';
+import { Address } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../constants.js';
 import {
     TokenAccountNotFoundError,
@@ -19,12 +24,12 @@ import { MULTISIG_SIZE } from './multisig.js';
 /** Information about a mint */
 export interface Mint {
     /** Address of the mint */
-    address: PublicKey;
+    address: Address;
     /**
      * Optional authority used to mint new tokens. The mint authority may only be provided during mint creation.
      * If no mint authority is present then the mint has a fixed supply and no further tokens may be minted.
      */
-    mintAuthority: PublicKey | null;
+    mintAuthority: Address | null;
     /** Total supply of tokens */
     supply: bigint;
     /** Number of base 10 digits to the right of the decimal place */
@@ -32,7 +37,7 @@ export interface Mint {
     /** Is this mint initialized */
     isInitialized: boolean;
     /** Optional authority to freeze token accounts */
-    freezeAuthority: PublicKey | null;
+    freezeAuthority: Address | null;
     /** Additional data for extension */
     tlvData: Buffer;
 }
@@ -40,27 +45,68 @@ export interface Mint {
 /** Mint as stored by the program */
 export interface RawMint {
     mintAuthorityOption: 1 | 0;
-    mintAuthority: PublicKey;
+    mintAuthority: Address;
     supply: bigint;
     decimals: number;
     isInitialized: boolean;
     freezeAuthorityOption: 1 | 0;
-    freezeAuthority: PublicKey;
+    freezeAuthority: Address;
 }
 
-/** Buffer layout for de/serializing a mint */
-export const MintLayout = struct<RawMint>([
-    u32('mintAuthorityOption'),
-    publicKey('mintAuthority'),
-    u64('supply'),
-    u8('decimals'),
-    bool('isInitialized'),
-    u32('freezeAuthorityOption'),
-    publicKey('freezeAuthority'),
-]);
+type CodamaOption<T> = { __option: 'Some'; value: T } | { __option: 'None' };
+
+const DEFAULT_ADDRESS = new Address('11111111111111111111111111111111');
+
+function unwrapAddressOption(option: CodamaOption<string>): Address | null {
+    return option.__option === 'Some' ? new Address(option.value) : null;
+}
+
+function getRawAddressOption(option: CodamaOption<string>): { option: 1 | 0; address: Address } {
+    return option.__option === 'Some'
+        ? { option: 1, address: new Address(option.value) }
+        : { option: 0, address: DEFAULT_ADDRESS };
+}
+
+function rawMintToCodamaArgs(rawMint: RawMint): MintArgs {
+    return {
+        mintAuthority: rawMint.mintAuthorityOption
+            ? (rawMint.mintAuthority.toBase58() as MintArgs['mintAuthority'])
+            : null,
+        supply: rawMint.supply,
+        decimals: rawMint.decimals,
+        isInitialized: rawMint.isInitialized,
+        freezeAuthority: rawMint.freezeAuthorityOption
+            ? (rawMint.freezeAuthority.toBase58() as MintArgs['freezeAuthority'])
+            : null,
+    };
+}
+
+/** Codama-backed layout compatibility helper for de/serializing a mint */
+export const MintLayout = {
+    span: getMintSize(),
+    decode(data: Uint8Array, offset = 0): RawMint {
+        const mint = getMintDecoder().decode(data.slice(offset, offset + MINT_SIZE));
+        const mintAuthority = getRawAddressOption(mint.mintAuthority);
+        const freezeAuthority = getRawAddressOption(mint.freezeAuthority);
+
+        return {
+            mintAuthorityOption: mintAuthority.option,
+            mintAuthority: mintAuthority.address,
+            supply: mint.supply,
+            decimals: mint.decimals,
+            isInitialized: mint.isInitialized,
+            freezeAuthorityOption: freezeAuthority.option,
+            freezeAuthority: freezeAuthority.address,
+        };
+    },
+    encode(rawMint: RawMint, buffer: Uint8Array = new Uint8Array(MINT_SIZE), offset = 0): number {
+        buffer.set(getMintEncoder().encode(rawMintToCodamaArgs(rawMint)), offset);
+        return MINT_SIZE;
+    },
+};
 
 /** Byte length of a mint */
-export const MINT_SIZE = MintLayout.span;
+export const MINT_SIZE = getMintSize();
 
 /**
  * Retrieve information about a mint
@@ -74,7 +120,7 @@ export const MINT_SIZE = MintLayout.span;
  */
 export async function getMint(
     connection: Connection,
-    address: PublicKey,
+    address: Address,
     commitment?: Commitment,
     programId = TOKEN_PROGRAM_ID,
 ): Promise<Mint> {
@@ -91,27 +137,27 @@ export async function getMint(
  *
  * @return Unpacked mint
  */
-export function unpackMint(address: PublicKey, info: AccountInfo<Buffer> | null, programId = TOKEN_PROGRAM_ID): Mint {
+export function unpackMint(address: Address, info: AccountInfo<Uint8Array> | null, programId = TOKEN_PROGRAM_ID): Mint {
     if (!info) throw new TokenAccountNotFoundError();
     if (!info.owner.equals(programId)) throw new TokenInvalidAccountOwnerError();
     if (info.data.length < MINT_SIZE) throw new TokenInvalidAccountSizeError();
 
-    const rawMint = MintLayout.decode(info.data.slice(0, MINT_SIZE));
+    const rawMint: CodamaMint = getMintDecoder().decode(info.data.slice(0, MINT_SIZE));
     let tlvData = Buffer.alloc(0);
     if (info.data.length > MINT_SIZE) {
         if (info.data.length <= ACCOUNT_SIZE) throw new TokenInvalidAccountSizeError();
         if (info.data.length === MULTISIG_SIZE) throw new TokenInvalidAccountSizeError();
         if (info.data[ACCOUNT_SIZE] != AccountType.Mint) throw new TokenInvalidMintError();
-        tlvData = info.data.slice(ACCOUNT_SIZE + ACCOUNT_TYPE_SIZE);
+        tlvData = Buffer.from(info.data.slice(ACCOUNT_SIZE + ACCOUNT_TYPE_SIZE));
     }
 
     return {
         address,
-        mintAuthority: rawMint.mintAuthorityOption ? rawMint.mintAuthority : null,
+        mintAuthority: unwrapAddressOption(rawMint.mintAuthority),
         supply: rawMint.supply,
         decimals: rawMint.decimals,
         isInitialized: rawMint.isInitialized,
-        freezeAuthority: rawMint.freezeAuthorityOption ? rawMint.freezeAuthority : null,
+        freezeAuthority: unwrapAddressOption(rawMint.freezeAuthority),
         tlvData,
     };
 }
@@ -144,7 +190,7 @@ export async function getMinimumBalanceForRentExemptMintWithExtensions(
     commitment?: Commitment,
 ): Promise<number> {
     const mintLen = getMintLen(extensions);
-    return await connection.getMinimumBalanceForRentExemption(mintLen, commitment);
+    return Number(await connection.getMinimumBalanceForRentExemption(mintLen, commitment));
 }
 
 /**
@@ -160,16 +206,16 @@ export async function getMinimumBalanceForRentExemptMintWithExtensions(
  * @return Promise containing the address of the associated token account
  */
 export async function getAssociatedTokenAddress(
-    mint: PublicKey,
-    owner: PublicKey,
+    mint: Address,
+    owner: Address,
     allowOwnerOffCurve = false,
     programId = TOKEN_PROGRAM_ID,
     associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID,
-): Promise<PublicKey> {
-    if (!allowOwnerOffCurve && !PublicKey.isOnCurve(owner.toBuffer())) throw new TokenOwnerOffCurveError();
+): Promise<Address> {
+    if (!allowOwnerOffCurve && !Address.isOnCurve(owner.toBytes())) throw new TokenOwnerOffCurveError();
 
-    const [address] = await PublicKey.findProgramAddress(
-        [owner.toBuffer(), programId.toBuffer(), mint.toBuffer()],
+    const [address] = await Address.findProgramAddress(
+        [owner.toBytes(), programId.toBytes(), mint.toBytes()],
         associatedTokenProgramId,
     );
 
@@ -188,18 +234,14 @@ export async function getAssociatedTokenAddress(
  * @return Address of the associated token account
  */
 export function getAssociatedTokenAddressSync(
-    mint: PublicKey,
-    owner: PublicKey,
+    mint: Address,
+    owner: Address,
     allowOwnerOffCurve = false,
     programId = TOKEN_PROGRAM_ID,
     associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID,
-): PublicKey {
-    if (!allowOwnerOffCurve && !PublicKey.isOnCurve(owner.toBuffer())) throw new TokenOwnerOffCurveError();
-
-    const [address] = PublicKey.findProgramAddressSync(
-        [owner.toBuffer(), programId.toBuffer(), mint.toBuffer()],
-        associatedTokenProgramId,
+): Address {
+    if (!allowOwnerOffCurve && !Address.isOnCurve(owner.toBytes())) throw new TokenOwnerOffCurveError();
+    throw new Error(
+        'getAssociatedTokenAddressSync is not supported with @solana/web3.js v3; use getAssociatedTokenAddress instead',
     );
-
-    return address;
 }

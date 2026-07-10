@@ -1,6 +1,4 @@
-import { struct, u32 } from '@solana/buffer-layout';
-import { publicKey } from '@solana/buffer-layout-utils';
-import { PublicKey } from '@solana/web3.js';
+import { Address } from '@solana/web3.js';
 import {
     unpackTokenGroup,
     unpackTokenGroupMember,
@@ -19,7 +17,7 @@ export function getTokenGroupState(mint: Mint): Partial<TokenGroup> | null {
 
         // Explicitly set None/Zero keys to null
         return {
-            updateAuthority: updateAuthority?.equals(PublicKey.default) ? undefined : updateAuthority,
+            updateAuthority: updateAuthority?.equals(Address.default) ? undefined : updateAuthority,
             mint,
             size,
             maxSize,

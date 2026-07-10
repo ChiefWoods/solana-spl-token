@@ -2,8 +2,9 @@ import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 use(chaiAsPromised);
 
-import type { Connection, PublicKey, Signer } from '@solana/web3.js';
-import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
+import type { Connection, Signer } from '@solana/web3.js';
+
+import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import { createMemoInstruction } from '@solana/spl-memo';
 import {
     createAccount,
@@ -29,18 +30,18 @@ describe('memoTransfer', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Keypair;
-    let mint: PublicKey;
+    let mint: Address;
     let mintAuthority: Keypair;
-    let source: PublicKey;
-    let destination: PublicKey;
+    let source: Address;
+    let destination: Address;
     before(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        mintAuthority = Keypair.generate();
-        owner = Keypair.generate();
+        mintAuthority = await Keypair.generate();
+        owner = await Keypair.generate();
     });
     beforeEach(async () => {
-        const mintKeypair = Keypair.generate();
+        const mintKeypair = await Keypair.generate();
         mint = await createMint(
             connection,
             payer,
@@ -62,14 +63,14 @@ describe('memoTransfer', () => {
             TEST_PROGRAM_ID,
         );
 
-        const destinationKeypair = Keypair.generate();
+        const destinationKeypair = await Keypair.generate();
         destination = destinationKeypair.publicKey;
         const accountLen = getAccountLen(EXTENSIONS);
         const lamports = await connection.getMinimumBalanceForRentExemption(accountLen);
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: payer.publicKey,
+                fromPubkey: new Address(payer.address),
                 newAccountPubkey: destination,
                 space: accountLen,
                 lamports,
@@ -113,7 +114,7 @@ describe('memoTransfer', () => {
     });
     it('works with memo when enabled', async () => {
         const transaction = new Transaction().add(
-            createMemoInstruction('transfer with a memo', [payer.publicKey, owner.publicKey]),
+            createMemoInstruction('transfer with a memo', [new Address(payer.address), new Address(owner.address)]),
             createTransferInstruction(source, destination, owner.publicKey, TRANSFER_AMOUNT, [], TEST_PROGRAM_ID),
         );
         await sendAndConfirmTransaction(connection, transaction, [payer, owner], {

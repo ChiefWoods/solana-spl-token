@@ -1,36 +1,36 @@
-import { struct } from '@solana/buffer-layout';
-import { publicKey } from '@solana/buffer-layout-utils';
-import { PublicKey } from '@solana/web3.js';
+import { getAddressCodec, getStructCodec } from '@solana/kit';
+import { Address } from '@solana/web3.js';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
 
 /** GroupMemberPointer as stored by the program */
 export interface GroupMemberPointer {
     /** Optional authority that can set the member address */
-    authority: PublicKey | null;
+    authority: Address | null;
     /** Optional account address that holds the member */
-    memberAddress: PublicKey | null;
+    memberAddress: Address | null;
 }
 
-/** Buffer layout for de/serializing a Group Pointer extension */
-export const GroupMemberPointerLayout = struct<{ authority: PublicKey; memberAddress: PublicKey }>([
-    publicKey('authority'),
-    publicKey('memberAddress'),
+/** Codec for de/serializing a GroupMemberPointer extension */
+export const GroupMemberPointerCodec = getStructCodec([
+    ['authority', getAddressCodec()],
+    ['memberAddress', getAddressCodec()],
 ]);
 
-export const GROUP_MEMBER_POINTER_SIZE = GroupMemberPointerLayout.span;
+/** @deprecated Use {@link GroupMemberPointerCodec} */
+export const GroupMemberPointerLayout = GroupMemberPointerCodec;
+
+export const GROUP_MEMBER_POINTER_SIZE = GroupMemberPointerCodec.fixedSize;
 
 export function getGroupMemberPointerState(mint: Mint): Partial<GroupMemberPointer> | null {
     const extensionData = getExtensionData(ExtensionType.GroupMemberPointer, mint.tlvData);
-    if (extensionData !== null) {
-        const { authority, memberAddress } = GroupMemberPointerLayout.decode(extensionData);
+    if (extensionData === null) return null;
 
-        // Explicitly set None/Zero keys to null
-        return {
-            authority: authority.equals(PublicKey.default) ? null : authority,
-            memberAddress: memberAddress.equals(PublicKey.default) ? null : memberAddress,
-        };
-    } else {
-        return null;
-    }
+    const decoded = GroupMemberPointerCodec.decode(extensionData);
+    const authority = new Address(decoded.authority);
+    const memberAddress = new Address(decoded.memberAddress);
+    return {
+        authority: authority.equals(Address.default) ? null : authority,
+        memberAddress: memberAddress.equals(Address.default) ? null : memberAddress,
+    };
 }

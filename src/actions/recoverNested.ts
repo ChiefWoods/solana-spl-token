@@ -1,8 +1,8 @@
-import type { ConfirmOptions, Connection, PublicKey, Signer, TransactionSignature } from '@solana/web3.js';
-import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, Signer, TransactionSignature } from '@solana/web3.js';
+import { sendAndConfirmTransaction, Transaction, Address } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../constants.js';
 import { createRecoverNestedInstruction } from '../instructions/associatedTokenAccount.js';
-import { getAssociatedTokenAddressSync } from '../state/mint.js';
+import { getAssociatedTokenAddress } from '../state/mint.js';
 
 /**
  * Recover funds funds in an associated token account which is owned by an associated token account
@@ -22,29 +22,30 @@ export async function recoverNested(
     connection: Connection,
     payer: Signer,
     owner: Signer,
-    mint: PublicKey,
-    nestedMint: PublicKey,
+    mint: Address,
+    nestedMint: Address,
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_PROGRAM_ID,
     associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID,
 ): Promise<TransactionSignature> {
-    const ownerAssociatedToken = getAssociatedTokenAddressSync(
+    const ownerPublicKey = new Address(owner.address);
+    const ownerAssociatedToken = await getAssociatedTokenAddress(
         mint,
-        owner.publicKey,
+        ownerPublicKey,
         false,
         programId,
         associatedTokenProgramId,
     );
 
-    const destinationAssociatedToken = getAssociatedTokenAddressSync(
+    const destinationAssociatedToken = await getAssociatedTokenAddress(
         nestedMint,
-        owner.publicKey,
+        ownerPublicKey,
         false,
         programId,
         associatedTokenProgramId,
     );
 
-    const nestedAssociatedToken = getAssociatedTokenAddressSync(
+    const nestedAssociatedToken = await getAssociatedTokenAddress(
         nestedMint,
         ownerAssociatedToken,
         true,
@@ -59,7 +60,7 @@ export async function recoverNested(
             destinationAssociatedToken,
             ownerAssociatedToken,
             mint,
-            owner.publicKey,
+            ownerPublicKey,
             programId,
             associatedTokenProgramId,
         ),

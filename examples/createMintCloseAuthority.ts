@@ -17,13 +17,13 @@ import {
 } from '@solana/web3.js';
 
 (async () => {
-    const payer = Keypair.generate();
+    const payer = await Keypair.generate();
 
-    const mintKeypair = Keypair.generate();
+    const mintKeypair = await Keypair.generate();
     const mint = mintKeypair.publicKey;
-    const mintAuthority = Keypair.generate();
-    const freezeAuthority = Keypair.generate();
-    const closeAuthority = Keypair.generate();
+    const mintAuthority = await Keypair.generate();
+    const freezeAuthority = await Keypair.generate();
+    const closeAuthority = await Keypair.generate();
 
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 
