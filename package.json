@@ -39,6 +39,7 @@
         "reinstall": "pnpm run nuke && pnpm install",
         "clean": "shx rm -rf lib **/*.tsbuildinfo || true",
         "build": "tsc --build --verbose tsconfig.all.json",
+        "typecheck": "tsc --build --verbose --noEmit tsconfig.all.json",
         "postbuild": "shx echo '{ \"type\": \"commonjs\" }' > lib/cjs/package.json",
         "watch": "tsc --build --verbose --watch tsconfig.all.json",
         "release": "pnpm run clean && pnpm run build",
