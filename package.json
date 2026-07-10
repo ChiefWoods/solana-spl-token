@@ -35,25 +35,25 @@
     },
     "scripts": {
         "prepublishOnly": "pnpm build",
-        "nuke": "shx rm -rf node_modules package-lock.json || true",
-        "reinstall": "npm run nuke && npm install",
+        "nuke": "shx rm -rf node_modules pnpm-lock.yaml || true",
+        "reinstall": "pnpm run nuke && pnpm install",
         "clean": "shx rm -rf lib **/*.tsbuildinfo || true",
         "build": "tsc --build --verbose tsconfig.all.json",
         "postbuild": "shx echo '{ \"type\": \"commonjs\" }' > lib/cjs/package.json",
         "watch": "tsc --build --verbose --watch tsconfig.all.json",
-        "release": "npm run clean && npm run build",
+        "release": "pnpm run clean && pnpm run build",
         "lint": "eslint --max-warnings 0 .",
         "lint:fix": "eslint --fix .",
         "format": "prettier --check src test",
         "format:fix": "prettier --write src test",
         "example": "node --experimental-specifier-resolution=node --loader ts-node/esm examples/createMintAndTransferTokens.ts",
-        "test": "npm run test:unit && npm run test:e2e-native && npm run test:e2e-2022",
+        "test": "pnpm run test:unit && pnpm run test:e2e-native && pnpm run test:e2e-2022",
         "test:unit": "mocha test/unit",
         "test:e2e-native": "mocha test/e2e",
         "test:e2e-2022": "TEST_PROGRAM_ID=TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb mocha test/e2e*",
-        "deploy": "npm run deploy:docs",
+        "deploy": "pnpm run deploy:docs",
         "docs": "shx rm -rf docs && typedoc && shx cp .nojekyll docs/",
-        "deploy:docs": "npm run docs && gh-pages --dest token/js --dist docs --dotfiles"
+        "deploy:docs": "pnpm run docs && gh-pages --dest token/js --dist docs --dotfiles"
     },
     "peerDependencies": {
         "@solana/web3.js": "^1.95.5"
