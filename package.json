@@ -45,8 +45,8 @@
         "release": "pnpm run clean && pnpm run build",
         "lint": "oxlint .",
         "lint:fix": "oxlint --fix .",
-        "format": "prettier --check src test",
-        "format:fix": "prettier --write src test",
+        "format": "oxfmt --check src test",
+        "format:fix": "oxfmt src test",
         "example": "node --experimental-specifier-resolution=node --loader ts-node/esm examples/createMintAndTransferTokens.ts",
         "test": "pnpm run test:unit && pnpm run test:e2e-native && pnpm run test:e2e-2022",
         "test:unit": "mocha test/unit",
@@ -69,7 +69,6 @@
     },
     "devDependencies": {
         "@solana/codecs-strings": "7.0.0",
-        "@solana/prettier-config-solana": "0.0.7",
         "@solana/spl-memo": "0.2.5",
         "@solana/web3.js": "3.0.0-rc.2",
         "@types/chai": "^5.0.1",
@@ -81,13 +80,12 @@
         "chai-as-promised": "^8.0.1",
         "gh-pages": "^6.3.0",
         "mocha": "^11.0.1",
+        "oxfmt": "0.58.0",
         "oxlint": "^1.73.0",
-        "prettier": "^3.4.2",
         "process": "^0.11.10",
         "shx": "^0.4.0",
         "ts-node": "^10.9.2",
         "typedoc": "^0.28.0",
         "typescript": "^6.0.3"
-    },
-    "prettier": "@solana/prettier-config-solana"
+    }
 }
