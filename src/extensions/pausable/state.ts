@@ -1,4 +1,5 @@
 import { getAddressCodec, getBooleanCodec, getStructCodec, getUnitCodec } from '@solana/kit';
+import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
 import { Address } from '@solana/web3.js';
 import type { Account } from '../../state/account.js';
 import type { Mint } from '../../state/mint.js';
@@ -12,14 +13,19 @@ export interface PausableConfig {
     paused: boolean;
 }
 
+type PausableConfigCodecData = {
+    authority: KitAddress;
+    paused: boolean;
+};
+
 /** Codec for de/serializing a pausable config */
-export const PausableConfigCodec = getStructCodec([
+export const PausableConfigCodec: FixedSizeCodec<PausableConfigCodecData, PausableConfigCodecData> = getStructCodec([
     ['authority', getAddressCodec()],
     ['paused', getBooleanCodec()],
 ]);
 
 /** @deprecated Use {@link PausableConfigCodec} */
-export const PausableConfigLayout = PausableConfigCodec;
+export const PausableConfigLayout: typeof PausableConfigCodec = PausableConfigCodec;
 
 export const PAUSABLE_CONFIG_SIZE = PausableConfigCodec.fixedSize;
 

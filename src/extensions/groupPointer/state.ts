@@ -1,4 +1,5 @@
 import { getAddressCodec, getStructCodec } from '@solana/kit';
+import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
 import { Address } from '@solana/web3.js';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
@@ -11,14 +12,19 @@ export interface GroupPointer {
     groupAddress: Address | null;
 }
 
+type GroupPointerCodecData = {
+    authority: KitAddress;
+    groupAddress: KitAddress;
+};
+
 /** Codec for de/serializing a GroupPointer extension */
-export const GroupPointerCodec = getStructCodec([
+export const GroupPointerCodec: FixedSizeCodec<GroupPointerCodecData, GroupPointerCodecData> = getStructCodec([
     ['authority', getAddressCodec()],
     ['groupAddress', getAddressCodec()],
 ]);
 
 /** @deprecated Use {@link GroupPointerCodec} */
-export const GroupPointerLayout = GroupPointerCodec;
+export const GroupPointerLayout: typeof GroupPointerCodec = GroupPointerCodec;
 
 export const GROUP_POINTER_SIZE = GroupPointerCodec.fixedSize;
 

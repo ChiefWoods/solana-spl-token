@@ -1,4 +1,5 @@
 import { getAddressCodec, getStructCodec } from '@solana/kit';
+import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
 import { Address } from '@solana/web3.js';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
@@ -8,11 +9,16 @@ export interface PermissionedBurn {
     authority: Address | null;
 }
 
+type PermissionedBurnCodecData = {
+    authority: KitAddress;
+};
+
 /** Codec for de/serializing a permissioned burn config */
-export const PermissionedBurnCodec = getStructCodec([['authority', getAddressCodec()]]);
+export const PermissionedBurnCodec: FixedSizeCodec<PermissionedBurnCodecData, PermissionedBurnCodecData> =
+    getStructCodec([['authority', getAddressCodec()]]);
 
 /** @deprecated Use {@link PermissionedBurnCodec} */
-export const PermissionedBurnLayout = PermissionedBurnCodec;
+export const PermissionedBurnLayout: typeof PermissionedBurnCodec = PermissionedBurnCodec;
 
 export const PERMISSIONED_BURN_SIZE = PermissionedBurnCodec.fixedSize;
 

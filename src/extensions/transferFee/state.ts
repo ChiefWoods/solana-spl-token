@@ -1,4 +1,5 @@
 import { getAddressCodec, getStructCodec, getU16Codec, getU64Codec } from '@solana/kit';
+import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
 import { Address } from '@solana/web3.js';
 import type { Account } from '../../state/account.js';
 import type { Mint } from '../../state/mint.js';
@@ -41,6 +42,34 @@ export const TransferFeeCodec = getStructCodec([
     ['transferFeeBasisPoints', getU16Codec()],
 ]);
 
+type TransferFeeCodecData = {
+    epoch: bigint | number;
+    maximumFee: bigint | number;
+    transferFeeBasisPoints: bigint | number;
+};
+
+type TransferFeeCodecDecodedData = {
+    epoch: bigint;
+    maximumFee: bigint;
+    transferFeeBasisPoints: number;
+};
+
+type TransferFeeConfigCodecData = {
+    transferFeeConfigAuthority: KitAddress;
+    withdrawWithheldAuthority: KitAddress;
+    withheldAmount: bigint | number;
+    olderTransferFee: TransferFeeCodecData;
+    newerTransferFee: TransferFeeCodecData;
+};
+
+type TransferFeeConfigCodecDecodedData = {
+    transferFeeConfigAuthority: KitAddress;
+    withdrawWithheldAuthority: KitAddress;
+    withheldAmount: bigint;
+    olderTransferFee: TransferFeeCodecDecodedData;
+    newerTransferFee: TransferFeeCodecDecodedData;
+};
+
 /** Calculate the transfer fee */
 export function calculateFee(transferFee: TransferFee, preFeeAmount: bigint): bigint {
     const transferFeeBasisPoints = transferFee.transferFeeBasisPoints;
@@ -55,16 +84,17 @@ export function calculateFee(transferFee: TransferFee, preFeeAmount: bigint): bi
 }
 
 /** Codec for de/serializing a transfer fee config extension */
-export const TransferFeeConfigCodec = getStructCodec([
-    ['transferFeeConfigAuthority', getAddressCodec()],
-    ['withdrawWithheldAuthority', getAddressCodec()],
-    ['withheldAmount', getU64Codec()],
-    ['olderTransferFee', TransferFeeCodec],
-    ['newerTransferFee', TransferFeeCodec],
-]);
+export const TransferFeeConfigCodec: FixedSizeCodec<TransferFeeConfigCodecData, TransferFeeConfigCodecDecodedData> =
+    getStructCodec([
+        ['transferFeeConfigAuthority', getAddressCodec()],
+        ['withdrawWithheldAuthority', getAddressCodec()],
+        ['withheldAmount', getU64Codec()],
+        ['olderTransferFee', TransferFeeCodec],
+        ['newerTransferFee', TransferFeeCodec],
+    ]);
 
 /** @deprecated Use {@link TransferFeeConfigCodec} */
-export const TransferFeeConfigLayout = TransferFeeConfigCodec;
+export const TransferFeeConfigLayout: typeof TransferFeeConfigCodec = TransferFeeConfigCodec;
 
 export const TRANSFER_FEE_CONFIG_SIZE = TransferFeeConfigCodec.fixedSize;
 

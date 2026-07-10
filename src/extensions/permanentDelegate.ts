@@ -1,4 +1,5 @@
 import { getAddressCodec, getStructCodec } from '@solana/kit';
+import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
 import { Address } from '@solana/web3.js';
 import type { Mint } from '../state/mint.js';
 import { ExtensionType, getExtensionData } from './extensionType.js';
@@ -8,11 +9,16 @@ export interface PermanentDelegate {
     delegate: Address;
 }
 
+type PermanentDelegateCodecData = {
+    delegate: KitAddress;
+};
+
 /** Codec for de/serializing a permanent delegate extension */
-export const PermanentDelegateCodec = getStructCodec([['delegate', getAddressCodec()]]);
+export const PermanentDelegateCodec: FixedSizeCodec<PermanentDelegateCodecData, PermanentDelegateCodecData> =
+    getStructCodec([['delegate', getAddressCodec()]]);
 
 /** @deprecated Use {@link PermanentDelegateCodec} */
-export const PermanentDelegateLayout = PermanentDelegateCodec;
+export const PermanentDelegateLayout: typeof PermanentDelegateCodec = PermanentDelegateCodec;
 
 export const PERMANENT_DELEGATE_SIZE = PermanentDelegateCodec.fixedSize;
 

@@ -9,6 +9,7 @@ import {
     getU64Codec,
     getU8Codec,
 } from '@solana/kit';
+import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
 import type { AccountInfo, AccountMeta, Connection } from '@solana/web3.js';
@@ -26,14 +27,19 @@ export interface TransferHook {
     programId: Address;
 }
 
+type TransferHookCodecData = {
+    authority: KitAddress;
+    programId: KitAddress;
+};
+
 /** Codec for de/serializing a transfer hook extension */
-export const TransferHookCodec = getStructCodec([
+export const TransferHookCodec: FixedSizeCodec<TransferHookCodecData, TransferHookCodecData> = getStructCodec([
     ['authority', getAddressCodec()],
     ['programId', getAddressCodec()],
 ]);
 
 /** @deprecated Use {@link TransferHookCodec} */
-export const TransferHookLayout = TransferHookCodec;
+export const TransferHookLayout: typeof TransferHookCodec = TransferHookCodec;
 
 export const TRANSFER_HOOK_SIZE = TransferHookCodec.fixedSize;
 

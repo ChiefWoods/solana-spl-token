@@ -1,4 +1,5 @@
 import { getAddressCodec, getI16Codec, getI64Codec, getStructCodec } from '@solana/kit';
+import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
 import { Address } from '@solana/web3.js';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
@@ -11,7 +12,26 @@ export interface InterestBearingMintConfigState {
     currentRate: number;
 }
 
-export const InterestBearingMintConfigStateCodec = getStructCodec([
+type InterestBearingMintConfigStateCodecData = {
+    rateAuthority: KitAddress;
+    initializationTimestamp: bigint | number;
+    preUpdateAverageRate: bigint | number;
+    lastUpdateTimestamp: bigint | number;
+    currentRate: bigint | number;
+};
+
+type InterestBearingMintConfigStateCodecDecodedData = {
+    rateAuthority: KitAddress;
+    initializationTimestamp: bigint;
+    preUpdateAverageRate: number;
+    lastUpdateTimestamp: bigint;
+    currentRate: number;
+};
+
+export const InterestBearingMintConfigStateCodec: FixedSizeCodec<
+    InterestBearingMintConfigStateCodecData,
+    InterestBearingMintConfigStateCodecDecodedData
+> = getStructCodec([
     ['rateAuthority', getAddressCodec()],
     ['initializationTimestamp', getI64Codec()],
     ['preUpdateAverageRate', getI16Codec()],
@@ -20,7 +40,8 @@ export const InterestBearingMintConfigStateCodec = getStructCodec([
 ]);
 
 /** @deprecated Use {@link InterestBearingMintConfigStateCodec} */
-export const InterestBearingMintConfigStateLayout = InterestBearingMintConfigStateCodec;
+export const InterestBearingMintConfigStateLayout: typeof InterestBearingMintConfigStateCodec =
+    InterestBearingMintConfigStateCodec;
 
 export const INTEREST_BEARING_MINT_CONFIG_STATE_SIZE = InterestBearingMintConfigStateCodec.fixedSize;
 

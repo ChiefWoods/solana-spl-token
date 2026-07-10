@@ -1,4 +1,5 @@
 import { getAddressCodec, getStructCodec } from '@solana/kit';
+import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
 import { Address } from '@solana/web3.js';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
@@ -11,14 +12,19 @@ export interface MetadataPointer {
     metadataAddress: Address | null;
 }
 
+type MetadataPointerCodecData = {
+    authority: KitAddress;
+    metadataAddress: KitAddress;
+};
+
 /** Codec for de/serializing a Metadata Pointer extension */
-export const MetadataPointerCodec = getStructCodec([
+export const MetadataPointerCodec: FixedSizeCodec<MetadataPointerCodecData, MetadataPointerCodecData> = getStructCodec([
     ['authority', getAddressCodec()],
     ['metadataAddress', getAddressCodec()],
 ]);
 
 /** @deprecated Use {@link MetadataPointerCodec} */
-export const MetadataPointerLayout = MetadataPointerCodec;
+export const MetadataPointerLayout: typeof MetadataPointerCodec = MetadataPointerCodec;
 
 export const METADATA_POINTER_SIZE = MetadataPointerCodec.fixedSize;
 
