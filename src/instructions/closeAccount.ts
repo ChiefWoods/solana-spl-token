@@ -12,12 +12,12 @@ import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for a CloseAccount instruction. */
 export interface CloseAccountInstructionData {
     instruction: TokenInstruction.CloseAccount;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding CloseAccount instruction data. */
 export const closeAccountInstructionData = createInstructionDataCodec({
     encoder: getCloseAccountInstructionDataEncoder(),
     decoder: getCloseAccountInstructionDataDecoder(),

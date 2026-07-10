@@ -14,13 +14,13 @@ import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec, optionToNullableBigInt } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for an UnwrapLamports instruction. */
 export interface UnwrapLamportsInstructionData {
     instruction: TokenInstruction.UnwrapLamports;
     amount: bigint | null;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding UnwrapLamports instruction data. */
 export const unwrapLamportsInstructionData = createInstructionDataCodec({
     encoder: getUnwrapLamportsInstructionDataEncoder(),
     decoder: getUnwrapLamportsInstructionDataDecoder(),

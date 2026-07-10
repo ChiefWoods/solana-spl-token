@@ -12,12 +12,12 @@ import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for a Revoke instruction. */
 export interface RevokeInstructionData {
     instruction: TokenInstruction.Revoke;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding Revoke instruction data. */
 export const revokeInstructionData = createInstructionDataCodec({
     encoder: getRevokeInstructionDataEncoder(),
     decoder: getRevokeInstructionDataDecoder(),

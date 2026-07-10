@@ -14,7 +14,7 @@ export enum MemoTransferInstruction {
     Disable = 1,
 }
 
-/** TODO: docs */
+/** Instruction data for MemoTransfer extension instructions. */
 export interface MemoTransferInstructionData {
     instruction: TokenInstruction.MemoTransferExtension;
     memoTransferInstruction: MemoTransferInstruction;

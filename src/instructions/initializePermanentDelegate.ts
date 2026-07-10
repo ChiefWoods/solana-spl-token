@@ -16,13 +16,13 @@ import {
 import { TokenInstruction } from './types.js';
 import { addressFromString, addressToString, createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for an InitializePermanentDelegate instruction. */
 export interface InitializePermanentDelegateInstructionData {
     instruction: TokenInstruction.InitializePermanentDelegate;
     delegate: Address;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding InitializePermanentDelegate instruction data. */
 export const initializePermanentDelegateInstructionData = createInstructionDataCodec({
     encoder: getInitializePermanentDelegateInstructionDataEncoder(),
     decoder: getInitializePermanentDelegateInstructionDataDecoder(),

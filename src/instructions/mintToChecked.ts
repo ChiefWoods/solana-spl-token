@@ -12,14 +12,14 @@ import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for a MintToChecked instruction. */
 export interface MintToCheckedInstructionData {
     instruction: TokenInstruction.MintToChecked;
     amount: bigint;
     decimals: number;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding MintToChecked instruction data. */
 export const mintToCheckedInstructionData = createInstructionDataCodec({
     encoder: getMintToCheckedInstructionDataEncoder(),
     decoder: getMintToCheckedInstructionDataDecoder(),

@@ -12,13 +12,13 @@ import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for a MintTo instruction. */
 export interface MintToInstructionData {
     instruction: TokenInstruction.MintTo;
     amount: bigint;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding MintTo instruction data. */
 export const mintToInstructionData = createInstructionDataCodec({
     encoder: getMintToInstructionDataEncoder(),
     decoder: getMintToInstructionDataDecoder(),

@@ -12,12 +12,12 @@ import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for a FreezeAccount instruction. */
 export interface FreezeAccountInstructionData {
     instruction: TokenInstruction.FreezeAccount;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding FreezeAccount instruction data. */
 export const freezeAccountInstructionData = createInstructionDataCodec({
     encoder: getFreezeAccountInstructionDataEncoder(),
     decoder: getFreezeAccountInstructionDataDecoder(),

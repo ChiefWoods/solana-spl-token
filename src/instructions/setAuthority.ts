@@ -37,14 +37,14 @@ export enum AuthorityType {
     PermissionedBurn = 17,
 }
 
-/** TODO: docs */
+/** Instruction data for a SetAuthority instruction. */
 export interface SetAuthorityInstructionData {
     instruction: TokenInstruction.SetAuthority;
     authorityType: AuthorityType;
     newAuthority: Address | null;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding SetAuthority instruction data. */
 export const setAuthorityInstructionData = createInstructionDataCodec({
     encoder: getSetAuthorityInstructionDataEncoder(),
     decoder: getSetAuthorityInstructionDataDecoder(),

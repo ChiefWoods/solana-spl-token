@@ -7,7 +7,7 @@ import type { ExtensionType } from '../extensions/extensionType.js';
 import { addSigners } from './internal.js';
 import type { TokenInstruction } from './types.js';
 
-/** TODO: docs */
+/** Instruction data for a Reallocate instruction. */
 export interface ReallocateInstructionData {
     instruction: TokenInstruction.Reallocate;
     extensionTypes: ExtensionType[];

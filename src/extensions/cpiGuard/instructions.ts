@@ -14,7 +14,7 @@ export enum CpiGuardInstruction {
     Disable = 1,
 }
 
-/** TODO: docs */
+/** Instruction data for CpiGuard extension instructions. */
 export interface CpiGuardInstructionData {
     instruction: TokenInstruction.CpiGuardExtension;
     cpiGuardInstruction: CpiGuardInstruction;

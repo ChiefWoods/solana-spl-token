@@ -15,14 +15,14 @@ import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for an ApproveChecked instruction. */
 export interface ApproveCheckedInstructionData {
     instruction: TokenInstruction.ApproveChecked;
     amount: bigint;
     decimals: number;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding ApproveChecked instruction data. */
 export const approveCheckedInstructionData = createInstructionDataCodec({
     encoder: getApproveCheckedInstructionDataEncoder(),
     decoder: getApproveCheckedInstructionDataDecoder(),

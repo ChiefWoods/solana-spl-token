@@ -20,7 +20,7 @@ import {
     optionToNullableAddress,
 } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for an InitializeMint instruction. */
 export interface InitializeMintInstructionData {
     instruction: TokenInstruction.InitializeMint;
     decimals: number;
@@ -28,7 +28,7 @@ export interface InitializeMintInstructionData {
     freezeAuthority: Address | null;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding InitializeMint instruction data. */
 export const initializeMintInstructionData = createInstructionDataCodec({
     encoder: getInitializeMintInstructionDataEncoder(),
     decoder: getInitializeMintInstructionDataDecoder(),

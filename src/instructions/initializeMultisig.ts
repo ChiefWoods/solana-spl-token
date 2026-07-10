@@ -15,13 +15,13 @@ import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for an InitializeMultisig instruction. */
 export interface InitializeMultisigInstructionData {
     instruction: TokenInstruction.InitializeMultisig;
     m: number;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding InitializeMultisig instruction data. */
 export const initializeMultisigInstructionData = createInstructionDataCodec({
     encoder: getInitializeMultisigInstructionDataEncoder(),
     decoder: getInitializeMultisigInstructionDataDecoder(),

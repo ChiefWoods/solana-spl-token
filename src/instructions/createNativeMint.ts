@@ -9,12 +9,12 @@ import { TokenUnsupportedInstructionError } from '../errors.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for a CreateNativeMint instruction. */
 export interface CreateNativeMintInstructionData {
     instruction: TokenInstruction.CreateNativeMint;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding CreateNativeMint instruction data. */
 export const createNativeMintInstructionData = createInstructionDataCodec({
     encoder: getCreateNativeMintInstructionDataEncoder(),
     decoder: getCreateNativeMintInstructionDataDecoder(),

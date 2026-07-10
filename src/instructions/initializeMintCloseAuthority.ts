@@ -15,13 +15,13 @@ import {
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec, nullableAddressToOption, optionToNullableAddress } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for an InitializeMintCloseAuthority instruction. */
 export interface InitializeMintCloseAuthorityInstructionData {
     instruction: TokenInstruction.InitializeMintCloseAuthority;
     closeAuthority: Address | null;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding InitializeMintCloseAuthority instruction data. */
 export const initializeMintCloseAuthorityInstructionData = createInstructionDataCodec({
     encoder: getInitializeMintCloseAuthorityInstructionDataEncoder(),
     decoder: getInitializeMintCloseAuthorityInstructionDataDecoder(),

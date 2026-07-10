@@ -42,7 +42,7 @@ export enum TransferFeeInstruction {
 
 // InitializeTransferFeeConfig
 
-/** TODO: docs */
+/** Instruction data for an InitializeTransferFeeConfig instruction. */
 export interface InitializeTransferFeeConfigInstructionData {
     instruction: TokenInstruction.TransferFeeExtension;
     transferFeeInstruction: TransferFeeInstruction.InitializeTransferFeeConfig;

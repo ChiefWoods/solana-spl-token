@@ -11,12 +11,12 @@ import {
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for a SyncNative instruction. */
 export interface SyncNativeInstructionData {
     instruction: TokenInstruction.SyncNative;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding SyncNative instruction data. */
 export const syncNativeInstructionData = createInstructionDataCodec({
     encoder: getSyncNativeInstructionDataEncoder(),
     decoder: getSyncNativeInstructionDataDecoder(),

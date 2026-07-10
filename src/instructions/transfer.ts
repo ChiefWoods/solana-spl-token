@@ -12,13 +12,13 @@ import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for a Transfer instruction. */
 export interface TransferInstructionData {
     instruction: TokenInstruction.Transfer;
     amount: bigint;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding Transfer instruction data. */
 export const transferInstructionData = createInstructionDataCodec({
     encoder: getTransferInstructionDataEncoder(),
     decoder: getTransferInstructionDataDecoder(),

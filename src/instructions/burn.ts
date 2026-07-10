@@ -12,13 +12,13 @@ import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for a Burn instruction. */
 export interface BurnInstructionData {
     instruction: TokenInstruction.Burn;
     amount: bigint;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding Burn instruction data. */
 export const burnInstructionData = createInstructionDataCodec({
     encoder: getBurnInstructionDataEncoder(),
     decoder: getBurnInstructionDataDecoder(),

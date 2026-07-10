@@ -15,7 +15,7 @@ export enum DefaultAccountStateInstruction {
     Update = 1,
 }
 
-/** TODO: docs */
+/** Instruction data for DefaultAccountState extension instructions. */
 export interface DefaultAccountStateInstructionData {
     instruction: TokenInstruction.DefaultAccountStateExtension;
     defaultAccountStateInstruction: DefaultAccountStateInstruction;

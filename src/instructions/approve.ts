@@ -12,13 +12,13 @@ import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for an Approve instruction. */
 export interface ApproveInstructionData {
     instruction: TokenInstruction.Approve;
     amount: bigint;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding Approve instruction data. */
 export const approveInstructionData = createInstructionDataCodec({
     encoder: getApproveInstructionDataEncoder(),
     decoder: getApproveInstructionDataDecoder(),

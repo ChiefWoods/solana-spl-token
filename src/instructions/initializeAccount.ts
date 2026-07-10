@@ -14,12 +14,12 @@ import {
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for an InitializeAccount instruction. */
 export interface InitializeAccountInstructionData {
     instruction: TokenInstruction.InitializeAccount;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding InitializeAccount instruction data. */
 export const initializeAccountInstructionData = createInstructionDataCodec({
     encoder: getInitializeAccountInstructionDataEncoder(),
     decoder: getInitializeAccountInstructionDataDecoder(),

@@ -14,13 +14,13 @@ import {
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for a UiAmountToAmount instruction. */
 export interface UiAmountToAmountInstructionData {
     instruction: TokenInstruction.UiAmountToAmount;
     amount: Uint8Array;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding UiAmountToAmount instruction data. */
 export const uiAmountToAmountInstructionData = createInstructionDataCodec({
     encoder: getUiAmountToAmountInstructionDataEncoder(),
     decoder: getUiAmountToAmountInstructionDataDecoder(),

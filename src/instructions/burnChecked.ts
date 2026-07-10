@@ -12,14 +12,14 @@ import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for a BurnChecked instruction. */
 export interface BurnCheckedInstructionData {
     instruction: TokenInstruction.BurnChecked;
     amount: bigint;
     decimals: number;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding BurnChecked instruction data. */
 export const burnCheckedInstructionData = createInstructionDataCodec({
     encoder: getBurnCheckedInstructionDataEncoder(),
     decoder: getBurnCheckedInstructionDataDecoder(),

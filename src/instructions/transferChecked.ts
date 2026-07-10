@@ -15,14 +15,14 @@ import { addSigners } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
-/** TODO: docs */
+/** Instruction data for a TransferChecked instruction. */
 export interface TransferCheckedInstructionData {
     instruction: TokenInstruction.TransferChecked;
     amount: bigint;
     decimals: number;
 }
 
-/** TODO: docs */
+/** Codec for encoding and decoding TransferChecked instruction data. */
 export const transferCheckedInstructionData = createInstructionDataCodec({
     encoder: getTransferCheckedInstructionDataEncoder(),
     decoder: getTransferCheckedInstructionDataDecoder(),

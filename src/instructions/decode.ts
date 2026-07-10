@@ -48,7 +48,7 @@ import { TokenInstruction } from './types.js';
 import type { DecodedUiAmountToAmountInstruction } from './uiAmountToAmount.js';
 import { decodeUiAmountToAmountInstruction } from './uiAmountToAmount.js';
 
-/** TODO: docs */
+/** Union of all decoded SPL Token instructions supported by this decoder. */
 export type DecodedInstruction =
     | DecodedInitializeMintInstruction
     | DecodedInitializeAccountInstruction
@@ -76,7 +76,7 @@ export type DecodedInstruction =
     // TODO: implement ^ and remove `never`
     | never;
 
-/** TODO: docs */
+/** Decode and validate an SPL Token instruction by dispatching on its instruction type. */
 export function decodeInstruction(
     instruction: TransactionInstruction,
     programId = TOKEN_PROGRAM_ID,
@@ -115,133 +115,133 @@ export function decodeInstruction(
     throw new TokenInvalidInstructionTypeError();
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is an InitializeMint instruction. */
 export function isInitializeMintInstruction(decoded: DecodedInstruction): decoded is DecodedInitializeMintInstruction {
     return decoded.data.instruction === TokenInstruction.InitializeMint;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is an InitializeAccount instruction. */
 export function isInitializeAccountInstruction(
     decoded: DecodedInstruction,
 ): decoded is DecodedInitializeAccountInstruction {
     return decoded.data.instruction === TokenInstruction.InitializeAccount;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is an InitializeMultisig instruction. */
 export function isInitializeMultisigInstruction(
     decoded: DecodedInstruction,
 ): decoded is DecodedInitializeMultisigInstruction {
     return decoded.data.instruction === TokenInstruction.InitializeMultisig;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is a Transfer instruction. */
 export function isTransferInstruction(decoded: DecodedInstruction): decoded is DecodedTransferInstruction {
     return decoded.data.instruction === TokenInstruction.Transfer;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is an Approve instruction. */
 export function isApproveInstruction(decoded: DecodedInstruction): decoded is DecodedApproveInstruction {
     return decoded.data.instruction === TokenInstruction.Approve;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is a Revoke instruction. */
 export function isRevokeInstruction(decoded: DecodedInstruction): decoded is DecodedRevokeInstruction {
     return decoded.data.instruction === TokenInstruction.Revoke;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is a SetAuthority instruction. */
 export function isSetAuthorityInstruction(decoded: DecodedInstruction): decoded is DecodedSetAuthorityInstruction {
     return decoded.data.instruction === TokenInstruction.SetAuthority;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is a MintTo instruction. */
 export function isMintToInstruction(decoded: DecodedInstruction): decoded is DecodedMintToInstruction {
     return decoded.data.instruction === TokenInstruction.MintTo;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is a Burn instruction. */
 export function isBurnInstruction(decoded: DecodedInstruction): decoded is DecodedBurnInstruction {
     return decoded.data.instruction === TokenInstruction.Burn;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is a CloseAccount instruction. */
 export function isCloseAccountInstruction(decoded: DecodedInstruction): decoded is DecodedCloseAccountInstruction {
     return decoded.data.instruction === TokenInstruction.CloseAccount;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is a FreezeAccount instruction. */
 export function isFreezeAccountInstruction(decoded: DecodedInstruction): decoded is DecodedFreezeAccountInstruction {
     return decoded.data.instruction === TokenInstruction.FreezeAccount;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is a ThawAccount instruction. */
 export function isThawAccountInstruction(decoded: DecodedInstruction): decoded is DecodedThawAccountInstruction {
     return decoded.data.instruction === TokenInstruction.ThawAccount;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is a TransferChecked instruction. */
 export function isTransferCheckedInstruction(
     decoded: DecodedInstruction,
 ): decoded is DecodedTransferCheckedInstruction {
     return decoded.data.instruction === TokenInstruction.TransferChecked;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is an ApproveChecked instruction. */
 export function isApproveCheckedInstruction(decoded: DecodedInstruction): decoded is DecodedApproveCheckedInstruction {
     return decoded.data.instruction === TokenInstruction.ApproveChecked;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is a MintToChecked instruction. */
 export function isMintToCheckedInstruction(decoded: DecodedInstruction): decoded is DecodedMintToCheckedInstruction {
     return decoded.data.instruction === TokenInstruction.MintToChecked;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is a BurnChecked instruction. */
 export function isBurnCheckedInstruction(decoded: DecodedInstruction): decoded is DecodedBurnCheckedInstruction {
     return decoded.data.instruction === TokenInstruction.BurnChecked;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is an InitializeAccount2 instruction. */
 export function isInitializeAccount2Instruction(
     decoded: DecodedInstruction,
 ): decoded is DecodedInitializeAccount2Instruction {
     return decoded.data.instruction === TokenInstruction.InitializeAccount2;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is a SyncNative instruction. */
 export function isSyncNativeInstruction(decoded: DecodedInstruction): decoded is DecodedSyncNativeInstruction {
     return decoded.data.instruction === TokenInstruction.SyncNative;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is an InitializeAccount3 instruction. */
 export function isInitializeAccount3Instruction(
     decoded: DecodedInstruction,
 ): decoded is DecodedInitializeAccount3Instruction {
     return decoded.data.instruction === TokenInstruction.InitializeAccount3;
 }
 
-/** TODO: docs, implement */
+/** Return whether a decoded instruction is an InitializeMultisig2 instruction once decoding is supported. */
 // export function isInitializeMultisig2Instruction(
 //     decoded: DecodedInstruction
 // ): decoded is DecodedInitializeMultisig2Instruction {
 //     return decoded.data.instruction === TokenInstruction.InitializeMultisig2;
 // }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is an InitializeMint2 instruction. */
 export function isInitializeMint2Instruction(
     decoded: DecodedInstruction,
 ): decoded is DecodedInitializeMint2Instruction {
     return decoded.data.instruction === TokenInstruction.InitializeMint2;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is an AmountToUiAmount instruction. */
 export function isAmountToUiAmountInstruction(
     decoded: DecodedInstruction,
 ): decoded is DecodedAmountToUiAmountInstruction {
     return decoded.data.instruction === TokenInstruction.AmountToUiAmount;
 }
 
-/** TODO: docs */
+/** Return whether a decoded instruction is a UiAmountToAmount instruction. */
 export function isUiAmountToAmountInstruction(
     decoded: DecodedInstruction,
 ): decoded is DecodedUiAmountToAmountInstruction {
