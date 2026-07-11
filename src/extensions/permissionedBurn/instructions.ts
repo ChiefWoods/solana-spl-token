@@ -16,7 +16,7 @@ export enum PermissionedBurnInstruction {
     BurnChecked = 2,
 }
 
-interface InitializePermissionedBurnInstructionData {
+export interface InitializePermissionedBurnInstructionData {
     instruction: TokenInstruction.PermissionedBurnExtension;
     permissionedBurnInstruction: PermissionedBurnInstruction.Initialize;
     authority: Address;
@@ -46,7 +46,7 @@ export function createInitializePermissionedBurnInstruction(
     return new TransactionInstruction({ keys, programId, data });
 }
 
-interface PermissionedBurnInstructionData {
+export interface PermissionedBurnInstructionData {
     instruction: TokenInstruction.PermissionedBurnExtension;
     permissionedBurnInstruction: PermissionedBurnInstruction.Burn;
     amount: bigint;
@@ -91,7 +91,7 @@ export function createPermissionedBurnInstruction(
     return new TransactionInstruction({ keys, programId, data });
 }
 
-interface PermissionedBurnCheckedInstructionData {
+export interface PermissionedBurnCheckedInstructionData {
     instruction: TokenInstruction.PermissionedBurnExtension;
     permissionedBurnInstruction: PermissionedBurnInstruction.BurnChecked;
     amount: bigint;
