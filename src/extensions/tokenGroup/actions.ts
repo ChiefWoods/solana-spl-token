@@ -1,16 +1,15 @@
 import type { ConfirmOptions, Connection, Signer, TransactionSignature } from '@solana/web3.js';
 import { sendAndConfirmTransaction, SystemProgram, Transaction, Address } from '@solana/web3.js';
+
+import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
+import { getSigners } from '../../actions/internal.js';
 import {
     createInitializeGroupInstruction,
     createUpdateGroupMaxSizeInstruction,
     createUpdateGroupAuthorityInstruction,
     createInitializeMemberInstruction,
-    TOKEN_GROUP_SIZE,
-    TOKEN_GROUP_MEMBER_SIZE,
-} from '@solana/spl-token-group';
-
-import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
-import { getSigners } from '../../actions/internal.js';
+} from './instructions.js';
+import { TOKEN_GROUP_SIZE, TOKEN_GROUP_MEMBER_SIZE } from './state.js';
 
 /**
  * Initialize a new `Group`

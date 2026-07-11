@@ -2,7 +2,6 @@ import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
 import { Address } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
-import { packTokenGroup } from '@solana/spl-token-group';
 
 import {
     ExtensionType,
@@ -14,6 +13,7 @@ import {
     getTokenGroupState,
     getMint,
     getMintLen,
+    packTokenGroup,
     tokenGroupInitializeGroupWithRentTransfer,
 } from '../../src';
 import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';

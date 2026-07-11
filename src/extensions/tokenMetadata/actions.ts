@@ -1,21 +1,19 @@
 import type { ConfirmOptions, Connection, Signer, TransactionSignature } from '@solana/web3.js';
 import { sendAndConfirmTransaction, SystemProgram, Transaction, Address } from '@solana/web3.js';
-import type { Field, TokenMetadata } from '@solana/spl-token-metadata';
+
+import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
+import { getSigners } from '../../actions/internal.js';
+import { ExtensionType, getExtensionData, getNewAccountLenForExtensionLen } from '../extensionType.js';
+import { TokenAccountNotFoundError } from '../../errors.js';
+import { unpackMint } from '../../state/index.js';
+import type { Field } from './field.js';
 import {
     createInitializeInstruction,
     createRemoveKeyInstruction,
     createUpdateAuthorityInstruction,
     createUpdateFieldInstruction,
-    pack,
-    unpack,
-} from '@solana/spl-token-metadata';
-
-import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
-import { getSigners } from '../../actions/internal.js';
-import { ExtensionType, getExtensionData, getNewAccountLenForExtensionLen } from '../extensionType.js';
-import { updateTokenMetadata } from './state.js';
-import { TokenAccountNotFoundError } from '../../errors.js';
-import { unpackMint } from '../../state/index.js';
+} from './instructions.js';
+import { pack, unpack, updateTokenMetadata, type TokenMetadata } from './state.js';
 
 async function getAdditionalRentForNewMetadata(
     connection: Connection,

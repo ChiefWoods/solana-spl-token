@@ -1,6 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { getBase64Encoder } from '@solana/codecs-strings';
-import { createEmitInstruction, pack } from '@solana/spl-token-metadata';
 import {
     Address,
     type Connection,
@@ -15,10 +14,12 @@ import {
 
 import {
     ExtensionType,
+    createEmitInstruction,
     createInitializeMetadataPointerInstruction,
     createInitializeMintInstruction,
     getMintLen,
     getTokenMetadata,
+    pack,
     tokenMetadataInitialize,
     tokenMetadataInitializeWithRentTransfer,
     tokenMetadataRemoveKey,

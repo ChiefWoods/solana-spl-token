@@ -10,19 +10,17 @@ import {
 import {
     createInitializeMetadataPointerInstruction,
     createInitializeMintInstruction,
+    createInitializeInstruction,
+    createUpdateFieldInstruction,
+    createRemoveKeyInstruction,
     ExtensionType,
     getMintLen,
     LENGTH_SIZE,
+    pack,
     TOKEN_2022_PROGRAM_ID,
     TYPE_SIZE,
-} from '@solana/spl-token';
-import type { TokenMetadata } from '@solana/spl-token-metadata';
-import {
-    createInitializeInstruction,
-    pack,
-    createUpdateFieldInstruction,
-    createRemoveKeyInstruction,
-} from '@solana/spl-token-metadata';
+    type TokenMetadata,
+} from '../src';
 
 (async () => {
     const payer = await Keypair.generate();

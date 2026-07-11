@@ -4,13 +4,13 @@ export {
     createRemoveKeyInstruction,
     createUpdateAuthorityInstruction,
     createEmitInstruction,
-} from '@solana/spl-token-metadata';
+} from '../extensions/tokenMetadata/index.js';
 export {
     createInitializeGroupInstruction,
     createUpdateGroupMaxSizeInstruction,
     createUpdateGroupAuthorityInstruction,
     createInitializeMemberInstruction,
-} from '@solana/spl-token-group';
+} from '../extensions/tokenGroup/index.js';
 
 export * from './associatedTokenAccount.js';
 export * from './decode.js';

@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Address } from '@solana/web3.js';
 
-import type { TokenMetadata } from '@solana/spl-token-metadata';
-import { Field } from '@solana/spl-token-metadata';
-import { updateTokenMetadata } from '../../src';
+import { Field, updateTokenMetadata, type TokenMetadata } from '../../src';
 
 describe('SPL Token 2022 Metadata Extension', () => {
     describe('Update token metadata', () => {
