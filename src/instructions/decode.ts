@@ -28,6 +28,8 @@ import type { DecodedInitializeMint2Instruction } from './initializeMint2.js';
 import { decodeInitializeMint2Instruction } from './initializeMint2.js';
 import type { DecodedInitializeMultisigInstruction } from './initializeMultisig.js';
 import { decodeInitializeMultisigInstruction } from './initializeMultisig.js';
+import type { DecodedInitializeMultisig2Instruction } from './initializeMultisig2.js';
+import { decodeInitializeMultisig2Instruction } from './initializeMultisig2.js';
 import type { DecodedMintToInstruction } from './mintTo.js';
 import { decodeMintToInstruction } from './mintTo.js';
 import type { DecodedMintToCheckedInstruction } from './mintToChecked.js';
@@ -72,9 +74,7 @@ export type DecodedInstruction =
     | DecodedInitializeMint2Instruction
     | DecodedAmountToUiAmountInstruction
     | DecodedUiAmountToAmountInstruction
-    // | DecodedInitializeMultisig2Instruction
-    // TODO: implement ^ and remove `never`
-    | never;
+    | DecodedInitializeMultisig2Instruction;
 
 /** Decode and validate an SPL Token instruction by dispatching on its instruction type. */
 export function decodeInstruction(
@@ -109,8 +109,8 @@ export function decodeInstruction(
     if (type === TokenInstruction.InitializeMint2) return decodeInitializeMint2Instruction(instruction, programId);
     if (type === TokenInstruction.AmountToUiAmount) return decodeAmountToUiAmountInstruction(instruction, programId);
     if (type === TokenInstruction.UiAmountToAmount) return decodeUiAmountToAmountInstruction(instruction, programId);
-    // TODO: implement
-    if (type === TokenInstruction.InitializeMultisig2) throw new TokenInvalidInstructionTypeError();
+    if (type === TokenInstruction.InitializeMultisig2)
+        return decodeInitializeMultisig2Instruction(instruction, programId);
 
     throw new TokenInvalidInstructionTypeError();
 }
@@ -220,12 +220,12 @@ export function isInitializeAccount3Instruction(
     return decoded.data.instruction === TokenInstruction.InitializeAccount3;
 }
 
-/** Return whether a decoded instruction is an InitializeMultisig2 instruction once decoding is supported. */
-// export function isInitializeMultisig2Instruction(
-//     decoded: DecodedInstruction
-// ): decoded is DecodedInitializeMultisig2Instruction {
-//     return decoded.data.instruction === TokenInstruction.InitializeMultisig2;
-// }
+/** Return whether a decoded instruction is an InitializeMultisig2 instruction. */
+export function isInitializeMultisig2Instruction(
+    decoded: DecodedInstruction,
+): decoded is DecodedInitializeMultisig2Instruction {
+    return decoded.data.instruction === TokenInstruction.InitializeMultisig2;
+}
 
 /** Return whether a decoded instruction is an InitializeMint2 instruction. */
 export function isInitializeMint2Instruction(

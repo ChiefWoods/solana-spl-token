@@ -22,6 +22,7 @@ import {
     getAssociatedTokenAddressSync,
     createInitializeAccount2Instruction,
     createInitializeAccount3Instruction,
+    createInitializeMultisig2Instruction,
     createAmountToUiAmountInstruction,
     createUiAmountToAmountInstruction,
     getMintLen,
@@ -87,6 +88,18 @@ describe('spl-token instructions', () => {
         );
         expect(ix.programId).toEqual(TOKEN_PROGRAM_ID);
         expect(ix.keys).toHaveLength(2);
+    });
+
+    it('InitializeMultisig2', async () => {
+        const ix = createInitializeMultisig2Instruction(
+            (await Keypair.generate()).publicKey,
+            [(await Keypair.generate()).publicKey, (await Keypair.generate()).publicKey],
+            2,
+        );
+        expect(ix.programId).toEqual(TOKEN_PROGRAM_ID);
+        expect(ix.keys).toHaveLength(3);
+        expect(ix.data[0]).toEqual(TokenInstruction.InitializeMultisig2);
+        expect(ix.data[1]).toEqual(2);
     });
 });
 
