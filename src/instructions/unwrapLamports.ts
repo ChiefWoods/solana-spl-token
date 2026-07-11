@@ -4,6 +4,7 @@ import {
 } from '@solana-program/token-2022';
 import type { AccountMeta, Address, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
     TokenInvalidInstructionDataError,
     TokenInvalidInstructionKeysError,
@@ -49,7 +50,7 @@ export function createUnwrapLamportsInstruction(
     owner: Address,
     amount: bigint | null,
     multiSigners: (Signer | Address)[] = [],
-    programId: Address,
+    programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
         [
@@ -60,13 +61,11 @@ export function createUnwrapLamportsInstruction(
         multiSigners,
     );
 
-    const data = Buffer.alloc(10); // worst-case
-    unwrapLamportsInstructionData.encode(
-        {
+    const data = Buffer.from(
+        unwrapLamportsInstructionData.encode({
             instruction: TokenInstruction.UnwrapLamports,
             amount,
-        },
-        data,
+        }) as Uint8Array,
     );
 
     return new TransactionInstruction({ keys, programId, data });

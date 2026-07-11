@@ -1,6 +1,7 @@
 export * from './amountToUiAmount.js';
 export * from './approve.js';
 export * from './approveChecked.js';
+export * from './batch.js';
 export * from './burn.js';
 export * from './burnChecked.js';
 export * from './closeAccount.js';
@@ -24,3 +25,4 @@ export * from './transfer.js';
 export * from './transferChecked.js';
 export * from './uiAmountToAmount.js';
 export * from './unwrapLamports.js';
+export * from './withdrawExcessLamports.js';

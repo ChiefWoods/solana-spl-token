@@ -38,7 +38,7 @@ export enum TokenInstruction {
     InitializePermanentDelegate = 35,
     TransferHookExtension = 36,
     // ConfidentialTransferFeeExtension = 37,
-    // WithdrawalExcessLamports = 38,
+    WithdrawExcessLamports = 38,
     MetadataPointerExtension = 39,
     GroupPointerExtension = 40,
     GroupMemberPointerExtension = 41,
@@ -47,4 +47,5 @@ export enum TokenInstruction {
     PausableExtension = 44,
     UnwrapLamports = 45,
     PermissionedBurnExtension = 46,
+    Batch = 255,
 }

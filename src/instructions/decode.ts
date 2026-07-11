@@ -8,6 +8,8 @@ import type { DecodedApproveInstruction } from './approve.js';
 import { decodeApproveInstruction } from './approve.js';
 import type { DecodedApproveCheckedInstruction } from './approveChecked.js';
 import { decodeApproveCheckedInstruction } from './approveChecked.js';
+import type { DecodedBatchInstruction } from './batch.js';
+import { decodeBatchInstruction } from './batch.js';
 import type { DecodedBurnInstruction } from './burn.js';
 import { decodeBurnInstruction } from './burn.js';
 import type { DecodedBurnCheckedInstruction } from './burnChecked.js';
@@ -49,6 +51,10 @@ import { decodeTransferCheckedInstruction } from './transferChecked.js';
 import { TokenInstruction } from './types.js';
 import type { DecodedUiAmountToAmountInstruction } from './uiAmountToAmount.js';
 import { decodeUiAmountToAmountInstruction } from './uiAmountToAmount.js';
+import type { DecodedUnwrapLamportsInstruction } from './unwrapLamports.js';
+import { decodeUnwrapLamportsInstruction } from './unwrapLamports.js';
+import type { DecodedWithdrawExcessLamportsInstruction } from './withdrawExcessLamports.js';
+import { decodeWithdrawExcessLamportsInstruction } from './withdrawExcessLamports.js';
 
 /** Union of all decoded SPL Token instructions supported by this decoder. */
 export type DecodedInstruction =
@@ -74,7 +80,10 @@ export type DecodedInstruction =
     | DecodedInitializeMint2Instruction
     | DecodedAmountToUiAmountInstruction
     | DecodedUiAmountToAmountInstruction
-    | DecodedInitializeMultisig2Instruction;
+    | DecodedInitializeMultisig2Instruction
+    | DecodedWithdrawExcessLamportsInstruction
+    | DecodedUnwrapLamportsInstruction
+    | DecodedBatchInstruction;
 
 /** Decode and validate an SPL Token instruction by dispatching on its instruction type. */
 export function decodeInstruction(
@@ -109,8 +118,12 @@ export function decodeInstruction(
     if (type === TokenInstruction.InitializeMint2) return decodeInitializeMint2Instruction(instruction, programId);
     if (type === TokenInstruction.AmountToUiAmount) return decodeAmountToUiAmountInstruction(instruction, programId);
     if (type === TokenInstruction.UiAmountToAmount) return decodeUiAmountToAmountInstruction(instruction, programId);
+    if (type === TokenInstruction.WithdrawExcessLamports)
+        return decodeWithdrawExcessLamportsInstruction(instruction, programId);
+    if (type === TokenInstruction.UnwrapLamports) return decodeUnwrapLamportsInstruction(instruction, programId);
     if (type === TokenInstruction.InitializeMultisig2)
         return decodeInitializeMultisig2Instruction(instruction, programId);
+    if (type === TokenInstruction.Batch) return decodeBatchInstruction(instruction, programId);
 
     throw new TokenInvalidInstructionTypeError();
 }
@@ -246,4 +259,21 @@ export function isUiAmountToAmountInstruction(
     decoded: DecodedInstruction,
 ): decoded is DecodedUiAmountToAmountInstruction {
     return decoded.data.instruction === TokenInstruction.UiAmountToAmount;
+}
+
+/** Return whether a decoded instruction is a WithdrawExcessLamports instruction. */
+export function isWithdrawExcessLamportsInstruction(
+    decoded: DecodedInstruction,
+): decoded is DecodedWithdrawExcessLamportsInstruction {
+    return decoded.data.instruction === TokenInstruction.WithdrawExcessLamports;
+}
+
+/** Return whether a decoded instruction is an UnwrapLamports instruction. */
+export function isUnwrapLamportsInstruction(decoded: DecodedInstruction): decoded is DecodedUnwrapLamportsInstruction {
+    return decoded.data.instruction === TokenInstruction.UnwrapLamports;
+}
+
+/** Return whether a decoded instruction is a Batch instruction. */
+export function isBatchInstruction(decoded: DecodedInstruction): decoded is DecodedBatchInstruction {
+    return decoded.data.instruction === TokenInstruction.Batch;
 }
