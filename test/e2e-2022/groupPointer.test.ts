@@ -1,6 +1,5 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-
 import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 
 import {
@@ -26,7 +25,7 @@ describe('Group pointer', () => {
     let mintAuthority: Keypair;
     let groupAddress: Address;
 
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -69,7 +68,7 @@ describe('Group pointer', () => {
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
         const groupPointer = getGroupPointerState(mintInfo);
 
-        expect(groupPointer).to.deep.equal({
+        expect(groupPointer).toEqual({
             authority: mintAuthority.publicKey,
             groupAddress,
         });
@@ -91,7 +90,7 @@ describe('Group pointer', () => {
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
         const groupPointer = getGroupPointerState(mintInfo);
 
-        expect(groupPointer).to.deep.equal({
+        expect(groupPointer).toEqual({
             authority: mintAuthority.publicKey,
             groupAddress: newGroupAddress,
         });
@@ -114,7 +113,7 @@ describe('Group pointer', () => {
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
         const groupPointer = getGroupPointerState(mintInfo);
 
-        expect(groupPointer).to.deep.equal({
+        expect(groupPointer).toEqual({
             authority: newAuthority,
             groupAddress,
         });
@@ -136,7 +135,7 @@ describe('Group pointer', () => {
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
         const groupPointer = getGroupPointerState(mintInfo);
 
-        expect(groupPointer).to.deep.equal({
+        expect(groupPointer).toEqual({
             authority: null,
             groupAddress,
         });

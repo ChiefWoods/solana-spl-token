@@ -1,6 +1,5 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-
 import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import {
     AccountState,
@@ -25,7 +24,7 @@ describe('defaultAccountState', () => {
     let mint: Address;
     let mintAuthority: Keypair;
     let freezeAuthority: Keypair;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -60,9 +59,9 @@ describe('defaultAccountState', () => {
     it('defaults to frozen', async () => {
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const defaultAccountState = getDefaultAccountState(mintInfo);
-        expect(defaultAccountState).to.not.equal(null);
+        expect(defaultAccountState).not.toBeNull();
         if (defaultAccountState !== null) {
-            expect(defaultAccountState.state).to.eql(TEST_STATE);
+            expect(defaultAccountState.state).toEqual(TEST_STATE);
         }
         const owner = await Keypair.generate();
         const account = await createAccount(
@@ -75,8 +74,8 @@ describe('defaultAccountState', () => {
             TEST_PROGRAM_ID,
         );
         const accountInfo = await getAccount(connection, account, undefined, TEST_PROGRAM_ID);
-        expect(accountInfo.isFrozen).to.equal(true);
-        expect(accountInfo.isInitialized).to.equal(true);
+        expect(accountInfo.isFrozen).toBe(true);
+        expect(accountInfo.isInitialized).toBe(true);
     });
     it('defaults to initialized after update', async () => {
         await updateDefaultAccountState(
@@ -100,7 +99,7 @@ describe('defaultAccountState', () => {
             TEST_PROGRAM_ID,
         );
         const accountInfo = await getAccount(connection, account, undefined, TEST_PROGRAM_ID);
-        expect(accountInfo.isFrozen).to.equal(false);
-        expect(accountInfo.isInitialized).to.equal(true);
+        expect(accountInfo.isFrozen).toBe(false);
+        expect(accountInfo.isInitialized).toBe(true);
     });
 });

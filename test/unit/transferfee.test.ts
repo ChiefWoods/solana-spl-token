@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import {
     calculateFee,
     calculateEpochFee,
@@ -6,7 +7,6 @@ import {
     decodeInitializeTransferFeeConfigInstruction,
     TOKEN_2022_PROGRAM_ID,
 } from '../../src';
-import { expect } from 'chai';
 import { Keypair, Address } from '@solana/web3.js';
 
 describe('transferFee', () => {
@@ -22,12 +22,12 @@ describe('transferFee', () => {
                 100,
                 100n,
             );
-            expect(instruction.data.length).to.eql(78);
+            expect(instruction.data.length).toEqual(78);
             const decoded = decodeInitializeTransferFeeConfigInstruction(instruction, TOKEN_2022_PROGRAM_ID);
-            expect(decoded.data.transferFeeConfigAuthority).to.eql(transferFeeConfigAuthority);
-            expect(decoded.data.withdrawWithheldAuthority).to.eql(withdrawWithheldAuthority);
-            expect(decoded.data.transferFeeBasisPoints).to.eql(100);
-            expect(decoded.data.maximumFee).to.eql(100n);
+            expect(decoded.data.transferFeeConfigAuthority).toEqual(transferFeeConfigAuthority);
+            expect(decoded.data.withdrawWithheldAuthority).toEqual(withdrawWithheldAuthority);
+            expect(decoded.data.transferFeeBasisPoints).toEqual(100);
+            expect(decoded.data.maximumFee).toEqual(100n);
         });
         it('should encode and decode with no transfer fee config authority', async () => {
             const mint = (await Keypair.generate()).publicKey;
@@ -39,12 +39,12 @@ describe('transferFee', () => {
                 100,
                 100n,
             );
-            expect(instruction.data.length).to.eql(46);
+            expect(instruction.data.length).toEqual(46);
             const decoded = decodeInitializeTransferFeeConfigInstruction(instruction, TOKEN_2022_PROGRAM_ID);
-            expect(decoded.data.transferFeeConfigAuthority).to.eql(null);
-            expect(decoded.data.withdrawWithheldAuthority).to.eql(withdrawWithheldAuthority);
-            expect(decoded.data.transferFeeBasisPoints).to.eql(100);
-            expect(decoded.data.maximumFee).to.eql(100n);
+            expect(decoded.data.transferFeeConfigAuthority).toEqual(null);
+            expect(decoded.data.withdrawWithheldAuthority).toEqual(withdrawWithheldAuthority);
+            expect(decoded.data.transferFeeBasisPoints).toEqual(100);
+            expect(decoded.data.maximumFee).toEqual(100n);
         });
         it('should encode and decode with no withdraw withheld authority', async () => {
             const mint = (await Keypair.generate()).publicKey;
@@ -56,22 +56,22 @@ describe('transferFee', () => {
                 100,
                 100n,
             );
-            expect(instruction.data.length).to.eql(46);
+            expect(instruction.data.length).toEqual(46);
             const decoded = decodeInitializeTransferFeeConfigInstruction(instruction, TOKEN_2022_PROGRAM_ID);
-            expect(decoded.data.transferFeeConfigAuthority).to.eql(transferFeeConfigAuthority);
-            expect(decoded.data.withdrawWithheldAuthority).to.eql(null);
-            expect(decoded.data.transferFeeBasisPoints).to.eql(100);
-            expect(decoded.data.maximumFee).to.eql(100n);
+            expect(decoded.data.transferFeeConfigAuthority).toEqual(transferFeeConfigAuthority);
+            expect(decoded.data.withdrawWithheldAuthority).toEqual(null);
+            expect(decoded.data.transferFeeBasisPoints).toEqual(100);
+            expect(decoded.data.maximumFee).toEqual(100n);
         });
         it('should encode and decode with no authorities', async () => {
             const mint = (await Keypair.generate()).publicKey;
             const instruction = createInitializeTransferFeeConfigInstruction(mint, null, null, 100, 100n);
-            expect(instruction.data.length).to.eql(14);
+            expect(instruction.data.length).toEqual(14);
             const decoded = decodeInitializeTransferFeeConfigInstruction(instruction, TOKEN_2022_PROGRAM_ID);
-            expect(decoded.data.transferFeeConfigAuthority).to.eql(null);
-            expect(decoded.data.withdrawWithheldAuthority).to.eql(null);
-            expect(decoded.data.transferFeeBasisPoints).to.eql(100);
-            expect(decoded.data.maximumFee).to.eql(100n);
+            expect(decoded.data.transferFeeConfigAuthority).toEqual(null);
+            expect(decoded.data.withdrawWithheldAuthority).toEqual(null);
+            expect(decoded.data.transferFeeBasisPoints).toEqual(100);
+            expect(decoded.data.maximumFee).toEqual(100n);
         });
     });
 
@@ -84,7 +84,7 @@ describe('transferFee', () => {
             };
             const preFeeAmount = 100n;
             const fee = calculateFee(transferFee, preFeeAmount);
-            expect(fee).to.eql(0n);
+            expect(fee).toEqual(0n);
         });
 
         it('should return 0 fee when preFeeAmount is 0', () => {
@@ -95,7 +95,7 @@ describe('transferFee', () => {
             };
             const preFeeAmount = 0n;
             const fee = calculateFee(transferFee, preFeeAmount);
-            expect(fee).to.eql(0n);
+            expect(fee).toEqual(0n);
         });
 
         it('should calculate the fee correctly when preFeeAmount is non-zero', () => {
@@ -106,7 +106,7 @@ describe('transferFee', () => {
             };
             const preFeeAmount = 500n;
             const fee = calculateFee(transferFee, preFeeAmount);
-            expect(fee).to.eql(3n);
+            expect(fee).toEqual(3n);
         });
 
         it('fee should be equal to maximum fee', () => {
@@ -117,7 +117,7 @@ describe('transferFee', () => {
             };
             const preFeeAmount = transferFee.maximumFee;
             const fee = calculateFee(transferFee, preFeeAmount * ONE_IN_BASIS_POINTS);
-            expect(fee).to.eql(transferFee.maximumFee);
+            expect(fee).toEqual(transferFee.maximumFee);
         });
         it('fee should be equal to maximum fee when added 1 to preFeeAmount', () => {
             const transferFee = {
@@ -127,7 +127,7 @@ describe('transferFee', () => {
             };
             const preFeeAmount = transferFee.maximumFee;
             const fee = calculateFee(transferFee, preFeeAmount * ONE_IN_BASIS_POINTS + 1n);
-            expect(fee).to.eql(transferFee.maximumFee);
+            expect(fee).toEqual(transferFee.maximumFee);
         });
     });
 
@@ -152,21 +152,21 @@ describe('transferFee', () => {
             const preFeeAmount = 200n;
             const epoch = 1n;
             const fee = calculateEpochFee(transferFeeConfig, epoch, preFeeAmount);
-            expect(fee).to.eql(1n);
+            expect(fee).toEqual(1n);
         });
 
         it('should return newerTransferFee when epoch is greater than or equal to newerTransferFee.epoch', () => {
             const preFeeAmount = 200n;
             const epoch = 2n;
             const fee = calculateEpochFee(transferFeeConfig, epoch, preFeeAmount);
-            expect(fee).to.eql(2n);
+            expect(fee).toEqual(2n);
         });
 
         it('should cap the fee to the maximumFee when calculated fee exceeds maximumFee', () => {
             const preFeeAmount = 500n;
             const epoch = 2n;
             const fee = calculateEpochFee(transferFeeConfig, epoch, preFeeAmount);
-            expect(fee).to.eql(4n);
+            expect(fee).toEqual(4n);
         });
     });
 });

@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
 import { Address } from '@solana/web3.js';
 import { Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
@@ -26,7 +26,7 @@ describe('scaledUiAmount', () => {
     let mint: Address;
     let mintAuthority: Keypair;
     let multiplier: number;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         owner = await Keypair.generate();
@@ -56,10 +56,10 @@ describe('scaledUiAmount', () => {
     it('initialize mint', async () => {
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const scaledUiAmountConfig = getScaledUiAmountConfig(mintInfo);
-        expect(scaledUiAmountConfig).to.not.equal(null);
+        expect(scaledUiAmountConfig).not.toBeNull();
         if (scaledUiAmountConfig !== null) {
-            expect(scaledUiAmountConfig.authority).to.eql(owner.publicKey);
-            expect(scaledUiAmountConfig.multiplier).to.eql(multiplier);
+            expect(scaledUiAmountConfig.authority).toEqual(owner.publicKey);
+            expect(scaledUiAmountConfig.multiplier).toEqual(multiplier);
         }
     });
 
@@ -77,9 +77,9 @@ describe('scaledUiAmount', () => {
         );
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const scaledUiAmountConfig = getScaledUiAmountConfig(mintInfo);
-        expect(scaledUiAmountConfig).to.not.equal(null);
+        expect(scaledUiAmountConfig).not.toBeNull();
         if (scaledUiAmountConfig !== null) {
-            expect(scaledUiAmountConfig.authority).to.eql(Address.default);
+            expect(scaledUiAmountConfig.authority).toEqual(Address.default);
         }
     });
 
@@ -100,11 +100,11 @@ describe('scaledUiAmount', () => {
         );
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const scaledUiAmountConfig = getScaledUiAmountConfig(mintInfo);
-        expect(scaledUiAmountConfig).to.not.equal(null);
+        expect(scaledUiAmountConfig).not.toBeNull();
         if (scaledUiAmountConfig !== null) {
-            expect(scaledUiAmountConfig.multiplier).to.eql(newMultiplier);
-            expect(scaledUiAmountConfig.newMultiplierEffectiveTimestamp).to.eql(effectiveTimestamp);
-            expect(scaledUiAmountConfig.newMultiplier).to.eql(newMultiplier);
+            expect(scaledUiAmountConfig.multiplier).toEqual(newMultiplier);
+            expect(scaledUiAmountConfig.newMultiplierEffectiveTimestamp).toEqual(effectiveTimestamp);
+            expect(scaledUiAmountConfig.newMultiplier).toEqual(newMultiplier);
         }
     });
 });

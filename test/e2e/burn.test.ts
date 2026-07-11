@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Address, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 import { createMint, createAccount, getAccount, mintTo, burn, burnChecked } from '../../src';
@@ -13,7 +13,7 @@ describe('burn', () => {
     let owner: Keypair;
     let account: Address;
     let amount: bigint;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -39,7 +39,7 @@ describe('burn', () => {
         const burnAmount = BigInt(1);
         await burn(connection, payer, account, mint, owner, burnAmount, [], undefined, TEST_PROGRAM_ID);
         const accountInfo = await getAccount(connection, account, undefined, TEST_PROGRAM_ID);
-        expect(accountInfo.amount).to.eql(amount - burnAmount);
+        expect(accountInfo.amount).toEqual(amount - burnAmount);
     });
     it('burnChecked', async () => {
         const burnAmount = BigInt(1);
@@ -56,6 +56,6 @@ describe('burn', () => {
             TEST_PROGRAM_ID,
         );
         const accountInfo = await getAccount(connection, account, undefined, TEST_PROGRAM_ID);
-        expect(accountInfo.amount).to.eql(amount - burnAmount);
+        expect(accountInfo.amount).toEqual(amount - burnAmount);
     });
 });

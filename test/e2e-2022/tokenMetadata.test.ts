@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { getBase64Encoder } from '@solana/codecs-strings';
 import { createEmitInstruction, pack } from '@solana/spl-token-metadata';
 import {
@@ -38,7 +38,7 @@ describe('tokenMetadata', async () => {
     let mintAuthority: Keypair;
     let updateAuthority: Keypair;
 
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -78,7 +78,7 @@ describe('tokenMetadata', async () => {
     });
 
     it('can fetch un-initialized token metadata as null', async () => {
-        expect(await getTokenMetadata(connection, mint.publicKey, undefined, TEST_PROGRAM_ID)).to.deep.equal(null);
+        expect(await getTokenMetadata(connection, mint.publicKey, undefined, TEST_PROGRAM_ID)).toEqual(null);
     });
 
     it('can initialize', async () => {
@@ -117,7 +117,7 @@ describe('tokenMetadata', async () => {
         );
 
         const meta = await getTokenMetadata(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(meta).to.deep.equal({
+        expect(meta).toEqual({
             updateAuthority: updateAuthority.publicKey,
             mint: mint.publicKey,
             name: 'name',
@@ -142,7 +142,7 @@ describe('tokenMetadata', async () => {
             TEST_PROGRAM_ID,
         );
         const meta = await getTokenMetadata(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(meta).to.deep.equal({
+        expect(meta).toEqual({
             updateAuthority: updateAuthority.publicKey,
             mint: mint.publicKey,
             name: 'name',
@@ -178,7 +178,7 @@ describe('tokenMetadata', async () => {
             TEST_PROGRAM_ID,
         );
         const meta = await getTokenMetadata(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(meta).to.deep.equal({
+        expect(meta).toEqual({
             updateAuthority: updateAuthority.publicKey,
             mint: mint.publicKey,
             name: 'TEST',
@@ -214,7 +214,7 @@ describe('tokenMetadata', async () => {
             TEST_PROGRAM_ID,
         );
         const meta = await getTokenMetadata(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(meta).to.deep.equal({
+        expect(meta).toEqual({
             updateAuthority: updateAuthority.publicKey,
             mint: mint.publicKey,
             name: 'My Shiny New Token Metadata',
@@ -250,7 +250,7 @@ describe('tokenMetadata', async () => {
             TEST_PROGRAM_ID,
         );
         const meta = await getTokenMetadata(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(meta).to.deep.equal({
+        expect(meta).toEqual({
             updateAuthority: updateAuthority.publicKey,
             mint: mint.publicKey,
             name: 'name',
@@ -297,7 +297,7 @@ describe('tokenMetadata', async () => {
             TEST_PROGRAM_ID,
         );
         const meta = await getTokenMetadata(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(meta).to.deep.equal({
+        expect(meta).toEqual({
             updateAuthority: updateAuthority.publicKey,
             mint: mint.publicKey,
             name: 'name',
@@ -344,7 +344,7 @@ describe('tokenMetadata', async () => {
             TEST_PROGRAM_ID,
         );
         const meta = await getTokenMetadata(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(meta).to.deep.equal({
+        expect(meta).toEqual({
             updateAuthority: updateAuthority.publicKey,
             mint: mint.publicKey,
             name: 'name',
@@ -391,7 +391,7 @@ describe('tokenMetadata', async () => {
             TEST_PROGRAM_ID,
         );
         const meta = await getTokenMetadata(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(meta).to.deep.equal({
+        expect(meta).toEqual({
             updateAuthority: updateAuthority.publicKey,
             mint: mint.publicKey,
             name: 'name',
@@ -427,7 +427,7 @@ describe('tokenMetadata', async () => {
             TEST_PROGRAM_ID,
         );
         const meta = await getTokenMetadata(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(meta).to.deep.equal({
+        expect(meta).toEqual({
             updateAuthority: updateAuthority.publicKey,
             mint: mint.publicKey,
             name: 'name',
@@ -463,7 +463,7 @@ describe('tokenMetadata', async () => {
             TEST_PROGRAM_ID,
         );
         const meta = await getTokenMetadata(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(meta).to.deep.equal({
+        expect(meta).toEqual({
             updateAuthority: newAuthority,
             mint: mint.publicKey,
             name: 'name',
@@ -520,6 +520,6 @@ describe('tokenMetadata', async () => {
             .then(res => res.value.returnData?.data[0])) as string;
         const returnData = getBase64Encoder().encode(returnDataBase64);
 
-        expect(returnData).to.deep.equal(tokenMetadata.updateAuthority.toBytes());
+        expect(returnData).toEqual(tokenMetadata.updateAuthority.toBytes());
     });
 });

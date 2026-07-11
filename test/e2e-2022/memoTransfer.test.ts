@@ -1,9 +1,5 @@
-import { expect, use } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
-use(chaiAsPromised);
-
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-
 import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import { createMemoInstruction } from '@solana/spl-memo';
 import {
@@ -34,7 +30,7 @@ describe('memoTransfer', () => {
     let mintAuthority: Keypair;
     let source: Address;
     let destination: Address;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -96,21 +92,21 @@ describe('memoTransfer', () => {
     it('fails without memo when enabled', async () => {
         const accountInfo = await getAccount(connection, destination, undefined, TEST_PROGRAM_ID);
         const memoTransfer = getMemoTransfer(accountInfo);
-        expect(memoTransfer).to.not.equal(null);
+        expect(memoTransfer).not.toBeNull();
         if (memoTransfer !== null) {
-            expect(memoTransfer.requireIncomingTransferMemos).to.equal(true);
+            expect(memoTransfer.requireIncomingTransferMemos).toBe(true);
         }
-        expect(
+        await expect(
             transfer(connection, payer, source, destination, owner, TRANSFER_AMOUNT, [], undefined, TEST_PROGRAM_ID),
-        ).to.be.rejectedWith(Error);
+        ).rejects.toThrow(Error);
     });
     it('works without memo when disabled', async () => {
         await disableRequiredMemoTransfers(connection, payer, destination, owner, [], undefined, TEST_PROGRAM_ID);
         await transfer(connection, payer, source, destination, owner, TRANSFER_AMOUNT, [], undefined, TEST_PROGRAM_ID);
         await enableRequiredMemoTransfers(connection, payer, destination, owner, [], undefined, TEST_PROGRAM_ID);
-        expect(
+        await expect(
             transfer(connection, payer, source, destination, owner, TRANSFER_AMOUNT, [], undefined, TEST_PROGRAM_ID),
-        ).to.be.rejectedWith(Error);
+        ).rejects.toThrow(Error);
     });
     it('works with memo when enabled', async () => {
         const transaction = new Transaction().add(

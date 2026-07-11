@@ -1,6 +1,5 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-
 import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 
 import {
@@ -26,7 +25,7 @@ describe('GroupMember pointer', () => {
     let mintAuthority: Keypair;
     let memberAddress: Address;
 
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -69,7 +68,7 @@ describe('GroupMember pointer', () => {
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
         const groupMemberPointer = getGroupMemberPointerState(mintInfo);
 
-        expect(groupMemberPointer).to.deep.equal({
+        expect(groupMemberPointer).toEqual({
             authority: mintAuthority.publicKey,
             memberAddress,
         });
@@ -91,7 +90,7 @@ describe('GroupMember pointer', () => {
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
         const groupMemberPointer = getGroupMemberPointerState(mintInfo);
 
-        expect(groupMemberPointer).to.deep.equal({
+        expect(groupMemberPointer).toEqual({
             authority: mintAuthority.publicKey,
             memberAddress: newGroupMemberAddress,
         });
@@ -114,7 +113,7 @@ describe('GroupMember pointer', () => {
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
         const groupMemberPointer = getGroupMemberPointerState(mintInfo);
 
-        expect(groupMemberPointer).to.deep.equal({
+        expect(groupMemberPointer).toEqual({
             authority: newAuthority,
             memberAddress,
         });
@@ -136,7 +135,7 @@ describe('GroupMember pointer', () => {
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
         const groupMemberPointer = getGroupMemberPointerState(mintInfo);
 
-        expect(groupMemberPointer).to.deep.equal({
+        expect(groupMemberPointer).toEqual({
             authority: null,
             memberAddress,
         });

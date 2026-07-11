@@ -1,7 +1,6 @@
+import { beforeAll, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-
 import { Address, Keypair, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
-import { expect } from 'chai';
 
 import {
     ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -25,7 +24,7 @@ describe('recoverNested', () => {
     let nestedMint: Address;
     const nestedMintAmount = 1;
     let nestedAssociatedToken: Address;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 10000000000);
         owner = await Keypair.generate();
@@ -112,12 +111,12 @@ describe('recoverNested', () => {
 
         await recoverNested(connection, payer, owner, mint, nestedMint, undefined, TEST_PROGRAM_ID);
 
-        expect(await connection.getAccountInfo(nestedAssociatedToken)).to.equal(null);
+        expect(await connection.getAccountInfo(nestedAssociatedToken)).toBeNull();
 
         const accountInfo = await getAccount(connection, destinationAssociatedToken, undefined, TEST_PROGRAM_ID);
-        expect(accountInfo).to.not.equal(null);
-        expect(accountInfo.mint).to.eql(nestedMint);
-        expect(accountInfo.owner).to.eql(new Address(owner.address));
-        expect(accountInfo.amount).to.eql(BigInt(nestedMintAmount));
+        expect(accountInfo).not.toBeNull();
+        expect(accountInfo.mint).toEqual(nestedMint);
+        expect(accountInfo.owner).toEqual(new Address(owner.address));
+        expect(accountInfo.amount).toEqual(BigInt(nestedMintAmount));
     });
 });

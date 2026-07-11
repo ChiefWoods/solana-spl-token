@@ -1,5 +1,5 @@
+import { describe, expect, it } from 'vitest';
 import { Address } from '@solana/web3.js';
-import { expect } from 'chai';
 
 import type { TokenMetadata } from '@solana/spl-token-metadata';
 import { Field } from '@solana/spl-token-metadata';
@@ -19,10 +19,10 @@ describe('SPL Token 2022 Metadata Extension', () => {
                 ],
             } as TokenMetadata);
 
-            expect(() => updateTokenMetadata(input, 'mint', 'string')).to.throw(
+            expect(() => updateTokenMetadata(input, 'mint', 'string')).toThrow(
                 'Cannot update mint via this instruction',
             );
-            expect(() => updateTokenMetadata(input, 'updateAuthority', 'string')).to.throw(
+            expect(() => updateTokenMetadata(input, 'updateAuthority', 'string')).toThrow(
                 'Cannot update updateAuthority via this instruction',
             );
         });
@@ -49,9 +49,9 @@ describe('SPL Token 2022 Metadata Extension', () => {
                 ],
             };
 
-            expect(updateTokenMetadata(input, 'name', 'updated_name')).to.deep.equal(expected);
-            expect(updateTokenMetadata(input, 'Name', 'updated_name')).to.deep.equal(expected);
-            expect(updateTokenMetadata(input, Field.Name, 'updated_name')).to.deep.equal(expected);
+            expect(updateTokenMetadata(input, 'name', 'updated_name')).toEqual(expected);
+            expect(updateTokenMetadata(input, 'Name', 'updated_name')).toEqual(expected);
+            expect(updateTokenMetadata(input, Field.Name, 'updated_name')).toEqual(expected);
         });
 
         it('can update symbol', async () => {
@@ -77,9 +77,9 @@ describe('SPL Token 2022 Metadata Extension', () => {
                 ],
             };
 
-            expect(updateTokenMetadata(input, 'symbol', 'updated_symbol')).to.deep.equal(expected);
-            expect(updateTokenMetadata(input, 'Symbol', 'updated_symbol')).to.deep.equal(expected);
-            expect(updateTokenMetadata(input, Field.Symbol, 'updated_symbol')).to.deep.equal(expected);
+            expect(updateTokenMetadata(input, 'symbol', 'updated_symbol')).toEqual(expected);
+            expect(updateTokenMetadata(input, 'Symbol', 'updated_symbol')).toEqual(expected);
+            expect(updateTokenMetadata(input, Field.Symbol, 'updated_symbol')).toEqual(expected);
         });
 
         it('can update uri', async () => {
@@ -105,9 +105,9 @@ describe('SPL Token 2022 Metadata Extension', () => {
                 ],
             };
 
-            expect(updateTokenMetadata(input, 'uri', 'updated_uri')).to.deep.equal(expected);
-            expect(updateTokenMetadata(input, 'Uri', 'updated_uri')).to.deep.equal(expected);
-            expect(updateTokenMetadata(input, Field.Uri, 'updated_uri')).to.deep.equal(expected);
+            expect(updateTokenMetadata(input, 'uri', 'updated_uri')).toEqual(expected);
+            expect(updateTokenMetadata(input, 'Uri', 'updated_uri')).toEqual(expected);
+            expect(updateTokenMetadata(input, Field.Uri, 'updated_uri')).toEqual(expected);
         });
 
         it('can update additional Metadata', async () => {
@@ -133,7 +133,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
                 ],
             };
 
-            expect(updateTokenMetadata(input, 'key1', 'update1')).to.deep.equal(expected);
+            expect(updateTokenMetadata(input, 'key1', 'update1')).toEqual(expected);
         });
 
         it('can add additional Metadata', async () => {
@@ -160,7 +160,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
                 ],
             };
 
-            expect(updateTokenMetadata(input, 'key3', 'value3')).to.deep.equal(expected);
+            expect(updateTokenMetadata(input, 'key3', 'value3')).toEqual(expected);
         });
 
         it('can update `additionalMetadata` key to additional metadata', async () => {
@@ -188,7 +188,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
                 ],
             };
 
-            expect(updateTokenMetadata(input, 'additionalMetadata', 'update3')).to.deep.equal(expected);
+            expect(updateTokenMetadata(input, 'additionalMetadata', 'update3')).toEqual(expected);
         });
 
         it('can add `additionalMetadata` key to additional metadata', async () => {
@@ -215,7 +215,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
                 ],
             };
 
-            expect(updateTokenMetadata(input, 'additionalMetadata', 'value3')).to.deep.equal(expected);
+            expect(updateTokenMetadata(input, 'additionalMetadata', 'value3')).toEqual(expected);
         });
     });
 });

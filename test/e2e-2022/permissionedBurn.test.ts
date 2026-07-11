@@ -1,9 +1,5 @@
-import { expect, use } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
-use(chaiAsPromised);
-
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-
 import { Address, Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import {
     ExtensionType,
@@ -28,7 +24,7 @@ describe('permissioned burn', () => {
     let mint: Address;
     let mintAuthority: Keypair;
     let permissionedAuthority: Keypair;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1_000_000_000);
         mintAuthority = await Keypair.generate();
@@ -58,9 +54,9 @@ describe('permissioned burn', () => {
     it('initializes config', async () => {
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const permissionedConfig = getPermissionedBurn(mintInfo);
-        expect(permissionedConfig).to.not.equal(null);
+        expect(permissionedConfig).not.toBeNull();
         if (permissionedConfig !== null) {
-            expect(permissionedConfig.authority).to.eql(permissionedAuthority.publicKey);
+            expect(permissionedConfig.authority).toEqual(permissionedAuthority.publicKey);
         }
     });
 
@@ -77,9 +73,9 @@ describe('permissioned burn', () => {
         );
         await mintTo(connection, payer, mint, account, mintAuthority, 2, [], undefined, TEST_PROGRAM_ID);
 
-        await expect(
-            burn(connection, payer, account, mint, owner, 1, [], undefined, TEST_PROGRAM_ID),
-        ).to.be.rejectedWith(Error);
+        await expect(burn(connection, payer, account, mint, owner, 1, [], undefined, TEST_PROGRAM_ID)).rejects.toThrow(
+            Error,
+        );
 
         const wrongPermissioned = await Keypair.generate();
         const badBurnTx = new Transaction().add(
@@ -96,7 +92,7 @@ describe('permissioned burn', () => {
         );
         await expect(
             sendAndConfirmTransaction(connection, badBurnTx, [payer, owner, wrongPermissioned]),
-        ).to.be.rejectedWith(Error);
+        ).rejects.toThrow(Error);
 
         const burnTx = new Transaction().add(
             createPermissionedBurnCheckedInstruction(
@@ -113,8 +109,8 @@ describe('permissioned burn', () => {
         await sendAndConfirmTransaction(connection, burnTx, [payer, owner, permissionedAuthority]);
 
         const accountInfo = await connection.getTokenAccountBalance(account);
-        expect(accountInfo.value.uiAmount).to.eql(1);
+        expect(accountInfo.value.uiAmount).toEqual(1);
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
-        expect(mintInfo.supply).to.eql(BigInt(1));
+        expect(mintInfo.supply).toEqual(BigInt(1));
     });
 });

@@ -1,6 +1,5 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-
 import { Address, Keypair, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 
 import { ExtensionType, createAccount, createMint, createReallocateInstruction, getAccountLen } from '../../src';
@@ -14,7 +13,7 @@ describe('reallocate', () => {
     let owner: Keypair;
     let account: Address;
     let mint: Address;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
     });
@@ -47,10 +46,10 @@ describe('reallocate', () => {
         );
         await sendAndConfirmTransaction(connection, transaction, [payer, owner], undefined);
         const info = await connection.getAccountInfo(account);
-        expect(info).to.not.equal(null);
+        expect(info).not.toBeNull();
         if (info !== null) {
             const expectedAccountLen = getAccountLen(EXTENSIONS);
-            expect(info.data.length).to.eql(expectedAccountLen);
+            expect(info.data.length).toEqual(expectedAccountLen);
         }
     });
 });

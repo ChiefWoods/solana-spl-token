@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection } from '@solana/web3.js';
 import { Address } from '@solana/web3.js';
 import {
@@ -156,7 +156,7 @@ describe('amountToUiAmountForMintWithoutSimulation', () => {
                 mint,
                 amount,
             );
-            expect(result).to.equal(expected);
+            expect(result).toBe(expected);
         }
     });
 
@@ -181,7 +181,7 @@ describe('amountToUiAmountForMintWithoutSimulation', () => {
                 mint,
                 amount,
             );
-            expect(result).to.equal(expected);
+            expect(result).toBe(expected);
         }
     });
 
@@ -197,7 +197,7 @@ describe('amountToUiAmountForMintWithoutSimulation', () => {
             mint,
             BigInt(10000000000),
         );
-        expect(result).to.equal('0.9512294245');
+        expect(result).toBe('0.9512294245');
     });
 
     it('should return the correct UiAmount for netting out rates', async () => {
@@ -213,7 +213,7 @@ describe('amountToUiAmountForMintWithoutSimulation', () => {
             mint,
             BigInt(10000000000),
         );
-        expect(result).to.equal('1');
+        expect(result).toBe('1');
     });
 
     it('should handle huge values correctly', async () => {
@@ -229,7 +229,7 @@ describe('amountToUiAmountForMintWithoutSimulation', () => {
             mint,
             BigInt('18446744073709551615'),
         );
-        expect(result).to.equal('20386805083448.098');
+        expect(result).toBe('20386805083448.098');
     });
 });
 
@@ -256,7 +256,7 @@ describe('amountToUiAmountForMintWithoutSimulation', () => {
             mint,
             '1.0512710963760241',
         );
-        expect(result).to.equal(1n);
+        expect(result).toBe(1n);
     });
 
     it('should handle decimal places correctly', async () => {
@@ -278,7 +278,7 @@ describe('amountToUiAmountForMintWithoutSimulation', () => {
                 mint,
                 uiAmount,
             );
-            expect(result).to.equal(expected);
+            expect(result).toBe(expected);
         }
     });
 
@@ -294,7 +294,7 @@ describe('amountToUiAmountForMintWithoutSimulation', () => {
             mint,
             '0.951229424500714',
         );
-        expect(result).to.equal(9999999999n); // calculation truncates to avoid floating point precision issues in transfers
+        expect(result).toBe(9999999999n); // calculation truncates to avoid floating point precision issues in transfers
     });
 
     it('should return the correct amount for netting out rates', async () => {
@@ -306,7 +306,7 @@ describe('amountToUiAmountForMintWithoutSimulation', () => {
         });
 
         const result = await uiAmountToAmountForMintWithoutSimulation(connection as unknown as Connection, mint, '1');
-        expect(result).to.equal(10000000000n);
+        expect(result).toBe(10000000000n);
     });
 
     it('should handle huge values correctly', async () => {
@@ -322,6 +322,6 @@ describe('amountToUiAmountForMintWithoutSimulation', () => {
             mint,
             '20386805083448100000',
         );
-        expect(result).to.equal(18446744073709551616n);
+        expect(result).toBe(18446744073709551616n);
     });
 });

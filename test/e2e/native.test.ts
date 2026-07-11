@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
 import { Address, Keypair, Transaction, SystemProgram, sendAndConfirmTransaction } from '@solana/web3.js';
 import {
@@ -20,7 +20,7 @@ describe('native', () => {
     let account: Address;
     let amount: number;
     let nativeMint: Address;
-    before(async () => {
+    beforeAll(async () => {
         amount = 1_000_000_000;
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 100_000_000_000);
@@ -46,13 +46,13 @@ describe('native', () => {
     });
     it('works', async () => {
         const accountInfo = await getAccount(connection, account, undefined, TEST_PROGRAM_ID);
-        expect(accountInfo.isNative).to.equal(true);
-        expect(accountInfo.amount).to.eql(BigInt(amount));
+        expect(accountInfo.isNative).toBe(true);
+        expect(accountInfo.amount).toEqual(BigInt(amount));
     });
     it('syncNative', async () => {
         let balance = 0n;
         const preInfo = await connection.getAccountInfo(account);
-        expect(preInfo).to.not.equal(null);
+        expect(preInfo).not.toBeNull();
         if (preInfo != null) {
             balance = preInfo.lamports;
         }
@@ -73,37 +73,37 @@ describe('native', () => {
 
         // no change in the amount
         const preAccountInfo = await getAccount(connection, account, undefined, TEST_PROGRAM_ID);
-        expect(preAccountInfo.isNative).to.equal(true);
-        expect(preAccountInfo.amount).to.eql(BigInt(amount));
+        expect(preAccountInfo.isNative).toBe(true);
+        expect(preAccountInfo.amount).toEqual(BigInt(amount));
 
         // but change in lamports
         const postInfo = await connection.getAccountInfo(account);
-        expect(postInfo).to.not.equal(null);
+        expect(postInfo).not.toBeNull();
         if (postInfo !== null) {
-            expect(postInfo.lamports).to.eql(balance + additionalLamports);
+            expect(postInfo.lamports).toEqual(balance + BigInt(additionalLamports));
         }
 
         // sync, amount changes
         await syncNative(connection, payer, account, undefined, TEST_PROGRAM_ID);
         const postAccountInfo = await getAccount(connection, account, undefined, TEST_PROGRAM_ID);
-        expect(postAccountInfo.isNative).to.equal(true);
-        expect(postAccountInfo.amount).to.eql(BigInt(amount) + additionalLamports);
+        expect(postAccountInfo.isNative).toBe(true);
+        expect(postAccountInfo.amount).toEqual(BigInt(amount) + additionalLamports);
     });
     it('closeAccount', async () => {
         let balance = 0n;
         const preInfo = await connection.getAccountInfo(account);
-        expect(preInfo).to.not.equal(null);
+        expect(preInfo).not.toBeNull();
         if (preInfo != null) {
             balance = preInfo.lamports;
         }
         const destination = (await Keypair.generate()).publicKey;
         await closeAccount(connection, payer, account, destination, owner, [], undefined, TEST_PROGRAM_ID);
         const nullInfo = await connection.getAccountInfo(account);
-        expect(nullInfo).to.equal(null);
+        expect(nullInfo).toBeNull();
         const destinationInfo = await connection.getAccountInfo(destination);
-        expect(destinationInfo).to.not.equal(null);
+        expect(destinationInfo).not.toBeNull();
         if (destinationInfo != null) {
-            expect(destinationInfo.lamports).to.eql(balance);
+            expect(destinationInfo.lamports).toEqual(balance);
         }
     });
 });

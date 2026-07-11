@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { beforeAll, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
 import { Address } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
@@ -31,7 +31,7 @@ describe('tokenGroupMember', async () => {
     let memberMintAuthority: Keypair;
     let memberUpdateAuthority: Keypair;
 
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
 
@@ -140,6 +140,6 @@ describe('tokenGroupMember', async () => {
 
         const mintInfo = await getMint(connection, memberMint.publicKey, undefined, TEST_PROGRAM_ID);
         const member = getTokenGroupMemberState(mintInfo);
-        expect(member).to.deep.equal(tokenGroupMember);
+        expect(member).toEqual(tokenGroupMember);
     });
 });

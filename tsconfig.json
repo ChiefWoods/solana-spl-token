@@ -4,6 +4,6 @@
     "compilerOptions": {
         "noEmit": true,
         "skipLibCheck": true,
-        "types": ["node", "mocha"]
+        "types": ["node", "vitest"]
     }
 }

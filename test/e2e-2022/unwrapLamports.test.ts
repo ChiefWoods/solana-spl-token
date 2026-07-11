@@ -1,3 +1,4 @@
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Address, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 
@@ -12,10 +13,7 @@ import {
 } from '../../src';
 
 import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
-import { expect, use } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
 import { unwrapLamports } from '../../src/actions/unwrapLamports';
-use(chaiAsPromised);
 
 describe('unwrapLamports', () => {
     let connection: Connection;
@@ -24,7 +22,7 @@ describe('unwrapLamports', () => {
     let account1: Address;
     let account2: Address;
     let balance: number;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1500000000);
 
@@ -65,7 +63,7 @@ describe('unwrapLamports', () => {
         );
 
         const destLamports = await connection.getBalance(account2);
-        expect(BigInt(destLamports)).to.eql(BigInt(amount));
+        expect(BigInt(destLamports)).toEqual(BigInt(amount));
 
         balance = balance - amount;
 
@@ -74,11 +72,11 @@ describe('unwrapLamports', () => {
 
         const sourceAccountInfo = await getAccount(connection, account1, undefined, TEST_PROGRAM_ID);
         const sourceLamports = await connection.getBalance(account1);
-        expect(sourceAccountInfo.amount).to.eql(BigInt(balance));
-        expect(sourceLamports).to.eql(BigInt(wrappedAccountLamports) + BigInt(balance));
+        expect(sourceAccountInfo.amount).toEqual(BigInt(balance));
+        expect(sourceLamports).toEqual(BigInt(wrappedAccountLamports) + BigInt(balance));
 
         amount = balance + 1;
-        expect(
+        await expect(
             unwrapLamports(
                 connection,
                 payer,
@@ -90,7 +88,7 @@ describe('unwrapLamports', () => {
                 undefined,
                 TEST_PROGRAM_ID,
             ),
-        ).to.be.rejectedWith(Error);
+        ).rejects.toThrow(Error);
     });
     it('unwrapLamports with None', async () => {
         const amount = null;
@@ -100,11 +98,11 @@ describe('unwrapLamports', () => {
         const wrappedAccountLamports = await connection.getMinimumBalanceForRentExemption(wrappedAccountSpace);
 
         const destLamports = await connection.getBalance(account2);
-        expect(destLamports).to.eql(BigInt(balance));
+        expect(destLamports).toEqual(BigInt(balance));
 
         const sourceAccountInfo = await getAccount(connection, account1, undefined, TEST_PROGRAM_ID);
         const sourceLamports = await connection.getBalance(account1);
-        expect(sourceAccountInfo.amount).to.eql(0n);
-        expect(sourceLamports).to.eql(wrappedAccountLamports);
+        expect(sourceAccountInfo.amount).toEqual(0n);
+        expect(sourceLamports).toEqual(wrappedAccountLamports);
     });
 });

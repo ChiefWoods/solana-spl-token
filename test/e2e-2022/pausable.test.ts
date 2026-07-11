@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
 import { Address } from '@solana/web3.js';
 import { Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
@@ -29,7 +29,7 @@ describe('pausable', () => {
     let owner: Keypair;
     let mint: Address;
     let mintAuthority: Keypair;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         owner = await Keypair.generate();
@@ -59,17 +59,17 @@ describe('pausable', () => {
         await pause(connection, payer, mint, owner, [], undefined, TEST_PROGRAM_ID);
         let mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         let pausableConfig = getPausableConfig(mintInfo);
-        expect(pausableConfig).to.not.equal(null);
+        expect(pausableConfig).not.toBeNull();
         if (pausableConfig !== null) {
-            expect(pausableConfig.paused).to.eql(true);
+            expect(pausableConfig.paused).toEqual(true);
         }
 
         await resume(connection, payer, mint, owner, [], undefined, TEST_PROGRAM_ID);
         mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         pausableConfig = getPausableConfig(mintInfo);
-        expect(pausableConfig).to.not.equal(null);
+        expect(pausableConfig).not.toBeNull();
         if (pausableConfig !== null) {
-            expect(pausableConfig.paused).to.eql(false);
+            expect(pausableConfig.paused).toEqual(false);
         }
     });
 
@@ -87,7 +87,7 @@ describe('pausable', () => {
 
         const accountInfo = await getAccount(connection, pausableAccount, undefined, TEST_PROGRAM_ID);
         const pausableAccountExtension = getPausableAccount(accountInfo);
-        expect(pausableAccountExtension).to.not.equal(null);
+        expect(pausableAccountExtension).not.toBeNull();
     });
 
     it('update authority', async () => {
@@ -104,9 +104,9 @@ describe('pausable', () => {
         );
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const pausableConfig = getPausableConfig(mintInfo);
-        expect(pausableConfig).to.not.equal(null);
+        expect(pausableConfig).not.toBeNull();
         if (pausableConfig !== null) {
-            expect(pausableConfig.authority).to.eql(Address.default);
+            expect(pausableConfig.authority).toEqual(Address.default);
         }
     });
 });

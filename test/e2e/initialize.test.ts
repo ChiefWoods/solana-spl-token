@@ -1,6 +1,6 @@
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
 import { Address, Transaction, SystemProgram, Keypair, sendAndConfirmTransaction } from '@solana/web3.js';
-import { expect } from 'chai';
 import {
     getMinimumBalanceForRentExemptMint,
     MINT_SIZE,
@@ -44,11 +44,11 @@ describe('initialize mint', () => {
         );
         await sendAndConfirmTransaction(connection, transaction, [payer, mintKeypair]);
         const mintInfo = await getMint(connection, mintKeypair.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(mintInfo.mintAuthority).to.eql(mintAuthority);
-        expect(mintInfo.supply).to.eql(BigInt(0));
-        expect(mintInfo.decimals).to.eql(TEST_TOKEN_DECIMALS);
-        expect(mintInfo.isInitialized).to.equal(true);
-        expect(mintInfo.freezeAuthority).to.eql(freezeAuthority);
+        expect(mintInfo.mintAuthority).toEqual(mintAuthority);
+        expect(mintInfo.supply).toEqual(BigInt(0));
+        expect(mintInfo.decimals).toEqual(TEST_TOKEN_DECIMALS);
+        expect(mintInfo.isInitialized).toBe(true);
+        expect(mintInfo.freezeAuthority).toEqual(freezeAuthority);
     });
     it('works with null freeze authority', async () => {
         const mintAuthority = (await Keypair.generate()).publicKey;
@@ -70,11 +70,11 @@ describe('initialize mint', () => {
         );
         await sendAndConfirmTransaction(connection, transaction, [payer, mintKeypair]);
         const mintInfo = await getMint(connection, mintKeypair.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(mintInfo.mintAuthority).to.eql(mintAuthority);
-        expect(mintInfo.supply).to.eql(BigInt(0));
-        expect(mintInfo.decimals).to.eql(TEST_TOKEN_DECIMALS);
-        expect(mintInfo.isInitialized).to.equal(true);
-        expect(mintInfo.freezeAuthority).to.equal(null);
+        expect(mintInfo.mintAuthority).toEqual(mintAuthority);
+        expect(mintInfo.supply).toEqual(BigInt(0));
+        expect(mintInfo.decimals).toEqual(TEST_TOKEN_DECIMALS);
+        expect(mintInfo.isInitialized).toBe(true);
+        expect(mintInfo.freezeAuthority).toBeNull();
     });
 });
 describe('initialize mint 2', () => {
@@ -109,11 +109,11 @@ describe('initialize mint 2', () => {
         );
         await sendAndConfirmTransaction(connection, transaction, [payer, mintKeypair]);
         const mintInfo = await getMint(connection, mintKeypair.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(mintInfo.mintAuthority).to.eql(mintAuthority);
-        expect(mintInfo.supply).to.eql(BigInt(0));
-        expect(mintInfo.decimals).to.eql(TEST_TOKEN_DECIMALS);
-        expect(mintInfo.isInitialized).to.equal(true);
-        expect(mintInfo.freezeAuthority).to.eql(freezeAuthority);
+        expect(mintInfo.mintAuthority).toEqual(mintAuthority);
+        expect(mintInfo.supply).toEqual(BigInt(0));
+        expect(mintInfo.decimals).toEqual(TEST_TOKEN_DECIMALS);
+        expect(mintInfo.isInitialized).toBe(true);
+        expect(mintInfo.freezeAuthority).toEqual(freezeAuthority);
     });
     it('works with null freeze authority', async () => {
         const mintAuthority = (await Keypair.generate()).publicKey;
@@ -135,10 +135,10 @@ describe('initialize mint 2', () => {
         );
         await sendAndConfirmTransaction(connection, transaction, [payer, mintKeypair]);
         const mintInfo = await getMint(connection, mintKeypair.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(mintInfo.mintAuthority).to.eql(mintAuthority);
-        expect(mintInfo.supply).to.eql(BigInt(0));
-        expect(mintInfo.decimals).to.eql(TEST_TOKEN_DECIMALS);
-        expect(mintInfo.isInitialized).to.equal(true);
-        expect(mintInfo.freezeAuthority).to.equal(null);
+        expect(mintInfo.mintAuthority).toEqual(mintAuthority);
+        expect(mintInfo.supply).toEqual(BigInt(0));
+        expect(mintInfo.decimals).toEqual(TEST_TOKEN_DECIMALS);
+        expect(mintInfo.isInitialized).toBe(true);
+        expect(mintInfo.freezeAuthority).toBeNull();
     });
 });

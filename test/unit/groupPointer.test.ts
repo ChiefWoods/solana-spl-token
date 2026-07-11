@@ -1,5 +1,5 @@
+import { describe, expect, it } from 'vitest';
 import { Address, Keypair, TransactionInstruction } from '@solana/web3.js';
-import { expect } from 'chai';
 import type { Mint } from '../../src';
 import {
     TOKEN_2022_PROGRAM_ID,
@@ -23,7 +23,7 @@ describe('SPL Token 2022 GroupPointer Extension', () => {
             groupAddress,
             TOKEN_2022_PROGRAM_ID,
         );
-        expect(instruction).to.deep.equal(
+        expect(instruction).toEqual(
             new TransactionInstruction({
                 programId: TOKEN_2022_PROGRAM_ID,
                 keys: [{ isSigner: false, isWritable: true, pubkey: mint }],
@@ -43,7 +43,7 @@ describe('SPL Token 2022 GroupPointer Extension', () => {
         const authority = (await Keypair.generate()).publicKey;
         const groupAddress = new Address(GROUP_ADDRESS_BYTES);
         const instruction = createUpdateGroupPointerInstruction(mint, authority, groupAddress);
-        expect(instruction).to.deep.equal(
+        expect(instruction).toEqual(
             new TransactionInstruction({
                 programId: TOKEN_2022_PROGRAM_ID,
                 keys: [
@@ -65,7 +65,7 @@ describe('SPL Token 2022 GroupPointer Extension', () => {
         const authority = (await Keypair.generate()).publicKey;
         const groupAddress = null;
         const instruction = createUpdateGroupPointerInstruction(mint, authority, groupAddress);
-        expect(instruction).to.deep.equal(
+        expect(instruction).toEqual(
             new TransactionInstruction({
                 programId: TOKEN_2022_PROGRAM_ID,
                 keys: [
@@ -96,7 +96,7 @@ describe('SPL Token 2022 GroupPointer Extension', () => {
             ]),
         } as Mint;
         const groupPointer = getGroupPointerState(mintInfo);
-        expect(groupPointer).to.deep.equal({
+        expect(groupPointer).toEqual({
             authority: new Address(AUTHORITY_ADDRESS_BYTES),
             groupAddress: new Address(GROUP_ADDRESS_BYTES),
         });
@@ -115,7 +115,7 @@ describe('SPL Token 2022 GroupPointer Extension', () => {
             ]),
         } as Mint;
         const groupPointer = getGroupPointerState(mintInfo);
-        expect(groupPointer).to.deep.equal({
+        expect(groupPointer).toEqual({
             authority: null,
             groupAddress: new Address(GROUP_ADDRESS_BYTES),
         });
@@ -134,7 +134,7 @@ describe('SPL Token 2022 GroupPointer Extension', () => {
             ]),
         } as Mint;
         const groupPointer = getGroupPointerState(mintInfo);
-        expect(groupPointer).to.deep.equal({
+        expect(groupPointer).toEqual({
             authority: new Address(AUTHORITY_ADDRESS_BYTES),
             groupAddress: null,
         });

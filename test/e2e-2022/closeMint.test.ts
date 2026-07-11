@@ -1,7 +1,4 @@
-import { expect, use } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
-use(chaiAsPromised);
-
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
 import { Address } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
@@ -30,7 +27,7 @@ describe('closeMint', () => {
     let closeAuthority: Keypair;
     let account: Address;
     let destination: Address;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -62,15 +59,15 @@ describe('closeMint', () => {
         account = await createAccount(connection, payer, mint, owner.publicKey, undefined, undefined, TEST_PROGRAM_ID);
         const amount = BigInt(1000);
         await mintTo(connection, payer, mint, account, mintAuthority, amount, [], undefined, TEST_PROGRAM_ID);
-        expect(
+        await expect(
             closeAccount(connection, payer, mint, destination, closeAuthority, [], undefined, TEST_PROGRAM_ID),
-        ).to.be.rejectedWith(Error);
+        ).rejects.toThrow(Error);
     });
     it('works', async () => {
         destination = (await Keypair.generate()).publicKey;
         const accountInfo = await connection.getAccountInfo(mint);
         let rentExemptAmount;
-        expect(accountInfo).to.not.equal(null);
+        expect(accountInfo).not.toBeNull();
         if (accountInfo !== null) {
             rentExemptAmount = accountInfo.lamports;
         }
@@ -78,12 +75,12 @@ describe('closeMint', () => {
         await closeAccount(connection, payer, mint, destination, closeAuthority, [], undefined, TEST_PROGRAM_ID);
 
         const closedInfo = await connection.getAccountInfo(mint);
-        expect(closedInfo).to.equal(null);
+        expect(closedInfo).toBeNull();
 
         const destinationInfo = await connection.getAccountInfo(destination);
-        expect(destinationInfo).to.not.equal(null);
+        expect(destinationInfo).not.toBeNull();
         if (destinationInfo !== null) {
-            expect(destinationInfo.lamports).to.eql(rentExemptAmount);
+            expect(destinationInfo.lamports).toEqual(rentExemptAmount);
         }
     });
     it('authority', async () => {
@@ -100,9 +97,9 @@ describe('closeMint', () => {
         );
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const mintCloseAuthority = getMintCloseAuthority(mintInfo);
-        expect(mintCloseAuthority).to.not.equal(null);
+        expect(mintCloseAuthority).not.toBeNull();
         if (mintCloseAuthority !== null) {
-            expect(mintCloseAuthority.closeAuthority).to.eql(Address.default);
+            expect(mintCloseAuthority.closeAuthority).toEqual(Address.default);
         }
     });
 });

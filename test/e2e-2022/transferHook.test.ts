@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { AccountMeta, Connection, Signer } from '@solana/web3.js';
 import { Address, TransactionInstruction } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
@@ -37,7 +37,7 @@ describe('transferHook', () => {
     let transferHookAuthority: Keypair;
     let pdaExtraAccountMeta: Address;
     let mint: Address;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         payerAddress = new Address(payer.address);
@@ -86,10 +86,10 @@ describe('transferHook', () => {
     it('is initialized', async () => {
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const transferHook = getTransferHook(mintInfo);
-        expect(transferHook).to.not.equal(null);
+        expect(transferHook).not.toBeNull();
         if (transferHook !== null) {
-            expect(transferHook.authority).to.eql(transferHookAuthority.publicKey);
-            expect(transferHook.programId).to.eql(TRANSFER_HOOK_TEST_PROGRAM_ID);
+            expect(transferHook.authority).toEqual(transferHookAuthority.publicKey);
+            expect(transferHook.programId).toEqual(TRANSFER_HOOK_TEST_PROGRAM_ID);
         }
     });
     it('can be updated', async () => {
@@ -106,10 +106,10 @@ describe('transferHook', () => {
         );
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const transferHook = getTransferHook(mintInfo);
-        expect(transferHook).to.not.equal(null);
+        expect(transferHook).not.toBeNull();
         if (transferHook !== null) {
-            expect(transferHook.authority).to.eql(transferHookAuthority.publicKey);
-            expect(transferHook.programId).to.eql(newTransferHookProgramId);
+            expect(transferHook.authority).toEqual(transferHookAuthority.publicKey);
+            expect(transferHook.programId).toEqual(newTransferHookProgramId);
         }
     });
     it('authority', async () => {
@@ -126,9 +126,9 @@ describe('transferHook', () => {
         );
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const transferHook = getTransferHook(mintInfo);
-        expect(transferHook).to.not.equal(null);
+        expect(transferHook).not.toBeNull();
         if (transferHook !== null) {
-            expect(transferHook.authority).to.eql(Address.default);
+            expect(transferHook.authority).toEqual(Address.default);
         }
     });
     it('transferChecked', async () => {

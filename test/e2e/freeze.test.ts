@@ -1,11 +1,9 @@
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Address, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 
 import { burn, createMint, createAccount, getAccount, freezeAccount, thawAccount, mintTo } from '../../src';
 import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
-import { expect, use } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
-use(chaiAsPromised);
 
 const TEST_TOKEN_DECIMALS = 2;
 describe('freezeThaw', () => {
@@ -18,7 +16,7 @@ describe('freezeThaw', () => {
     let account: Address;
     let amount: bigint;
     const burnAmount = BigInt(1);
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -44,9 +42,9 @@ describe('freezeThaw', () => {
     it('freezes', async () => {
         await freezeAccount(connection, payer, account, mint, freezeAuthority, [], undefined, TEST_PROGRAM_ID);
 
-        expect(
+        await expect(
             burn(connection, payer, account, mint, owner, burnAmount, [], undefined, TEST_PROGRAM_ID),
-        ).to.be.rejectedWith(Error);
+        ).rejects.toThrow(Error);
     });
     it('thaws', async () => {
         await freezeAccount(connection, payer, account, mint, freezeAuthority, [], undefined, TEST_PROGRAM_ID);
@@ -56,6 +54,6 @@ describe('freezeThaw', () => {
         await burn(connection, payer, account, mint, owner, burnAmount, [], undefined, TEST_PROGRAM_ID);
         const accountInfo = await getAccount(connection, account, undefined, TEST_PROGRAM_ID);
 
-        expect(accountInfo.amount).to.eql(amount - burnAmount);
+        expect(accountInfo.amount).toEqual(amount - burnAmount);
     });
 });

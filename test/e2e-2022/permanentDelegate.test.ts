@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
 import { Address } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
@@ -28,7 +28,7 @@ describe('permanentDelegate', () => {
     let permanentDelegate: Keypair;
     let account: Address;
     let destination: Address;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -59,9 +59,9 @@ describe('permanentDelegate', () => {
         await mintTo(connection, payer, mint, account, mintAuthority, 5, [], undefined, TEST_PROGRAM_ID);
         await burn(connection, payer, account, mint, permanentDelegate, 2, undefined, undefined, TEST_PROGRAM_ID);
         const info = await connection.getTokenAccountBalance(account);
-        expect(info).to.not.equal(null);
+        expect(info).not.toBeNull();
         if (info !== null) {
-            expect(info.value.uiAmount).to.eql(3);
+            expect(info.value.uiAmount).toEqual(3);
         }
     });
     it('transfer tokens', async () => {
@@ -93,13 +93,13 @@ describe('permanentDelegate', () => {
         );
         const source_info = await connection.getTokenAccountBalance(account);
         const destination_info = await connection.getTokenAccountBalance(destination);
-        expect(source_info).to.not.equal(null);
-        expect(destination_info).to.not.equal(null);
+        expect(source_info).not.toBeNull();
+        expect(destination_info).not.toBeNull();
         if (source_info !== null) {
-            expect(source_info.value.uiAmount).to.eql(3);
+            expect(source_info.value.uiAmount).toEqual(3);
         }
         if (destination_info !== null) {
-            expect(destination_info.value.uiAmount).to.eql(2);
+            expect(destination_info.value.uiAmount).toEqual(2);
         }
     });
     it('authority', async () => {
@@ -116,9 +116,9 @@ describe('permanentDelegate', () => {
         );
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const permanentDelegateConfig = getPermanentDelegate(mintInfo);
-        expect(permanentDelegateConfig).to.not.equal(null);
+        expect(permanentDelegateConfig).not.toBeNull();
         if (permanentDelegateConfig !== null) {
-            expect(permanentDelegateConfig.delegate).to.eql(Address.default);
+            expect(permanentDelegateConfig.delegate).toEqual(Address.default);
         }
     });
 });

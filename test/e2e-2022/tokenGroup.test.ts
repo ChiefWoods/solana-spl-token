@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
 import { Address } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
@@ -28,7 +28,7 @@ describe('tokenGroup', async () => {
     let mintAuthority: Keypair;
     let updateAuthority: Keypair;
 
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -69,7 +69,7 @@ describe('tokenGroup', async () => {
 
     it('can fetch un-initialized token group as null', async () => {
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
-        expect(getTokenGroupState(mintInfo)).to.deep.equal(null);
+        expect(getTokenGroupState(mintInfo)).toEqual(null);
     });
 
     it('can initialize', async () => {
@@ -105,7 +105,7 @@ describe('tokenGroup', async () => {
 
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
         const group = getTokenGroupState(mintInfo);
-        expect(group).to.deep.equal(tokenGroup);
+        expect(group).toEqual(tokenGroup);
     });
 
     it('can initialize with rent transfer', async () => {
@@ -130,7 +130,7 @@ describe('tokenGroup', async () => {
 
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
         const group = getTokenGroupState(mintInfo);
-        expect(group).to.deep.equal(tokenGroup);
+        expect(group).toEqual(tokenGroup);
     });
 
     it('can update max size', async () => {
@@ -177,7 +177,7 @@ describe('tokenGroup', async () => {
 
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
         const group = getTokenGroupState(mintInfo);
-        expect(group).to.deep.equal({
+        expect(group).toEqual({
             updateAuthority: updateAuthority.publicKey,
             mint: mint.publicKey,
             size: BigInt(0),
@@ -230,7 +230,7 @@ describe('tokenGroup', async () => {
 
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
         const group = getTokenGroupState(mintInfo);
-        expect(group).to.deep.equal({
+        expect(group).toEqual({
             updateAuthority: newUpdateAuthority.publicKey,
             mint: mint.publicKey,
             size: BigInt(0),

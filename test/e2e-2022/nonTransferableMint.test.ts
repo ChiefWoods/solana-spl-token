@@ -1,9 +1,5 @@
-import { expect, use } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
-use(chaiAsPromised);
-
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-
 import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import {
     createInitializeMintInstruction,
@@ -27,7 +23,7 @@ describe('nonTransferable', () => {
     let payer: Signer;
     let mint: Address;
     let mintAuthority: Keypair;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -55,7 +51,7 @@ describe('nonTransferable', () => {
     it('fails transfer', async () => {
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const nonTransferable = getNonTransferable(mintInfo);
-        expect(nonTransferable).to.not.equal(null);
+        expect(nonTransferable).not.toBeNull();
 
         const owner = await Keypair.generate();
         const accountLen = getAccountLen([ExtensionType.ImmutableOwner, ExtensionType.NonTransferableAccount]);
@@ -94,8 +90,8 @@ describe('nonTransferable', () => {
         const amount = BigInt(1000);
         await mintTo(connection, payer, mint, source, mintAuthority, amount, [], undefined, TEST_PROGRAM_ID);
 
-        expect(
+        await expect(
             transfer(connection, payer, source, destination, owner, amount, [], undefined, TEST_PROGRAM_ID),
-        ).to.be.rejectedWith(Error);
+        ).rejects.toThrow(Error);
     });
 });

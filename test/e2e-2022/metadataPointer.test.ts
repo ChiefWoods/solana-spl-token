@@ -1,6 +1,5 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-
 import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 
 import {
@@ -24,7 +23,7 @@ describe('Metadata pointer', () => {
     let mintAuthority: Keypair;
     let metadataAddress: Address;
 
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -67,7 +66,7 @@ describe('Metadata pointer', () => {
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
         const metadataPointer = getMetadataPointerState(mintInfo);
 
-        expect(metadataPointer).to.deep.equal({
+        expect(metadataPointer).toEqual({
             authority: mintAuthority.publicKey,
             metadataAddress,
         });
@@ -89,7 +88,7 @@ describe('Metadata pointer', () => {
         const mintInfo = await getMint(connection, mint.publicKey, undefined, TEST_PROGRAM_ID);
         const metadataPointer = getMetadataPointerState(mintInfo);
 
-        expect(metadataPointer).to.deep.equal({
+        expect(metadataPointer).toEqual({
             authority: mintAuthority.publicKey,
             metadataAddress: newMetadataAddress,
         });

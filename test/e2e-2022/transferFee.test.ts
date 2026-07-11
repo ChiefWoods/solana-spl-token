@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
 import { Address } from '@solana/web3.js';
 import { Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
@@ -43,7 +43,7 @@ describe('transferFee', () => {
     let destinationAccount: Address;
     let mint: Address;
     let mintAuthority: Keypair;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
     });
@@ -137,22 +137,22 @@ describe('transferFee', () => {
         it('initializes', async () => {
             const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
             const transferFeeConfig = getTransferFeeConfig(mintInfo);
-            expect(transferFeeConfig).to.not.equal(null);
+            expect(transferFeeConfig).not.toBeNull();
             if (transferFeeConfig !== null) {
-                expect(transferFeeConfig.transferFeeConfigAuthority).to.eql(transferFeeConfigAuthority.publicKey);
-                expect(transferFeeConfig.withdrawWithheldAuthority).to.eql(withdrawWithheldAuthority.publicKey);
-                expect(transferFeeConfig.olderTransferFee.transferFeeBasisPoints).to.eql(FEE_BASIS_POINTS);
-                expect(transferFeeConfig.olderTransferFee.maximumFee).to.eql(MAX_FEE);
-                expect(transferFeeConfig.newerTransferFee.transferFeeBasisPoints).to.eql(FEE_BASIS_POINTS);
-                expect(transferFeeConfig.newerTransferFee.maximumFee).to.eql(MAX_FEE);
-                expect(transferFeeConfig.withheldAmount).to.eql(BigInt(0));
+                expect(transferFeeConfig.transferFeeConfigAuthority).toEqual(transferFeeConfigAuthority.publicKey);
+                expect(transferFeeConfig.withdrawWithheldAuthority).toEqual(withdrawWithheldAuthority.publicKey);
+                expect(transferFeeConfig.olderTransferFee.transferFeeBasisPoints).toEqual(FEE_BASIS_POINTS);
+                expect(transferFeeConfig.olderTransferFee.maximumFee).toEqual(MAX_FEE);
+                expect(transferFeeConfig.newerTransferFee.transferFeeBasisPoints).toEqual(FEE_BASIS_POINTS);
+                expect(transferFeeConfig.newerTransferFee.maximumFee).toEqual(MAX_FEE);
+                expect(transferFeeConfig.withheldAmount).toEqual(BigInt(0));
             }
 
             const accountInfo = await getAccount(connection, destinationAccount, undefined, TEST_PROGRAM_ID);
             const transferFeeAmount = getTransferFeeAmount(accountInfo);
-            expect(transferFeeAmount).to.not.equal(null);
+            expect(transferFeeAmount).not.toBeNull();
             if (transferFeeAmount !== null) {
-                expect(transferFeeAmount.withheldAmount).to.eql(FEE);
+                expect(transferFeeAmount.withheldAmount).toEqual(FEE);
             }
         });
         it('transferCheckedWithFee', async () => {
@@ -172,9 +172,9 @@ describe('transferFee', () => {
             );
             const accountInfo = await getAccount(connection, destinationAccount, undefined, TEST_PROGRAM_ID);
             const transferFeeAmount = getTransferFeeAmount(accountInfo);
-            expect(transferFeeAmount).to.not.equal(null);
+            expect(transferFeeAmount).not.toBeNull();
             if (transferFeeAmount !== null) {
-                expect(transferFeeAmount.withheldAmount).to.eql(FEE * BigInt(2));
+                expect(transferFeeAmount.withheldAmount).toEqual(FEE * BigInt(2));
             }
         });
         it('withdrawWithheldTokensFromAccounts', async () => {
@@ -190,11 +190,11 @@ describe('transferFee', () => {
                 TEST_PROGRAM_ID,
             );
             const accountInfo = await getAccount(connection, destinationAccount, undefined, TEST_PROGRAM_ID);
-            expect(accountInfo.amount).to.eql(TRANSFER_AMOUNT);
+            expect(accountInfo.amount).toEqual(TRANSFER_AMOUNT);
             const transferFeeAmount = getTransferFeeAmount(accountInfo);
-            expect(transferFeeAmount).to.not.equal(null);
+            expect(transferFeeAmount).not.toBeNull();
             if (transferFeeAmount !== null) {
-                expect(transferFeeAmount.withheldAmount).to.eql(BigInt(0));
+                expect(transferFeeAmount.withheldAmount).toEqual(BigInt(0));
             }
         });
         it('harvestWithheldTokensToMint', async () => {
@@ -208,15 +208,15 @@ describe('transferFee', () => {
             );
             const accountInfo = await getAccount(connection, destinationAccount, undefined, TEST_PROGRAM_ID);
             const transferFeeAmount = getTransferFeeAmount(accountInfo);
-            expect(transferFeeAmount).to.not.equal(null);
+            expect(transferFeeAmount).not.toBeNull();
             if (transferFeeAmount !== null) {
-                expect(transferFeeAmount.withheldAmount).to.eql(BigInt(0));
+                expect(transferFeeAmount.withheldAmount).toEqual(BigInt(0));
             }
             const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
             const transferFeeConfig = getTransferFeeConfig(mintInfo);
-            expect(transferFeeConfig).to.not.equal(null);
+            expect(transferFeeConfig).not.toBeNull();
             if (transferFeeConfig !== null) {
-                expect(transferFeeConfig.withheldAmount).to.eql(FEE);
+                expect(transferFeeConfig.withheldAmount).toEqual(FEE);
             }
         });
         it('withdrawWithheldTokensFromMint', async () => {
@@ -239,17 +239,17 @@ describe('transferFee', () => {
                 TEST_PROGRAM_ID,
             );
             const accountInfo = await getAccount(connection, destinationAccount, undefined, TEST_PROGRAM_ID);
-            expect(accountInfo.amount).to.eql(TRANSFER_AMOUNT);
+            expect(accountInfo.amount).toEqual(TRANSFER_AMOUNT);
             const transferFeeAmount = getTransferFeeAmount(accountInfo);
-            expect(transferFeeAmount).to.not.equal(null);
+            expect(transferFeeAmount).not.toBeNull();
             if (transferFeeAmount !== null) {
-                expect(transferFeeAmount.withheldAmount).to.eql(BigInt(0));
+                expect(transferFeeAmount.withheldAmount).toEqual(BigInt(0));
             }
             const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
             const transferFeeConfig = getTransferFeeConfig(mintInfo);
-            expect(transferFeeConfig).to.not.equal(null);
+            expect(transferFeeConfig).not.toBeNull();
             if (transferFeeConfig !== null) {
-                expect(transferFeeConfig.withheldAmount).to.eql(BigInt(0));
+                expect(transferFeeConfig.withheldAmount).toEqual(BigInt(0));
             }
         });
         it('transferFeeConfigAuthority', async () => {
@@ -266,9 +266,9 @@ describe('transferFee', () => {
             );
             const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
             const transferFeeConfig = getTransferFeeConfig(mintInfo);
-            expect(transferFeeConfig).to.not.equal(null);
+            expect(transferFeeConfig).not.toBeNull();
             if (transferFeeConfig !== null) {
-                expect(transferFeeConfig.transferFeeConfigAuthority).to.eql(Address.default);
+                expect(transferFeeConfig.transferFeeConfigAuthority).toEqual(Address.default);
             }
         });
         it('withdrawWithheldAuthority', async () => {
@@ -285,9 +285,9 @@ describe('transferFee', () => {
             );
             const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
             const transferFeeConfig = getTransferFeeConfig(mintInfo);
-            expect(transferFeeConfig).to.not.equal(null);
+            expect(transferFeeConfig).not.toBeNull();
             if (transferFeeConfig !== null) {
-                expect(transferFeeConfig.withdrawWithheldAuthority).to.eql(Address.default);
+                expect(transferFeeConfig.withdrawWithheldAuthority).toEqual(Address.default);
             }
         });
         it('setTransferFee', async () => {
@@ -307,13 +307,13 @@ describe('transferFee', () => {
             );
             const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
             const transferFeeConfig = getTransferFeeConfig(mintInfo);
-            expect(transferFeeConfig).to.not.equal(null);
+            expect(transferFeeConfig).not.toBeNull();
             if (transferFeeConfig !== null) {
-                expect(transferFeeConfig.transferFeeConfigAuthority).to.eql(transferFeeConfigAuthority.publicKey);
-                expect(transferFeeConfig.olderTransferFee.transferFeeBasisPoints).to.eql(FEE_BASIS_POINTS);
-                expect(transferFeeConfig.olderTransferFee.maximumFee).to.eql(MAX_FEE);
-                expect(transferFeeConfig.newerTransferFee.transferFeeBasisPoints).to.eql(UPDATED_FEE_BASIS_POINTS);
-                expect(transferFeeConfig.newerTransferFee.maximumFee).to.eql(UPDATED_MAX_FEE);
+                expect(transferFeeConfig.transferFeeConfigAuthority).toEqual(transferFeeConfigAuthority.publicKey);
+                expect(transferFeeConfig.olderTransferFee.transferFeeBasisPoints).toEqual(FEE_BASIS_POINTS);
+                expect(transferFeeConfig.olderTransferFee.maximumFee).toEqual(MAX_FEE);
+                expect(transferFeeConfig.newerTransferFee.transferFeeBasisPoints).toEqual(UPDATED_FEE_BASIS_POINTS);
+                expect(transferFeeConfig.newerTransferFee.maximumFee).toEqual(UPDATED_MAX_FEE);
             }
         });
     });
@@ -325,15 +325,15 @@ describe('transferFee', () => {
 
             const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
             const transferFeeConfig = getTransferFeeConfig(mintInfo);
-            expect(transferFeeConfig).to.not.equal(null);
+            expect(transferFeeConfig).not.toBeNull();
             if (transferFeeConfig !== null) {
-                expect(transferFeeConfig.transferFeeConfigAuthority).to.eql(Address.default);
-                expect(transferFeeConfig.withdrawWithheldAuthority).to.eql(withdrawWithheldAuthority.publicKey);
-                expect(transferFeeConfig.olderTransferFee.transferFeeBasisPoints).to.eql(FEE_BASIS_POINTS);
-                expect(transferFeeConfig.olderTransferFee.maximumFee).to.eql(MAX_FEE);
-                expect(transferFeeConfig.newerTransferFee.transferFeeBasisPoints).to.eql(FEE_BASIS_POINTS);
-                expect(transferFeeConfig.newerTransferFee.maximumFee).to.eql(MAX_FEE);
-                expect(transferFeeConfig.withheldAmount).to.eql(BigInt(0));
+                expect(transferFeeConfig.transferFeeConfigAuthority).toEqual(Address.default);
+                expect(transferFeeConfig.withdrawWithheldAuthority).toEqual(withdrawWithheldAuthority.publicKey);
+                expect(transferFeeConfig.olderTransferFee.transferFeeBasisPoints).toEqual(FEE_BASIS_POINTS);
+                expect(transferFeeConfig.olderTransferFee.maximumFee).toEqual(MAX_FEE);
+                expect(transferFeeConfig.newerTransferFee.transferFeeBasisPoints).toEqual(FEE_BASIS_POINTS);
+                expect(transferFeeConfig.newerTransferFee.maximumFee).toEqual(MAX_FEE);
+                expect(transferFeeConfig.withheldAmount).toEqual(BigInt(0));
             }
         });
         it('initializes with null withdraw withheld authority', async () => {
@@ -342,15 +342,15 @@ describe('transferFee', () => {
 
             const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
             const transferFeeConfig = getTransferFeeConfig(mintInfo);
-            expect(transferFeeConfig).to.not.equal(null);
+            expect(transferFeeConfig).not.toBeNull();
             if (transferFeeConfig !== null) {
-                expect(transferFeeConfig.transferFeeConfigAuthority).to.eql(transferFeeConfigAuthority.publicKey);
-                expect(transferFeeConfig.withdrawWithheldAuthority).to.eql(Address.default);
-                expect(transferFeeConfig.olderTransferFee.transferFeeBasisPoints).to.eql(FEE_BASIS_POINTS);
-                expect(transferFeeConfig.olderTransferFee.maximumFee).to.eql(MAX_FEE);
-                expect(transferFeeConfig.newerTransferFee.transferFeeBasisPoints).to.eql(FEE_BASIS_POINTS);
-                expect(transferFeeConfig.newerTransferFee.maximumFee).to.eql(MAX_FEE);
-                expect(transferFeeConfig.withheldAmount).to.eql(BigInt(0));
+                expect(transferFeeConfig.transferFeeConfigAuthority).toEqual(transferFeeConfigAuthority.publicKey);
+                expect(transferFeeConfig.withdrawWithheldAuthority).toEqual(Address.default);
+                expect(transferFeeConfig.olderTransferFee.transferFeeBasisPoints).toEqual(FEE_BASIS_POINTS);
+                expect(transferFeeConfig.olderTransferFee.maximumFee).toEqual(MAX_FEE);
+                expect(transferFeeConfig.newerTransferFee.transferFeeBasisPoints).toEqual(FEE_BASIS_POINTS);
+                expect(transferFeeConfig.newerTransferFee.maximumFee).toEqual(MAX_FEE);
+                expect(transferFeeConfig.withheldAmount).toEqual(BigInt(0));
             }
         });
         it('initializes with both authorities null', async () => {
@@ -358,15 +358,15 @@ describe('transferFee', () => {
 
             const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
             const transferFeeConfig = getTransferFeeConfig(mintInfo);
-            expect(transferFeeConfig).to.not.equal(null);
+            expect(transferFeeConfig).not.toBeNull();
             if (transferFeeConfig !== null) {
-                expect(transferFeeConfig.transferFeeConfigAuthority).to.eql(Address.default);
-                expect(transferFeeConfig.withdrawWithheldAuthority).to.eql(Address.default);
-                expect(transferFeeConfig.olderTransferFee.transferFeeBasisPoints).to.eql(FEE_BASIS_POINTS);
-                expect(transferFeeConfig.olderTransferFee.maximumFee).to.eql(MAX_FEE);
-                expect(transferFeeConfig.newerTransferFee.transferFeeBasisPoints).to.eql(FEE_BASIS_POINTS);
-                expect(transferFeeConfig.newerTransferFee.maximumFee).to.eql(MAX_FEE);
-                expect(transferFeeConfig.withheldAmount).to.eql(BigInt(0));
+                expect(transferFeeConfig.transferFeeConfigAuthority).toEqual(Address.default);
+                expect(transferFeeConfig.withdrawWithheldAuthority).toEqual(Address.default);
+                expect(transferFeeConfig.olderTransferFee.transferFeeBasisPoints).toEqual(FEE_BASIS_POINTS);
+                expect(transferFeeConfig.olderTransferFee.maximumFee).toEqual(MAX_FEE);
+                expect(transferFeeConfig.newerTransferFee.transferFeeBasisPoints).toEqual(FEE_BASIS_POINTS);
+                expect(transferFeeConfig.newerTransferFee.maximumFee).toEqual(MAX_FEE);
+                expect(transferFeeConfig.withheldAmount).toEqual(BigInt(0));
             }
         });
     });

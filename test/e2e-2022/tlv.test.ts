@@ -1,6 +1,5 @@
-import { expect } from 'chai';
+import { beforeAll, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-
 import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 
 import type { Account, Mint } from '../../src';
@@ -25,7 +24,7 @@ describe('tlv test', () => {
     let payer: Signer;
     let owner: Keypair;
 
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         owner = await Keypair.generate();
@@ -82,7 +81,7 @@ describe('tlv test', () => {
                                 getExtensionData(extension, accountInfo.tlvData),
                                 `account parse test failed: found ${ExtensionType[extension]}, but should not have. \
                                 test case: no extensions, ${i} extra bytes`,
-                            ).to.equal(null);
+                            ).toBeNull();
                         }
                         return Promise.resolve(undefined);
                     }),

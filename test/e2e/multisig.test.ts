@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Address, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 
@@ -31,7 +31,7 @@ describe('multisig', () => {
     let multisig: Address;
     let signers: Keypair[];
     let signerPublicKeys: Address[];
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -79,25 +79,25 @@ describe('multisig', () => {
     });
     it('create', async () => {
         const multisigInfo = await getMultisig(connection, multisig, undefined, TEST_PROGRAM_ID);
-        expect(multisigInfo.m).to.eql(M);
-        expect(multisigInfo.n).to.eql(N);
-        expect(multisigInfo.signer1).to.eql(signerPublicKeys[0]);
-        expect(multisigInfo.signer2).to.eql(signerPublicKeys[1]);
-        expect(multisigInfo.signer3).to.eql(signerPublicKeys[2]);
-        expect(multisigInfo.signer4).to.eql(signerPublicKeys[3]);
-        expect(multisigInfo.signer5).to.eql(signerPublicKeys[4]);
+        expect(multisigInfo.m).toEqual(M);
+        expect(multisigInfo.n).toEqual(N);
+        expect(multisigInfo.signer1).toEqual(signerPublicKeys[0]);
+        expect(multisigInfo.signer2).toEqual(signerPublicKeys[1]);
+        expect(multisigInfo.signer3).toEqual(signerPublicKeys[2]);
+        expect(multisigInfo.signer4).toEqual(signerPublicKeys[3]);
+        expect(multisigInfo.signer5).toEqual(signerPublicKeys[4]);
     });
     it('transfer', async () => {
         await transfer(connection, payer, account1, account2, multisig, amount, signers, undefined, TEST_PROGRAM_ID);
         const accountInfo = await getAccount(connection, account2, undefined, TEST_PROGRAM_ID);
-        expect(accountInfo.amount).to.eql(amount);
+        expect(accountInfo.amount).toEqual(amount);
     });
     it('approve', async () => {
         const delegate = (await Keypair.generate()).publicKey;
         await approve(connection, payer, account1, delegate, multisig, amount, signers, undefined, TEST_PROGRAM_ID);
         const approvedAccountInfo = await getAccount(connection, account1, undefined, TEST_PROGRAM_ID);
-        expect(approvedAccountInfo.delegatedAmount).to.eql(amount);
-        expect(approvedAccountInfo.delegate).to.eql(delegate);
+        expect(approvedAccountInfo.delegatedAmount).toEqual(amount);
+        expect(approvedAccountInfo.delegate).toEqual(delegate);
     });
     it('setAuthority', async () => {
         const newOwner = (await Keypair.generate()).publicKey;
@@ -113,6 +113,6 @@ describe('multisig', () => {
             TEST_PROGRAM_ID,
         );
         const accountInfo = await getAccount(connection, account1, undefined, TEST_PROGRAM_ID);
-        expect(accountInfo.owner).to.eql(newOwner);
+        expect(accountInfo.owner).toEqual(newOwner);
     });
 });

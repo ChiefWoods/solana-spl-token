@@ -1,9 +1,5 @@
-import { expect, use } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
-use(chaiAsPromised);
-
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-
 import { Address, Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 
 import {
@@ -25,7 +21,7 @@ describe('immutableOwner', () => {
     let owner: Keypair;
     let account: Address;
     let mint: Address;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
     });
@@ -62,7 +58,7 @@ describe('immutableOwner', () => {
     });
     it('AccountOwner', async () => {
         const newOwner = await Keypair.generate();
-        expect(
+        await expect(
             setAuthority(
                 connection,
                 payer,
@@ -74,6 +70,6 @@ describe('immutableOwner', () => {
                 undefined,
                 TEST_PROGRAM_ID,
             ),
-        ).to.be.rejectedWith(Error);
+        ).rejects.toThrow(Error);
     });
 });

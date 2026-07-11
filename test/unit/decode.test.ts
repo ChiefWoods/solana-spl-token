@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { describe, expect, it } from 'vitest';
 import { Keypair } from '@solana/web3.js';
 import {
     createInitializeMintCloseAuthorityInstruction,
@@ -13,8 +13,8 @@ describe('spl-token-2022 instructions', () => {
             (await Keypair.generate()).publicKey,
             TOKEN_2022_PROGRAM_ID,
         );
-        expect(ix.programId).to.eql(TOKEN_2022_PROGRAM_ID);
-        expect(ix.keys).to.have.length(1);
+        expect(ix.programId).toEqual(TOKEN_2022_PROGRAM_ID);
+        expect(ix.keys).toHaveLength(1);
     });
     it('InitializePermanentDelegate', async () => {
         const ix = createInitializePermanentDelegateInstruction(
@@ -22,7 +22,7 @@ describe('spl-token-2022 instructions', () => {
             (await Keypair.generate()).publicKey,
             TOKEN_2022_PROGRAM_ID,
         );
-        expect(ix.programId).to.eql(TOKEN_2022_PROGRAM_ID);
-        expect(ix.keys).to.have.length(1);
+        expect(ix.programId).toEqual(TOKEN_2022_PROGRAM_ID);
+        expect(ix.keys).toHaveLength(1);
     });
 });

@@ -1,12 +1,10 @@
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Address, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 
 import { AuthorityType, createMint, createAccount, getAccount, getMint, setAuthority } from '../../src';
 
 import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
-import { expect, use } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
-use(chaiAsPromised);
 
 const TEST_TOKEN_DECIMALS = 2;
 describe('setAuthority', () => {
@@ -17,7 +15,7 @@ describe('setAuthority', () => {
     let freezeAuthority: Keypair;
     let owner: Keypair;
     let account: Address;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -60,7 +58,7 @@ describe('setAuthority', () => {
             TEST_PROGRAM_ID,
         );
         const accountInfo = await getAccount(connection, account, undefined, TEST_PROGRAM_ID);
-        expect(accountInfo.owner).to.eql(newOwner.publicKey);
+        expect(accountInfo.owner).toEqual(newOwner.publicKey);
         await setAuthority(
             connection,
             payer,
@@ -72,7 +70,7 @@ describe('setAuthority', () => {
             undefined,
             TEST_PROGRAM_ID,
         );
-        expect(
+        await expect(
             setAuthority(
                 connection,
                 payer,
@@ -84,7 +82,7 @@ describe('setAuthority', () => {
                 undefined,
                 TEST_PROGRAM_ID,
             ),
-        ).to.be.rejectedWith(Error);
+        ).rejects.toThrow(Error);
     });
     it('MintAuthority', async () => {
         await setAuthority(
@@ -99,7 +97,7 @@ describe('setAuthority', () => {
             TEST_PROGRAM_ID,
         );
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
-        expect(mintInfo.mintAuthority).to.equal(null);
+        expect(mintInfo.mintAuthority).toBeNull();
     });
     it('CloseAuthority', async () => {
         const closeAuthority = await Keypair.generate();
@@ -115,7 +113,7 @@ describe('setAuthority', () => {
             TEST_PROGRAM_ID,
         );
         const accountInfo = await getAccount(connection, account, undefined, TEST_PROGRAM_ID);
-        expect(accountInfo.closeAuthority).to.eql(closeAuthority.publicKey);
+        expect(accountInfo.closeAuthority).toEqual(closeAuthority.publicKey);
     });
     it('FreezeAuthority', async () => {
         await setAuthority(
@@ -130,6 +128,6 @@ describe('setAuthority', () => {
             TEST_PROGRAM_ID,
         );
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
-        expect(mintInfo.freezeAuthority).to.equal(null);
+        expect(mintInfo.freezeAuthority).toBeNull();
     });
 });

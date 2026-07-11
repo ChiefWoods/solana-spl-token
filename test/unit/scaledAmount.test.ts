@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { Connection } from '@solana/web3.js';
 import { Address } from '@solana/web3.js';
 import {
@@ -136,18 +136,18 @@ describe('Scaled UI Amount Extension', () => {
 
             for (const { amount, multiplier, decimals, expected } of testCases) {
                 const result = amountToUiAmountForScaledUiAmountMintWithoutSimulation(amount, decimals, multiplier);
-                expect(result).to.equal(expected);
+                expect(result).toBe(expected);
             }
         });
 
         it('should handle zero multiplier', () => {
             const result = amountToUiAmountForScaledUiAmountMintWithoutSimulation(100n, 2, 0);
-            expect(result).to.equal('0');
+            expect(result).toBe('0');
         });
 
         it('should handle large numbers correctly', () => {
             const result = amountToUiAmountForScaledUiAmountMintWithoutSimulation(BigInt(10_000_000_000), 10, 5);
-            expect(result).to.equal('5');
+            expect(result).toBe('5');
         });
     });
 
@@ -162,17 +162,17 @@ describe('Scaled UI Amount Extension', () => {
 
             for (const { uiAmount, multiplier, decimals, expected } of testCases) {
                 const result = uiAmountToAmountForScaledUiAmountMintWithoutSimulation(uiAmount, decimals, multiplier);
-                expect(result).to.equal(expected);
+                expect(result).toBe(expected);
             }
         });
 
         it('should handle zero multiplier', () => {
-            expect(() => uiAmountToAmountForScaledUiAmountMintWithoutSimulation('1', 2, 0)).to.throw();
+            expect(() => uiAmountToAmountForScaledUiAmountMintWithoutSimulation('1', 2, 0)).toThrow();
         });
 
         it('should handle large numbers correctly', () => {
             const result = uiAmountToAmountForScaledUiAmountMintWithoutSimulation('5.0000000000000000', 10, 5);
-            expect(result).to.equal(10000000000n);
+            expect(result).toBe(10000000000n);
         });
     });
 
@@ -198,12 +198,12 @@ describe('Scaled UI Amount Extension', () => {
                 mint,
                 100n,
             );
-            expect(result).to.equal('1');
+            expect(result).toBe('1');
 
             // Test with new multiplier after effective timestamp
             connection.setClockTimestamp(futureTime);
             result = await amountToUiAmountForMintWithoutSimulation(connection as unknown as Connection, mint, 100n);
-            expect(result).to.equal('2');
+            expect(result).toBe('2');
         });
 
         it('should correctly convert back and forth', async () => {
@@ -223,7 +223,7 @@ describe('Scaled UI Amount Extension', () => {
                 mint,
                 originalAmount,
             );
-            expect(uiAmount).to.equal('5');
+            expect(uiAmount).toBe('5');
 
             const convertedBack = await uiAmountToAmountForMintWithoutSimulation(
                 connection as unknown as Connection,
@@ -231,7 +231,7 @@ describe('Scaled UI Amount Extension', () => {
                 uiAmount,
             );
 
-            expect(convertedBack).to.equal(originalAmount);
+            expect(convertedBack).toBe(originalAmount);
         });
 
         it('should handle max values correctly', async () => {
@@ -250,7 +250,7 @@ describe('Scaled UI Amount Extension', () => {
                 mint,
                 BigInt(Number.MAX_SAFE_INTEGER),
             );
-            expect(result).to.equal('Infinity');
+            expect(result).toBe('Infinity');
         });
     });
 });

@@ -1,3 +1,4 @@
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { ExtraAccountMeta, ExtraAccountMetaList } from '../../src';
 import {
     ACCOUNT_SIZE,
@@ -17,12 +18,9 @@ import {
     getExtraAccountMetas,
     resolveExtraAccountMeta,
 } from '../../src';
-import { expect, use } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
 import type { Connection } from '@solana/web3.js';
 import { Keypair, Address, TransactionInstruction } from '@solana/web3.js';
 import { getConnection } from '../common';
-use(chaiAsPromised);
 
 describe('transferHook', () => {
     describe('validation data', () => {
@@ -217,7 +215,7 @@ describe('transferHook', () => {
         ]);
         /** **/
 
-        before(async () => {
+        beforeAll(async () => {
             connection = await getConnection();
             pdaPublicKey = (await Address.findProgramAddress(seeds, testProgramId))[0];
             pdaPublicKeyWithProgramId = (await Address.findProgramAddress(seeds, plainAccount))[0];
@@ -237,40 +235,44 @@ describe('transferHook', () => {
                 space: BigInt(extraAccountList.length),
             };
             const parsedExtraAccounts = getExtraAccountMetas(accountInfo);
-            expect(parsedExtraAccounts).to.not.equal(null);
+            expect(parsedExtraAccounts).not.toBeNull();
             if (parsedExtraAccounts == null) {
                 return;
             }
 
-            expect(parsedExtraAccounts).to.have.length(5);
+            expect(parsedExtraAccounts).toHaveLength(5);
             if (parsedExtraAccounts.length !== 5) {
                 return;
             }
 
-            expect(parsedExtraAccounts[0].discriminator).to.eql(0);
-            expect(parsedExtraAccounts[0].addressConfig).to.eql(plainAccount.toBytes());
-            expect(parsedExtraAccounts[0].isSigner).to.equal(false);
-            expect(parsedExtraAccounts[0].isWritable).to.equal(false);
+            expect(parsedExtraAccounts[0].discriminator).toEqual(0);
+            expect(parsedExtraAccounts[0].addressConfig).toEqual(plainAccount.toBytes());
+            expect(parsedExtraAccounts[0].isSigner).toBe(false);
+            expect(parsedExtraAccounts[0].isWritable).toBe(false);
 
-            expect(parsedExtraAccounts[1].discriminator).to.eql(1);
-            expect(parsedExtraAccounts[1].addressConfig).to.eql(addressConfig);
-            expect(parsedExtraAccounts[1].isSigner).to.equal(true);
-            expect(parsedExtraAccounts[1].isWritable).to.equal(false);
+            expect(parsedExtraAccounts[1].discriminator).toEqual(1);
+            expect(parsedExtraAccounts[1].addressConfig).toEqual(new Uint8Array(addressConfig));
+            expect(parsedExtraAccounts[1].isSigner).toBe(true);
+            expect(parsedExtraAccounts[1].isWritable).toBe(false);
 
-            expect(parsedExtraAccounts[2].discriminator).to.eql(128);
-            expect(parsedExtraAccounts[2].addressConfig).to.eql(addressConfig);
-            expect(parsedExtraAccounts[2].isSigner).to.equal(false);
-            expect(parsedExtraAccounts[2].isWritable).to.equal(true);
+            expect(parsedExtraAccounts[2].discriminator).toEqual(128);
+            expect(parsedExtraAccounts[2].addressConfig).toEqual(new Uint8Array(addressConfig));
+            expect(parsedExtraAccounts[2].isSigner).toBe(false);
+            expect(parsedExtraAccounts[2].isWritable).toBe(true);
 
-            expect(parsedExtraAccounts[3].discriminator).to.eql(2);
-            expect(parsedExtraAccounts[3].addressConfig).to.eql(addressConfigForKeyDataFromAccountInfo);
-            expect(parsedExtraAccounts[3].isSigner).to.equal(false);
-            expect(parsedExtraAccounts[3].isWritable).to.equal(false);
+            expect(parsedExtraAccounts[3].discriminator).toEqual(2);
+            expect(parsedExtraAccounts[3].addressConfig).toEqual(
+                new Uint8Array(addressConfigForKeyDataFromAccountInfo),
+            );
+            expect(parsedExtraAccounts[3].isSigner).toBe(false);
+            expect(parsedExtraAccounts[3].isWritable).toBe(false);
 
-            expect(parsedExtraAccounts[4].discriminator).to.eql(2);
-            expect(parsedExtraAccounts[4].addressConfig).to.eql(addressConfigForKeyDataFromInstructionData);
-            expect(parsedExtraAccounts[4].isSigner).to.equal(false);
-            expect(parsedExtraAccounts[4].isWritable).to.equal(false);
+            expect(parsedExtraAccounts[4].discriminator).toEqual(2);
+            expect(parsedExtraAccounts[4].addressConfig).toEqual(
+                new Uint8Array(addressConfigForKeyDataFromInstructionData),
+            );
+            expect(parsedExtraAccounts[4].isSigner).toBe(false);
+            expect(parsedExtraAccounts[4].isWritable).toBe(false);
         });
 
         it('can resolve extra metas', async () => {
@@ -282,9 +284,9 @@ describe('transferHook', () => {
                 testProgramId,
             );
 
-            expect(resolvedPlainAccount.pubkey).to.eql(plainAccount);
-            expect(resolvedPlainAccount.isSigner).to.equal(false);
-            expect(resolvedPlainAccount.isWritable).to.equal(false);
+            expect(resolvedPlainAccount.pubkey).toEqual(plainAccount);
+            expect(resolvedPlainAccount.isSigner).toBe(false);
+            expect(resolvedPlainAccount.isWritable).toBe(false);
 
             const resolvedPdaAccount = await resolveExtraAccountMeta(
                 connection,
@@ -294,9 +296,9 @@ describe('transferHook', () => {
                 testProgramId,
             );
 
-            expect(resolvedPdaAccount.pubkey).to.eql(pdaPublicKey);
-            expect(resolvedPdaAccount.isSigner).to.equal(true);
-            expect(resolvedPdaAccount.isWritable).to.equal(false);
+            expect(resolvedPdaAccount.pubkey).toEqual(pdaPublicKey);
+            expect(resolvedPdaAccount.isSigner).toBe(true);
+            expect(resolvedPdaAccount.isWritable).toBe(false);
 
             const resolvedPdaAccountWithProgramId = await resolveExtraAccountMeta(
                 connection,
@@ -306,9 +308,9 @@ describe('transferHook', () => {
                 testProgramId,
             );
 
-            expect(resolvedPdaAccountWithProgramId.pubkey).to.eql(pdaPublicKeyWithProgramId);
-            expect(resolvedPdaAccountWithProgramId.isSigner).to.equal(false);
-            expect(resolvedPdaAccountWithProgramId.isWritable).to.equal(true);
+            expect(resolvedPdaAccountWithProgramId.pubkey).toEqual(pdaPublicKeyWithProgramId);
+            expect(resolvedPdaAccountWithProgramId.isSigner).toBe(false);
+            expect(resolvedPdaAccountWithProgramId.isWritable).toBe(true);
 
             const resolvedKeyDataFromInstructionData = await resolveExtraAccountMeta(
                 connection,
@@ -318,9 +320,9 @@ describe('transferHook', () => {
                 testProgramId,
             );
 
-            expect(resolvedKeyDataFromInstructionData.pubkey).to.eql(plainAccount);
-            expect(resolvedKeyDataFromInstructionData.isSigner).to.equal(false);
-            expect(resolvedKeyDataFromInstructionData.isWritable).to.equal(false);
+            expect(resolvedKeyDataFromInstructionData.pubkey).toEqual(plainAccount);
+            expect(resolvedKeyDataFromInstructionData.isSigner).toBe(false);
+            expect(resolvedKeyDataFromInstructionData.isWritable).toBe(false);
 
             const resolvedKeyDataFromAccountInfo = await resolveExtraAccountMeta(
                 connection,
@@ -330,9 +332,9 @@ describe('transferHook', () => {
                 testProgramId,
             );
 
-            expect(resolvedKeyDataFromAccountInfo.pubkey).to.eql(plainAccount);
-            expect(resolvedKeyDataFromAccountInfo.isSigner).to.equal(false);
-            expect(resolvedKeyDataFromAccountInfo.isWritable).to.equal(false);
+            expect(resolvedKeyDataFromAccountInfo.pubkey).toEqual(plainAccount);
+            expect(resolvedKeyDataFromAccountInfo.isSigner).toBe(false);
+            expect(resolvedKeyDataFromAccountInfo.isWritable).toBe(false);
         });
     });
 
@@ -398,7 +400,7 @@ describe('transferHook', () => {
                     TransferHookCodec.write(
                         {
                             authority: (await Keypair.generate()).address,
-                            programId: new Address(transferHookProgramId).toBase58(),
+                            programId: transferHookProgramId.toBase58(),
                         },
                         data,
                         ACCOUNT_SIZE + ACCOUNT_TYPE_SIZE + TYPE_SIZE + LENGTH_SIZE,
@@ -548,7 +550,7 @@ describe('transferHook', () => {
                     authorityPubkey,
                     amount,
                 ),
-            ).to.be.rejectedWith('Missing required account in instruction');
+            ).rejects.toThrow('Missing required account in instruction');
 
             const instruction = new TransactionInstruction({
                 keys: [
@@ -586,7 +588,7 @@ describe('transferHook', () => {
                 { pubkey: validateStatePubkey, isSigner: false, isWritable: false },
             ];
 
-            expect(instruction.keys).to.eql(checkMetas);
+            expect(instruction.keys).toEqual(checkMetas);
         });
 
         it('can create a transfer instruction with extra metas', async () => {
@@ -695,7 +697,7 @@ describe('transferHook', () => {
                 { pubkey: validateStatePubkey, isSigner: false, isWritable: false },
             ];
 
-            expect(instruction.keys).to.eql(checkMetas);
+            expect(instruction.keys).toEqual(checkMetas);
         });
     });
 });

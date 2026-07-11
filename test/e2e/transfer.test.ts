@@ -1,3 +1,4 @@
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Address, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 
@@ -14,9 +15,6 @@ import {
 } from '../../src';
 
 import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
-import { expect, use } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
-use(chaiAsPromised);
 
 const TEST_TOKEN_DECIMALS = 2;
 describe('transfer', () => {
@@ -29,7 +27,7 @@ describe('transfer', () => {
     let owner2: Keypair;
     let account2: Address;
     let amount: bigint;
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         mintAuthority = await Keypair.generate();
@@ -73,10 +71,10 @@ describe('transfer', () => {
         await transfer(connection, payer, account1, account2, owner1, amount, [], undefined, TEST_PROGRAM_ID);
 
         const destAccountInfo = await getAccount(connection, account2, undefined, TEST_PROGRAM_ID);
-        expect(destAccountInfo.amount).to.eql(amount);
+        expect(destAccountInfo.amount).toEqual(amount);
 
         const sourceAccountInfo = await getAccount(connection, account1, undefined, TEST_PROGRAM_ID);
-        expect(sourceAccountInfo.amount).to.eql(BigInt(0));
+        expect(sourceAccountInfo.amount).toEqual(BigInt(0));
     });
     it('transferChecked', async () => {
         const transferAmount = amount / BigInt(2);
@@ -95,11 +93,11 @@ describe('transfer', () => {
         );
 
         const destAccountInfo = await getAccount(connection, account2, undefined, TEST_PROGRAM_ID);
-        expect(destAccountInfo.amount).to.eql(transferAmount);
+        expect(destAccountInfo.amount).toEqual(transferAmount);
 
         const sourceAccountInfo = await getAccount(connection, account1, undefined, TEST_PROGRAM_ID);
-        expect(sourceAccountInfo.amount).to.eql(transferAmount);
-        expect(
+        expect(sourceAccountInfo.amount).toEqual(transferAmount);
+        await expect(
             transferChecked(
                 connection,
                 payer,
@@ -113,7 +111,7 @@ describe('transfer', () => {
                 undefined,
                 TEST_PROGRAM_ID,
             ),
-        ).to.be.rejectedWith(Error);
+        ).rejects.toThrow(Error);
     });
     it('approveRevoke', async () => {
         const delegate = await Keypair.generate();
@@ -130,12 +128,12 @@ describe('transfer', () => {
             TEST_PROGRAM_ID,
         );
         const approvedAccountInfo = await getAccount(connection, account1, undefined, TEST_PROGRAM_ID);
-        expect(approvedAccountInfo.delegatedAmount).to.eql(delegatedAmount);
-        expect(approvedAccountInfo.delegate).to.eql(delegate.publicKey);
+        expect(approvedAccountInfo.delegatedAmount).toEqual(delegatedAmount);
+        expect(approvedAccountInfo.delegate).toEqual(delegate.publicKey);
         await revoke(connection, payer, account1, owner1, [], undefined, TEST_PROGRAM_ID);
         const revokedAccountInfo = await getAccount(connection, account1, undefined, TEST_PROGRAM_ID);
-        expect(revokedAccountInfo.delegatedAmount).to.eql(BigInt(0));
-        expect(revokedAccountInfo.delegate).to.equal(null);
+        expect(revokedAccountInfo.delegatedAmount).toEqual(BigInt(0));
+        expect(revokedAccountInfo.delegate).toBeNull();
     });
     it('delegateTransfer', async () => {
         const delegate = await Keypair.generate();
@@ -156,10 +154,10 @@ describe('transfer', () => {
         const transferAmount = delegatedAmount - BigInt(1);
         await transfer(connection, payer, account1, account2, delegate, transferAmount, [], undefined, TEST_PROGRAM_ID);
         const accountInfo = await getAccount(connection, account1, undefined, TEST_PROGRAM_ID);
-        expect(accountInfo.delegatedAmount).to.eql(delegatedAmount - transferAmount);
-        expect(accountInfo.delegate).to.eql(delegate.publicKey);
-        expect(
+        expect(accountInfo.delegatedAmount).toEqual(delegatedAmount - transferAmount);
+        expect(accountInfo.delegate).toEqual(delegate.publicKey);
+        await expect(
             transfer(connection, payer, account1, account2, delegate, BigInt(2), [], undefined, TEST_PROGRAM_ID),
-        ).to.be.rejectedWith(Error);
+        ).rejects.toThrow(Error);
     });
 });

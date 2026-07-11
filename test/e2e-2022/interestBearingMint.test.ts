@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import { beforeAll, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
 import { Address } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
@@ -25,7 +25,7 @@ describe('interestBearingMint', () => {
     let freezeAuthority: Keypair;
     let mintKeypair: Keypair;
 
-    before(async () => {
+    beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
         rateAuthority = await Keypair.generate();
@@ -50,13 +50,13 @@ describe('interestBearingMint', () => {
         );
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const interestBearingMintConfigState = getInterestBearingMintConfigState(mintInfo);
-        expect(interestBearingMintConfigState).to.not.equal(null);
+        expect(interestBearingMintConfigState).not.toBeNull();
         if (interestBearingMintConfigState !== null) {
-            expect(interestBearingMintConfigState.rateAuthority).to.eql(rateAuthority.publicKey);
-            expect(interestBearingMintConfigState.preUpdateAverageRate).to.eql(TEST_RATE);
-            expect(interestBearingMintConfigState.currentRate).to.eql(TEST_RATE);
-            expect(interestBearingMintConfigState.lastUpdateTimestamp).to.be.greaterThan(0);
-            expect(interestBearingMintConfigState.initializationTimestamp).to.be.greaterThan(0);
+            expect(interestBearingMintConfigState.rateAuthority).toEqual(rateAuthority.publicKey);
+            expect(interestBearingMintConfigState.preUpdateAverageRate).toEqual(TEST_RATE);
+            expect(interestBearingMintConfigState.currentRate).toEqual(TEST_RATE);
+            expect(interestBearingMintConfigState.lastUpdateTimestamp).toBeGreaterThan(0);
+            expect(interestBearingMintConfigState.initializationTimestamp).toBeGreaterThan(0);
         }
 
         await updateRateInterestBearingMint(
@@ -72,13 +72,13 @@ describe('interestBearingMint', () => {
         const mintInfoUpdatedRate = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const updatedRateConfigState = getInterestBearingMintConfigState(mintInfoUpdatedRate);
 
-        expect(updatedRateConfigState).to.not.equal(null);
+        expect(updatedRateConfigState).not.toBeNull();
         if (updatedRateConfigState !== null) {
-            expect(updatedRateConfigState.rateAuthority).to.eql(rateAuthority.publicKey);
-            expect(updatedRateConfigState.currentRate).to.eql(TEST_UPDATE_RATE);
-            expect(updatedRateConfigState.preUpdateAverageRate).to.eql(TEST_RATE);
-            expect(updatedRateConfigState.lastUpdateTimestamp).to.be.greaterThan(0);
-            expect(updatedRateConfigState.initializationTimestamp).to.be.greaterThan(0);
+            expect(updatedRateConfigState.rateAuthority).toEqual(rateAuthority.publicKey);
+            expect(updatedRateConfigState.currentRate).toEqual(TEST_UPDATE_RATE);
+            expect(updatedRateConfigState.preUpdateAverageRate).toEqual(TEST_RATE);
+            expect(updatedRateConfigState.lastUpdateTimestamp).toBeGreaterThan(0);
+            expect(updatedRateConfigState.initializationTimestamp).toBeGreaterThan(0);
         }
     });
     it('authority', async () => {
@@ -95,9 +95,9 @@ describe('interestBearingMint', () => {
         );
         const mintInfo = await getMint(connection, mint, undefined, TEST_PROGRAM_ID);
         const rateConfigState = getInterestBearingMintConfigState(mintInfo);
-        expect(rateConfigState).to.not.equal(null);
+        expect(rateConfigState).not.toBeNull();
         if (rateConfigState !== null) {
-            expect(rateConfigState.rateAuthority).to.eql(Address.default);
+            expect(rateConfigState.rateAuthority).toEqual(Address.default);
         }
     });
 });
