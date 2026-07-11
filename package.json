@@ -48,6 +48,7 @@
         "format": "oxfmt --check src test",
         "format:fix": "oxfmt src test",
         "example": "node --experimental-specifier-resolution=node --loader ts-node/esm examples/createMintAndTransferTokens.ts",
+        "start-local-validator": "./start-local-validator.sh",
         "test": "pnpm run test:unit && pnpm run test:e2e-native && pnpm run test:e2e-2022",
         "test:unit": "vitest run --dir test/unit",
         "test:e2e-native": "vitest run --dir test/e2e",
