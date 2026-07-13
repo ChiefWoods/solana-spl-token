@@ -1,4 +1,7 @@
 export * from './accountType.js';
+export * from './confidentialMintBurn/index.js';
+export * from './confidentialTransfer/index.js';
+export * from './confidentialTransferFee/index.js';
 export * from './cpiGuard/index.js';
 export * from './defaultAccountState/index.js';
 export * from './extensionType.js';
