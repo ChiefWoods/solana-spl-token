@@ -26,6 +26,7 @@ import {
     createAmountToUiAmountInstruction,
     createUiAmountToAmountInstruction,
     getMintLen,
+    getAccountTypeOfMintType,
 } from '../../src';
 
 describe('spl-token instructions', () => {
@@ -273,6 +274,8 @@ describe('extensionType', () => {
         expect(getAccountLen([])).toEqual(165);
         expect(getAccountLen([ExtensionType.ImmutableOwner])).toEqual(170);
         expect(getAccountLen([ExtensionType.PermanentDelegate])).toEqual(202);
+        expect(getAccountLen([ExtensionType.ConfidentialTransferAccount])).toEqual(165 + 1 + 4 + 295);
+        expect(getAccountLen([ExtensionType.ConfidentialTransferFeeAmount])).toEqual(165 + 1 + 4 + 64);
     });
 
     it('calculates size for mints', () => {
@@ -280,6 +283,9 @@ describe('extensionType', () => {
         expect(getMintLen([])).toEqual(82);
         expect(getMintLen([ExtensionType.TransferHook])).toEqual(234);
         expect(getMintLen([ExtensionType.MetadataPointer])).toEqual(234);
+        expect(getMintLen([ExtensionType.ConfidentialTransferMint])).toEqual(166 + 4 + 65);
+        expect(getMintLen([ExtensionType.ConfidentialTransferFee])).toEqual(166 + 4 + 129);
+        expect(getMintLen([ExtensionType.ConfidentialMintBurn])).toEqual(166 + 4 + 196);
         expect(
             getMintLen([ExtensionType.TransferFeeConfig, ExtensionType.NonTransferable], {
                 [ExtensionType.TokenMetadata]: 200,
@@ -305,5 +311,27 @@ describe('extensionType', () => {
         const collectedExts = [ExtensionType.Uninitialized].concat(mintExts, accountExts);
 
         expect(collectedExts.sort()).toEqual(exts.sort());
+    });
+
+    it('defines confidential extension discriminators', () => {
+        expect(TokenInstruction.ConfidentialTransferExtension).toEqual(27);
+        expect(ExtensionType.ConfidentialTransferMint).toEqual(4);
+        expect(ExtensionType.ConfidentialTransferAccount).toEqual(5);
+        expect(TokenInstruction.ConfidentialTransferFeeExtension).toEqual(37);
+        expect(TokenInstruction.ConfidentialMintBurnExtension).toEqual(42);
+        expect(ExtensionType.ConfidentialTransferFee).toEqual(16);
+        expect(ExtensionType.ConfidentialTransferFeeAmount).toEqual(17);
+        expect(ExtensionType.ConfidentialMintBurn).toEqual(24);
+        expect(isMintExtension(ExtensionType.ConfidentialTransferMint)).toEqual(true);
+        expect(isMintExtension(ExtensionType.ConfidentialTransferFee)).toEqual(true);
+        expect(isMintExtension(ExtensionType.ConfidentialMintBurn)).toEqual(true);
+        expect(isAccountExtension(ExtensionType.ConfidentialTransferAccount)).toEqual(true);
+        expect(isAccountExtension(ExtensionType.ConfidentialTransferFeeAmount)).toEqual(true);
+        expect(getAccountTypeOfMintType(ExtensionType.ConfidentialTransferMint)).toEqual(
+            ExtensionType.ConfidentialTransferAccount,
+        );
+        expect(getAccountTypeOfMintType(ExtensionType.ConfidentialTransferFee)).toEqual(
+            ExtensionType.ConfidentialTransferFeeAmount,
+        );
     });
 });

@@ -1,7 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
 import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
-import { createMemoInstruction } from '@solana/spl-memo';
 import {
     createAccount,
     createMint,
@@ -18,6 +17,7 @@ import {
     ExtensionType,
 } from '../../src';
 import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
+import { createMemoInstruction } from '../helpers/memo';
 
 const TEST_TOKEN_DECIMALS = 2;
 const TRANSFER_AMOUNT = 1_000;

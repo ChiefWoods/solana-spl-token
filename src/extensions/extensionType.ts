@@ -6,6 +6,12 @@ import { MINT_SIZE, unpackMint } from '../state/mint.js';
 import { MULTISIG_SIZE } from '../state/multisig.js';
 import { ACCOUNT_TYPE_SIZE } from './accountType.js';
 import { CPI_GUARD_SIZE } from './cpiGuard/index.js';
+import {
+    CONFIDENTIAL_TRANSFER_FEE_AMOUNT_SIZE,
+    CONFIDENTIAL_TRANSFER_FEE_CONFIG_SIZE,
+} from './confidentialTransferFee/state.js';
+import { CONFIDENTIAL_MINT_BURN_SIZE } from './confidentialMintBurn/state.js';
+import { CONFIDENTIAL_TRANSFER_ACCOUNT_SIZE, CONFIDENTIAL_TRANSFER_MINT_SIZE } from './confidentialTransfer/state.js';
 import { DEFAULT_ACCOUNT_STATE_SIZE } from './defaultAccountState/index.js';
 import { TOKEN_GROUP_SIZE, TOKEN_GROUP_MEMBER_SIZE } from './tokenGroup/index.js';
 import { GROUP_MEMBER_POINTER_SIZE } from './groupMemberPointer/state.js';
@@ -42,19 +48,19 @@ export enum ExtensionType {
     NonTransferableAccount,
     TransferHook,
     TransferHookAccount,
-    // ConfidentialTransferFee, // Not implemented yet
-    // ConfidentialTransferFeeAmount, // Not implemented yet
-    MetadataPointer = 18, // Remove number once above extensions implemented
-    TokenMetadata = 19, // Remove number once above extensions implemented
-    GroupPointer = 20,
-    TokenGroup = 21,
-    GroupMemberPointer = 22,
-    TokenGroupMember = 23,
-    // ConfidentialMintBurn, // Not implemented yet
-    ScaledUiAmountConfig = 25,
-    PausableConfig = 26,
-    PausableAccount = 27,
-    PermissionedBurn = 28,
+    ConfidentialTransferFee,
+    ConfidentialTransferFeeAmount,
+    MetadataPointer,
+    TokenMetadata,
+    GroupPointer,
+    TokenGroup,
+    GroupMemberPointer,
+    TokenGroupMember,
+    ConfidentialMintBurn,
+    ScaledUiAmountConfig,
+    PausableConfig,
+    PausableAccount,
+    PermissionedBurn,
 }
 
 export const TYPE_SIZE = 2;
@@ -86,9 +92,15 @@ export function getTypeLen(e: ExtensionType): number {
         case ExtensionType.MintCloseAuthority:
             return MINT_CLOSE_AUTHORITY_SIZE;
         case ExtensionType.ConfidentialTransferMint:
-            return 65;
+            return CONFIDENTIAL_TRANSFER_MINT_SIZE;
         case ExtensionType.ConfidentialTransferAccount:
-            return 295;
+            return CONFIDENTIAL_TRANSFER_ACCOUNT_SIZE;
+        case ExtensionType.ConfidentialTransferFee:
+            return CONFIDENTIAL_TRANSFER_FEE_CONFIG_SIZE;
+        case ExtensionType.ConfidentialTransferFeeAmount:
+            return CONFIDENTIAL_TRANSFER_FEE_AMOUNT_SIZE;
+        case ExtensionType.ConfidentialMintBurn:
+            return CONFIDENTIAL_MINT_BURN_SIZE;
         case ExtensionType.CpiGuard:
             return CPI_GUARD_SIZE;
         case ExtensionType.DefaultAccountState:
@@ -139,6 +151,8 @@ export function isMintExtension(e: ExtensionType): boolean {
         case ExtensionType.TransferFeeConfig:
         case ExtensionType.MintCloseAuthority:
         case ExtensionType.ConfidentialTransferMint:
+        case ExtensionType.ConfidentialTransferFee:
+        case ExtensionType.ConfidentialMintBurn:
         case ExtensionType.DefaultAccountState:
         case ExtensionType.NonTransferable:
         case ExtensionType.InterestBearingConfig:
@@ -157,6 +171,7 @@ export function isMintExtension(e: ExtensionType): boolean {
         case ExtensionType.Uninitialized:
         case ExtensionType.TransferFeeAmount:
         case ExtensionType.ConfidentialTransferAccount:
+        case ExtensionType.ConfidentialTransferFeeAmount:
         case ExtensionType.ImmutableOwner:
         case ExtensionType.MemoTransfer:
         case ExtensionType.CpiGuard:
@@ -173,6 +188,7 @@ export function isAccountExtension(e: ExtensionType): boolean {
     switch (e) {
         case ExtensionType.TransferFeeAmount:
         case ExtensionType.ConfidentialTransferAccount:
+        case ExtensionType.ConfidentialTransferFeeAmount:
         case ExtensionType.ImmutableOwner:
         case ExtensionType.MemoTransfer:
         case ExtensionType.CpiGuard:
@@ -184,6 +200,8 @@ export function isAccountExtension(e: ExtensionType): boolean {
         case ExtensionType.TransferFeeConfig:
         case ExtensionType.MintCloseAuthority:
         case ExtensionType.ConfidentialTransferMint:
+        case ExtensionType.ConfidentialTransferFee:
+        case ExtensionType.ConfidentialMintBurn:
         case ExtensionType.DefaultAccountState:
         case ExtensionType.NonTransferable:
         case ExtensionType.InterestBearingConfig:
@@ -210,6 +228,8 @@ export function getAccountTypeOfMintType(e: ExtensionType): ExtensionType {
             return ExtensionType.TransferFeeAmount;
         case ExtensionType.ConfidentialTransferMint:
             return ExtensionType.ConfidentialTransferAccount;
+        case ExtensionType.ConfidentialTransferFee:
+            return ExtensionType.ConfidentialTransferFeeAmount;
         case ExtensionType.NonTransferable:
             return ExtensionType.NonTransferableAccount;
         case ExtensionType.TransferHook:
@@ -218,6 +238,7 @@ export function getAccountTypeOfMintType(e: ExtensionType): ExtensionType {
             return ExtensionType.PausableAccount;
         case ExtensionType.TransferFeeAmount:
         case ExtensionType.ConfidentialTransferAccount:
+        case ExtensionType.ConfidentialTransferFeeAmount:
         case ExtensionType.CpiGuard:
         case ExtensionType.DefaultAccountState:
         case ExtensionType.ImmutableOwner:
@@ -234,6 +255,7 @@ export function getAccountTypeOfMintType(e: ExtensionType): ExtensionType {
         case ExtensionType.GroupMemberPointer:
         case ExtensionType.TokenGroup:
         case ExtensionType.TokenGroupMember:
+        case ExtensionType.ConfidentialMintBurn:
         case ExtensionType.ScaledUiAmountConfig:
         case ExtensionType.PausableAccount:
         case ExtensionType.PermissionedBurn:
