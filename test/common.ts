@@ -2,6 +2,7 @@ import { FailedTransactionMetadata, LiteSVM, type TransactionMetadata } from 'li
 import path from 'node:path';
 import type {
     AccountInfo,
+    Address as AddressType,
     BlockhashWithExpiryBlockHeight,
     Commitment,
     Connection,
@@ -13,8 +14,20 @@ import type {
     TransactionSignature,
     VersionedTransaction,
 } from '@solana/web3.js';
-import { Address, Keypair, Transaction } from '@solana/web3.js';
-import { TOKEN_PROGRAM_ID } from '../src';
+import { Address, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
+import {
+    createAmountToUiAmountInstruction,
+    createInitializeInterestBearingMintInstruction,
+    createInitializeMintInstruction,
+    createInitializeScaledUiAmountConfigInstruction,
+    createUpdateMultiplierDataInstruction,
+    createUiAmountToAmountInstruction,
+    ExtensionType,
+    NATIVE_MINT_2022,
+    TOKEN_2022_PROGRAM_ID,
+    TOKEN_PROGRAM_ID,
+    getMintLen,
+} from '../src';
 import { unpackAccount } from '../src/state/account';
 import { unpackMint } from '../src/state/mint';
 
@@ -30,6 +43,21 @@ const TRANSFER_HOOK_FIXTURE = path.join(FIXTURES_DIR, 'spl_transfer_hook_example
 
 const CONFIRMED_CONTEXT = { slot: 0n };
 const CONFIRMED_SIGNATURE_RESULT = { context: CONFIRMED_CONTEXT, value: { err: null } };
+export const TEST_CLOCK_TIMESTAMP = 31556736;
+
+type InterestBearingMintConfig = {
+    type: 'interestBearing';
+    rate?: number;
+};
+
+type ScaledUiAmountMintConfig = {
+    type: 'scaledUiAmount';
+    multiplier?: number;
+    newMultiplierEffectiveTimestamp?: number;
+    newMultiplier?: number;
+};
+
+type MintExtensionConfig = InterestBearingMintConfig | ScaledUiAmountMintConfig;
 
 async function settlePendingSignatures(): Promise<void> {
     await new Promise(resolve => setImmediate(resolve));
@@ -51,14 +79,158 @@ function toAccountInfo(account: ReturnType<LiteSVM['getAccount']>): AccountInfo<
     };
 }
 
-function createLiteSvm(): LiteSVM {
+export function createLiteSvm(unixTimestamp = Math.floor(Date.now() / 1000)): LiteSVM {
     const svm = new LiteSVM().withSigverify(false).withTransactionHistory(0n).withNativeMints();
-    // set unix timestamp to current time
     const clock = svm.getClock();
-    clock.unixTimestamp = BigInt(Math.floor(Date.now() / 1000));
+    clock.unixTimestamp = BigInt(unixTimestamp);
     svm.setClock(clock);
     svm.addProgramFromFile(TRANSFER_HOOK_TEST_PROGRAM_ID, TRANSFER_HOOK_FIXTURE);
     return svm;
+}
+
+export function setLiteSvmClock(svm: LiteSVM, unixTimestamp: number): void {
+    const clock = svm.getClock();
+    clock.unixTimestamp = BigInt(unixTimestamp);
+    svm.setClock(clock);
+}
+
+type TestMint = {
+    address: Address;
+    authority: Keypair;
+};
+
+async function sendLiteSvmTransaction(
+    svm: LiteSVM,
+    transaction: Transaction,
+    signers: Signer[] = [],
+    payer?: Keypair,
+): Promise<TransactionMetadata> {
+    payer ??= await Keypair.generate();
+    svm.airdrop(payer.publicKey, 1_000_000_000n);
+    transaction.feePayer = payer.publicKey;
+    transaction.recentBlockhash = svm.latestBlockhash();
+    transaction.lastValidBlockHeight = 0n;
+    await transaction.sign(payer, ...signers);
+
+    const result = await svm.sendTransaction(transaction);
+    if (result instanceof FailedTransactionMetadata) {
+        throw new Error(`LiteSVM transaction failed: ${result.toString()}`);
+    }
+
+    return result;
+}
+
+export async function createTestMint(svm: LiteSVM, decimals = 2, extension?: MintExtensionConfig): Promise<TestMint> {
+    const payer = await Keypair.generate();
+    const mint = await Keypair.generate();
+    const mintAuthority = await Keypair.generate();
+    const extensionTypes =
+        extension?.type === 'interestBearing'
+            ? [ExtensionType.InterestBearingConfig]
+            : extension?.type === 'scaledUiAmount'
+              ? [ExtensionType.ScaledUiAmountConfig]
+              : [];
+    const mintLen = getMintLen(extensionTypes);
+    const lamports = svm.minimumBalanceForRentExemption(BigInt(mintLen));
+    const transaction = new Transaction().add(
+        SystemProgram.createAccount({
+            fromPubkey: payer.publicKey,
+            newAccountPubkey: mint.publicKey,
+            space: mintLen,
+            lamports,
+            programId: TOKEN_2022_PROGRAM_ID,
+        }),
+    );
+
+    if (extension?.type === 'interestBearing') {
+        transaction.add(
+            createInitializeInterestBearingMintInstruction(
+                mint.publicKey,
+                mintAuthority.publicKey,
+                extension.rate ?? 500,
+                TOKEN_2022_PROGRAM_ID,
+            ),
+        );
+    }
+
+    if (extension?.type === 'scaledUiAmount') {
+        transaction.add(
+            createInitializeScaledUiAmountConfigInstruction(
+                mint.publicKey,
+                mintAuthority.publicKey,
+                extension.multiplier ?? 0,
+                TOKEN_2022_PROGRAM_ID,
+            ),
+        );
+    }
+
+    transaction.add(
+        createInitializeMintInstruction(mint.publicKey, decimals, mintAuthority.publicKey, null, TOKEN_2022_PROGRAM_ID),
+    );
+
+    await sendLiteSvmTransaction(svm, transaction, [mint], payer);
+
+    if (extension?.type === 'scaledUiAmount' && extension.newMultiplier !== undefined) {
+        await sendLiteSvmTransaction(
+            svm,
+            new Transaction().add(
+                createUpdateMultiplierDataInstruction(
+                    mint.publicKey,
+                    mintAuthority.publicKey,
+                    extension.newMultiplier,
+                    BigInt(extension.newMultiplierEffectiveTimestamp ?? TEST_CLOCK_TIMESTAMP),
+                    [],
+                    TOKEN_2022_PROGRAM_ID,
+                ),
+            ),
+            [mintAuthority],
+        );
+    }
+
+    return { address: mint.publicKey, authority: mintAuthority };
+}
+
+export async function invokeReturnData(
+    svm: LiteSVM,
+    transaction: Transaction,
+    programId: AddressType = TOKEN_2022_PROGRAM_ID,
+): Promise<Buffer> {
+    const metadata = await sendLiteSvmTransaction(svm, transaction);
+    const programReturnPrefix = `Program return: ${new Address(programId).toBase58()} `;
+    const programReturnLog = metadata.logs().find(log => log.startsWith(programReturnPrefix));
+    if (!programReturnLog) {
+        throw new Error(`LiteSVM transaction did not emit return data for ${new Address(programId).toBase58()}`);
+    }
+
+    return Buffer.from(programReturnLog.slice(programReturnPrefix.length), 'base64');
+}
+
+export async function invokeAmountToUiAmount(
+    svm: LiteSVM,
+    amount: bigint,
+    mint: AddressType = NATIVE_MINT_2022,
+    programId: AddressType = TOKEN_2022_PROGRAM_ID,
+): Promise<string> {
+    const data = await invokeReturnData(
+        svm,
+        new Transaction().add(createAmountToUiAmountInstruction(mint, amount, programId)),
+        programId,
+    );
+    return data.toString('utf8');
+}
+
+export async function invokeUiAmountToAmount(
+    svm: LiteSVM,
+    amount: string,
+    mint: AddressType = NATIVE_MINT_2022,
+    programId: AddressType = TOKEN_2022_PROGRAM_ID,
+): Promise<bigint> {
+    const data = await invokeReturnData(
+        svm,
+        new Transaction().add(createUiAmountToAmountInstruction(mint, amount, programId)),
+        programId,
+    );
+    return data.readBigUInt64LE();
 }
 
 class LiteSvmConnection {
