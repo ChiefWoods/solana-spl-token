@@ -39,6 +39,9 @@ importers:
       gh-pages:
         specifier: ^6.3.0
         version: 6.3.0
+      litesvm-web3js:
+        specifier: file:/Users/chiiyuen/solana-foundation/litesvm/crates/node-litesvm-web3js
+        version: file:../litesvm/crates/node-litesvm-web3js(fastestsmallesttextencoderdecoder@1.0.22)(typescript@6.0.3)
       oxfmt:
         specifier: 0.58.0
         version: 0.58.0
@@ -1470,6 +1473,14 @@ packages:
 
   linkify-it@5.0.2:
     resolution: {integrity: sha512-ONTm2jCMAVZjgQa/Fy1kScXsuOoF5NPTsoFBdE1KVIZ2vAh/r9+Bqo+0jINCBYnavTPQZz38QzFTme79ENoN3Q==}
+
+  litesvm-core@file:../litesvm/crates/node-litesvm-core:
+    resolution: {directory: ../litesvm/crates/node-litesvm-core, type: directory}
+    engines: {node: '>= 20'}
+
+  litesvm-web3js@file:../litesvm/crates/node-litesvm-web3js:
+    resolution: {directory: ../litesvm/crates/node-litesvm-web3js, type: directory}
+    engines: {node: '>= 20'}
 
   locate-path@5.0.0:
     resolution: {integrity: sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g==}
@@ -3225,6 +3236,18 @@ snapshots:
   linkify-it@5.0.2:
     dependencies:
       uc.micro: 2.1.0
+
+  litesvm-core@file:../litesvm/crates/node-litesvm-core: {}
+
+  litesvm-web3js@file:../litesvm/crates/node-litesvm-web3js(fastestsmallesttextencoderdecoder@1.0.22)(typescript@6.0.3):
+    dependencies:
+      '@solana/web3.js': 3.0.0-rc.2(fastestsmallesttextencoderdecoder@1.0.22)(typescript@6.0.3)
+      litesvm-core: file:../litesvm/crates/node-litesvm-core
+    transitivePeerDependencies:
+      - bufferutil
+      - fastestsmallesttextencoderdecoder
+      - typescript
+      - utf-8-validate
 
   locate-path@5.0.0:
     dependencies:
