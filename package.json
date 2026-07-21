@@ -51,7 +51,7 @@
         "test": "pnpm run test:unit && pnpm run test:e2e-native && pnpm run test:e2e-2022",
         "test:unit": "vitest run --dir test/unit",
         "test:e2e-native": "vitest run --dir test/e2e",
-        "test:e2e-2022": "TEST_PROGRAM_ID=TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb vitest run --dir test/e2e && TEST_PROGRAM_ID=TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb vitest run --dir test/e2e-2022",
+        "test:e2e-2022": "TEST_PROGRAM_ID=TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb vitest run --fileParallelism test/e2e test/e2e-2022",
         "deploy": "pnpm run deploy:docs",
         "docs": "shx rm -rf docs && typedoc && shx cp .nojekyll docs/",
         "deploy:docs": "pnpm run docs && gh-pages --dest token/js --dist docs --dotfiles"
