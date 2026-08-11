@@ -6,16 +6,6 @@ cd "${here}"
 TOKEN_2022_SO=./fixtures/spl_token_2022.so
 TRANSFER_HOOK_SO=./fixtures/spl_transfer_hook_example_no_default_features.so
 
-if [[ ! -f "${TOKEN_2022_SO}" ]]; then
-  echo "Missing ${TOKEN_2022_SO}."
-  exit 1
-fi
-
-if [[ ! -f "${TRANSFER_HOOK_SO}" ]]; then
-  echo "Missing ${TRANSFER_HOOK_SO}."
-  exit 1
-fi
-
 ARGS=(
   -r
   -q
