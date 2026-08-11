@@ -5,6 +5,7 @@ cd "${here}"
 
 TOKEN_2022_SO=./fixtures/spl_token_2022.so
 TRANSFER_HOOK_SO=./fixtures/spl_transfer_hook_example_no_default_features.so
+SPL_ELGAMAL_REGISTRY=./fixtures/spl_elgamal_registry.so
 
 if [[ ! -f "${TOKEN_2022_SO}" ]]; then
   echo "Missing ${TOKEN_2022_SO}."
@@ -21,6 +22,7 @@ ARGS=(
   -q
   --bpf-program TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb "${TOKEN_2022_SO}"
   --bpf-program TokenHookExampLe8smaVNrxTBezWTRbEwxwb1Zykrb "${TRANSFER_HOOK_SO}"
+  --bpf-program regVYJW7tcT8zipN5YiBvHsvR5jXW1uLFxaHSbugABg "${SPL_ELGAMAL_REGISTRY}"
 )
 PORT=8899
 PID=$(lsof -t -i:$PORT)
