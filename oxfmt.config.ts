@@ -1,6 +1,8 @@
+import solanaConfig from '@solana-config/oxc/oxfmt';
 import { defineConfig } from 'oxfmt';
 
 export default defineConfig({
+    ...solanaConfig,
     arrowParens: 'avoid',
     bracketSameLine: false,
     bracketSpacing: true,
