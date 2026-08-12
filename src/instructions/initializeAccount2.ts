@@ -89,7 +89,7 @@ export function decodeInitializeAccount2Instruction(
     if (data.instruction !== TokenInstruction.InitializeAccount2) throw new TokenInvalidInstructionTypeError();
     if (!account || !mint || !rent) throw new TokenInvalidInstructionKeysError();
 
-    // TODO: key checks?
+    if (!account.isWritable || !rent.pubkey.equals(SYSVAR_RENT_PUBKEY)) throw new TokenInvalidInstructionKeysError();
 
     return {
         programId,

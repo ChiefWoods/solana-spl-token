@@ -8,7 +8,7 @@ import {
     TokenInvalidInstructionProgramError,
     TokenInvalidInstructionTypeError,
 } from '../errors.js';
-import { addSigners } from './internal.js';
+import { addSigners, hasValidAuthority } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
@@ -104,7 +104,8 @@ export function decodeMintToInstruction(
     if (data.instruction !== TokenInstruction.MintTo) throw new TokenInvalidInstructionTypeError();
     if (!mint || !destination || !authority) throw new TokenInvalidInstructionKeysError();
 
-    // TODO: key checks?
+    if (!mint.isWritable || !destination.isWritable || !hasValidAuthority(authority, multiSigners))
+        throw new TokenInvalidInstructionKeysError();
 
     return {
         programId,

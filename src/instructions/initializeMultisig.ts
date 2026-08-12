@@ -106,7 +106,7 @@ export function decodeInitializeMultisigInstruction(
     if (data.instruction !== TokenInstruction.InitializeMultisig) throw new TokenInvalidInstructionTypeError();
     if (!account || !rent || !signers.length) throw new TokenInvalidInstructionKeysError();
 
-    // TODO: key checks?
+    if (!account.isWritable || !rent.pubkey.equals(SYSVAR_RENT_PUBKEY)) throw new TokenInvalidInstructionKeysError();
 
     return {
         programId,

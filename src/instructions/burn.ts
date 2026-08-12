@@ -8,7 +8,7 @@ import {
     TokenInvalidInstructionProgramError,
     TokenInvalidInstructionTypeError,
 } from '../errors.js';
-import { addSigners } from './internal.js';
+import { addSigners, hasValidAuthority } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
@@ -104,7 +104,8 @@ export function decodeBurnInstruction(
     if (data.instruction !== TokenInstruction.Burn) throw new TokenInvalidInstructionTypeError();
     if (!account || !mint || !owner) throw new TokenInvalidInstructionKeysError();
 
-    // TODO: key checks?
+    if (!account.isWritable || !mint.isWritable || !hasValidAuthority(owner, multiSigners))
+        throw new TokenInvalidInstructionKeysError();
 
     return {
         programId,

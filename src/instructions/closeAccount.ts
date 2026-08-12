@@ -8,7 +8,7 @@ import {
     TokenInvalidInstructionProgramError,
     TokenInvalidInstructionTypeError,
 } from '../errors.js';
-import { addSigners } from './internal.js';
+import { addSigners, hasValidAuthority } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
@@ -94,7 +94,8 @@ export function decodeCloseAccountInstruction(
     if (data.instruction !== TokenInstruction.CloseAccount) throw new TokenInvalidInstructionTypeError();
     if (!account || !destination || !authority) throw new TokenInvalidInstructionKeysError();
 
-    // TODO: key checks?
+    if (!account.isWritable || !destination.isWritable || !hasValidAuthority(authority, multiSigners))
+        throw new TokenInvalidInstructionKeysError();
 
     return {
         programId,

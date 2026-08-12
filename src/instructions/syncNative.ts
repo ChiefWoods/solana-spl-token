@@ -74,7 +74,7 @@ export function decodeSyncNativeInstruction(
     if (data.instruction !== TokenInstruction.SyncNative) throw new TokenInvalidInstructionTypeError();
     if (!account) throw new TokenInvalidInstructionKeysError();
 
-    // TODO: key checks?
+    if (!account.isWritable) throw new TokenInvalidInstructionKeysError();
 
     return {
         programId,

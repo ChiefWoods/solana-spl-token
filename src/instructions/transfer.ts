@@ -8,7 +8,7 @@ import {
     TokenInvalidInstructionProgramError,
     TokenInvalidInstructionTypeError,
 } from '../errors.js';
-import { addSigners } from './internal.js';
+import { addSigners, hasValidAuthority } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
@@ -104,7 +104,8 @@ export function decodeTransferInstruction(
     if (data.instruction !== TokenInstruction.Transfer) throw new TokenInvalidInstructionTypeError();
     if (!source || !destination || !owner) throw new TokenInvalidInstructionKeysError();
 
-    // TODO: key checks?
+    if (!source.isWritable || !destination.isWritable || !hasValidAuthority(owner, multiSigners))
+        throw new TokenInvalidInstructionKeysError();
 
     return {
         programId,

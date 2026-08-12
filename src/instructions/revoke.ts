@@ -8,7 +8,7 @@ import {
     TokenInvalidInstructionProgramError,
     TokenInvalidInstructionTypeError,
 } from '../errors.js';
-import { addSigners } from './internal.js';
+import { addSigners, hasValidAuthority } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
@@ -84,7 +84,7 @@ export function decodeRevokeInstruction(
     if (data.instruction !== TokenInstruction.Revoke) throw new TokenInvalidInstructionTypeError();
     if (!account || !owner) throw new TokenInvalidInstructionKeysError();
 
-    // TODO: key checks?
+    if (!account.isWritable || !hasValidAuthority(owner, multiSigners)) throw new TokenInvalidInstructionKeysError();
 
     return {
         programId,

@@ -8,7 +8,7 @@ import {
     TokenInvalidInstructionProgramError,
     TokenInvalidInstructionTypeError,
 } from '../errors.js';
-import { addSigners } from './internal.js';
+import { addSigners, hasValidAuthority } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec } from './codec.js';
 
@@ -94,7 +94,7 @@ export function decodeFreezeAccountInstruction(
     if (data.instruction !== TokenInstruction.FreezeAccount) throw new TokenInvalidInstructionTypeError();
     if (!account || !mint || !authority) throw new TokenInvalidInstructionKeysError();
 
-    // TODO: key checks?
+    if (!account.isWritable || !hasValidAuthority(authority, multiSigners)) throw new TokenInvalidInstructionKeysError();
 
     return {
         programId,

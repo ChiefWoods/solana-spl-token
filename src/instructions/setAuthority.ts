@@ -11,7 +11,7 @@ import {
     TokenInvalidInstructionProgramError,
     TokenInvalidInstructionTypeError,
 } from '../errors.js';
-import { addSigners } from './internal.js';
+import { addSigners, hasValidAuthority } from './internal.js';
 import { TokenInstruction } from './types.js';
 import { createInstructionDataCodec, nullableAddressToOption, optionToNullableAddress } from './codec.js';
 
@@ -136,7 +136,8 @@ export function decodeSetAuthorityInstruction(
     if (data.instruction !== TokenInstruction.SetAuthority) throw new TokenInvalidInstructionTypeError();
     if (!account || !currentAuthority) throw new TokenInvalidInstructionKeysError();
 
-    // TODO: key checks?
+    if (!account.isWritable || !hasValidAuthority(currentAuthority, multiSigners))
+        throw new TokenInvalidInstructionKeysError();
 
     return {
         programId,

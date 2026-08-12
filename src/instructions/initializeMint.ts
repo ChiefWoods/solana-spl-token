@@ -124,7 +124,7 @@ export function decodeInitializeMintInstruction(
     if (data.instruction !== TokenInstruction.InitializeMint) throw new TokenInvalidInstructionTypeError();
     if (!mint || !rent) throw new TokenInvalidInstructionKeysError();
 
-    // TODO: key checks?
+    if (!mint.isWritable || !rent.pubkey.equals(SYSVAR_RENT_PUBKEY)) throw new TokenInvalidInstructionKeysError();
 
     return {
         programId,

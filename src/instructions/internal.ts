@@ -21,3 +21,8 @@ export function addSigners(
     }
     return keys;
 }
+
+/** @internal */
+export function hasValidAuthority(authority: AccountMeta, multiSigners: AccountMeta[]): boolean {
+    return authority.isSigner || (multiSigners.length > 0 && multiSigners.every((signer) => signer.isSigner));
+}
