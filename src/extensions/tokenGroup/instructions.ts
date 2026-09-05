@@ -4,16 +4,16 @@ import {
     getUpdateTokenGroupMaxSizeInstructionDataEncoder,
     getUpdateTokenGroupUpdateAuthorityInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { Address } from '@solana/web3.js';
+import type { PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 
 export interface InitializeGroupInstructionArgs {
-    programId?: Address;
-    group: Address;
-    mint: Address;
-    mintAuthority: Address;
-    updateAuthority: Address | null;
+    programId?: PublicKey;
+    group: PublicKey;
+    mint: PublicKey;
+    mintAuthority: PublicKey;
+    updateAuthority: PublicKey | null;
     maxSize: bigint;
 }
 
@@ -49,9 +49,9 @@ export function createInitializeGroupInstruction(args: InitializeGroupInstructio
 }
 
 export interface UpdateGroupMaxSizeInstructionArgs {
-    programId?: Address;
-    group: Address;
-    updateAuthority: Address;
+    programId?: PublicKey;
+    group: PublicKey;
+    updateAuthority: PublicKey;
     maxSize: bigint;
 }
 
@@ -79,10 +79,10 @@ export function createUpdateGroupMaxSizeInstruction(args: UpdateGroupMaxSizeInst
 }
 
 export interface UpdateGroupAuthorityInstructionArgs {
-    programId?: Address;
-    group: Address;
-    currentAuthority: Address;
-    newAuthority: Address | null;
+    programId?: PublicKey;
+    group: PublicKey;
+    currentAuthority: PublicKey;
+    newAuthority: PublicKey | null;
 }
 
 /**
@@ -115,12 +115,12 @@ export function createUpdateGroupAuthorityInstruction(
 }
 
 export interface InitializeMemberInstructionArgs {
-    programId?: Address;
-    member: Address;
-    memberMint: Address;
-    memberMintAuthority: Address;
-    group: Address;
-    groupUpdateAuthority: Address;
+    programId?: PublicKey;
+    member: PublicKey;
+    memberMint: PublicKey;
+    memberMintAuthority: PublicKey;
+    group: PublicKey;
+    groupUpdateAuthority: PublicKey;
 }
 
 /**

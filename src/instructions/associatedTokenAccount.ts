@@ -1,4 +1,4 @@
-import type { Address } from '@solana/web3.js';
+import type { PublicKey } from '@solana/web3.js';
 import { SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../constants.js';
 import { getAssociatedTokenAddress } from '../state/mint.js';
@@ -16,10 +16,10 @@ import { getAssociatedTokenAddress } from '../state/mint.js';
  * @return Instruction to add to a transaction
  */
 export function createAssociatedTokenAccountInstruction(
-    payer: Address,
-    associatedToken: Address,
-    owner: Address,
-    mint: Address,
+    payer: PublicKey,
+    associatedToken: PublicKey,
+    owner: PublicKey,
+    mint: PublicKey,
     programId = TOKEN_PROGRAM_ID,
     associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
@@ -47,10 +47,10 @@ export function createAssociatedTokenAccountInstruction(
  * @return Instruction to add to a transaction
  */
 export function createAssociatedTokenAccountIdempotentInstruction(
-    payer: Address,
-    associatedToken: Address,
-    owner: Address,
-    mint: Address,
+    payer: PublicKey,
+    associatedToken: PublicKey,
+    owner: PublicKey,
+    mint: PublicKey,
     programId = TOKEN_PROGRAM_ID,
     associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
@@ -78,9 +78,9 @@ export function createAssociatedTokenAccountIdempotentInstruction(
  * @return Instruction to add to a transaction
  */
 export async function createAssociatedTokenAccountIdempotentInstructionWithDerivation(
-    payer: Address,
-    owner: Address,
-    mint: Address,
+    payer: PublicKey,
+    owner: PublicKey,
+    mint: PublicKey,
     allowOwnerOffCurve = true,
     programId = TOKEN_PROGRAM_ID,
     associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -104,10 +104,10 @@ export async function createAssociatedTokenAccountIdempotentInstructionWithDeriv
 }
 
 function buildAssociatedTokenAccountInstruction(
-    payer: Address,
-    associatedToken: Address,
-    owner: Address,
-    mint: Address,
+    payer: PublicKey,
+    associatedToken: PublicKey,
+    owner: PublicKey,
+    mint: PublicKey,
     instructionData: Buffer,
     programId = TOKEN_PROGRAM_ID,
     associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -143,12 +143,12 @@ function buildAssociatedTokenAccountInstruction(
  * @return Instruction to add to a transaction
  */
 export function createRecoverNestedInstruction(
-    nestedAssociatedToken: Address,
-    nestedMint: Address,
-    destinationAssociatedToken: Address,
-    ownerAssociatedToken: Address,
-    ownerMint: Address,
-    owner: Address,
+    nestedAssociatedToken: PublicKey,
+    nestedMint: PublicKey,
+    destinationAssociatedToken: PublicKey,
+    ownerAssociatedToken: PublicKey,
+    ownerMint: PublicKey,
+    owner: PublicKey,
     programId = TOKEN_PROGRAM_ID,
     associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID,
 ): TransactionInstruction {

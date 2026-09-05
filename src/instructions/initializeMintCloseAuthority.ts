@@ -2,7 +2,7 @@ import {
     getInitializeMintCloseAuthorityInstructionDataDecoder,
     getInitializeMintCloseAuthorityInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { AccountMeta, Address } from '@solana/web3.js';
+import type { AccountMeta, PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions } from '../constants.js';
 import {
@@ -18,7 +18,7 @@ import { createInstructionDataCodec, nullableAddressToOption, optionToNullableAd
 /** Instruction data for an InitializeMintCloseAuthority instruction. */
 export interface InitializeMintCloseAuthorityInstructionData {
     instruction: TokenInstruction.InitializeMintCloseAuthority;
-    closeAuthority: Address | null;
+    closeAuthority: PublicKey | null;
 }
 
 /** Codec for encoding and decoding InitializeMintCloseAuthority instruction data. */
@@ -44,9 +44,9 @@ export const initializeMintCloseAuthorityInstructionData = createInstructionData
  * @return Instruction to add to a transaction
  */
 export function createInitializeMintCloseAuthorityInstruction(
-    mint: Address,
-    closeAuthority: Address | null,
-    programId: Address,
+    mint: PublicKey,
+    closeAuthority: PublicKey | null,
+    programId: PublicKey,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
@@ -71,13 +71,13 @@ export function createInitializeMintCloseAuthorityInstruction(
 
 /** A decoded, valid InitializeMintCloseAuthority instruction */
 export interface DecodedInitializeMintCloseAuthorityInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
     };
     data: {
         instruction: TokenInstruction.InitializeMintCloseAuthority;
-        closeAuthority: Address | null;
+        closeAuthority: PublicKey | null;
     };
 }
 
@@ -91,7 +91,7 @@ export interface DecodedInitializeMintCloseAuthorityInstruction {
  */
 export function decodeInitializeMintCloseAuthorityInstruction(
     instruction: TransactionInstruction,
-    programId: Address,
+    programId: PublicKey,
 ): DecodedInitializeMintCloseAuthorityInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
     if (instruction.data.length < initializeMintCloseAuthorityInstructionData.getSpan(instruction.data))
@@ -116,13 +116,13 @@ export function decodeInitializeMintCloseAuthorityInstruction(
 
 /** A decoded, non-validated InitializeMintCloseAuthority instruction */
 export interface DecodedInitializeMintCloseAuthorityInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta | undefined;
     };
     data: {
         instruction: number;
-        closeAuthority: Address | null;
+        closeAuthority: PublicKey | null;
     };
 }
 

@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address, Keypair, sendAndConfirmTransaction, SystemProgram, Transaction } from '@solana/web3.js';
+import { PublicKey, Keypair, sendAndConfirmTransaction, SystemProgram, Transaction } from '@solana/web3.js';
 import { createAccount, createMint, getAccount, getMint, withdrawExcessLamports } from '../../src';
 import { TEST_PROGRAM_ID, getConnection, newAccountWithLamports } from '../common';
 
@@ -30,14 +30,14 @@ describe('withdrawExcessLamports', () => {
         const mintRent = await connection.getBalance(mint);
         const excessLamports = 12345n;
         const destination = await newAccountWithLamports(connection);
-        const destinationAddress = new Address(destination.address);
+        const destinationAddress = new PublicKey(destination.address);
         const destinationBalance = await connection.getBalance(destinationAddress);
 
         await sendAndConfirmTransaction(
             connection,
             new Transaction().add(
                 SystemProgram.transfer({
-                    fromPubkey: new Address(payer.address),
+                    fromPubkey: new PublicKey(payer.address),
                     toPubkey: mint,
                     lamports: excessLamports,
                 }),
@@ -88,14 +88,14 @@ describe('withdrawExcessLamports', () => {
         const sourceRent = await connection.getBalance(source);
         const excessLamports = 12345n;
         const destination = await newAccountWithLamports(connection);
-        const destinationAddress = new Address(destination.address);
+        const destinationAddress = new PublicKey(destination.address);
         const destinationBalance = await connection.getBalance(destinationAddress);
 
         await sendAndConfirmTransaction(
             connection,
             new Transaction().add(
                 SystemProgram.transfer({
-                    fromPubkey: new Address(payer.address),
+                    fromPubkey: new PublicKey(payer.address),
                     toPubkey: source,
                     lamports: excessLamports,
                 }),

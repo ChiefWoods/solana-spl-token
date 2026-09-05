@@ -2,7 +2,7 @@ import {
     getCreateNativeMintInstructionDataDecoder,
     getCreateNativeMintInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { Address } from '@solana/web3.js';
+import type { PublicKey } from '@solana/web3.js';
 import { SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { NATIVE_MINT_2022, programSupportsExtensions, TOKEN_2022_PROGRAM_ID } from '../constants.js';
 import { TokenUnsupportedInstructionError } from '../errors.js';
@@ -33,7 +33,7 @@ export const createNativeMintInstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createCreateNativeMintInstruction(
-    payer: Address,
+    payer: PublicKey,
     nativeMintId = NATIVE_MINT_2022,
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {

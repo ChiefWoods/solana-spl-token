@@ -1,11 +1,11 @@
 import { getAddressCodec, getI16Codec, getI64Codec, getStructCodec } from '@solana/kit';
 import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
 
 export interface InterestBearingMintConfigState {
-    rateAuthority: Address;
+    rateAuthority: PublicKey;
     initializationTimestamp: bigint;
     preUpdateAverageRate: number;
     lastUpdateTimestamp: bigint;
@@ -49,5 +49,5 @@ export function getInterestBearingMintConfigState(mint: Mint): InterestBearingMi
     const extensionData = getExtensionData(ExtensionType.InterestBearingConfig, mint.tlvData);
     if (extensionData === null) return null;
     const decoded = InterestBearingMintConfigStateCodec.decode(extensionData);
-    return { ...decoded, rateAuthority: new Address(decoded.rateAuthority) };
+    return { ...decoded, rateAuthority: new PublicKey(decoded.rateAuthority) };
 }

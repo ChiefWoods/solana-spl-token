@@ -2,7 +2,7 @@ import {
     getWithdrawExcessLamportsInstructionDataDecoder,
     getWithdrawExcessLamportsInstructionDataEncoder,
 } from '@solana-program/token';
-import type { AccountMeta, Address, Signer } from '@solana/web3.js';
+import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -40,10 +40,10 @@ export const withdrawExcessLamportsInstructionData = createInstructionDataCodec(
  * @return Instruction to add to a transaction
  */
 export function createWithdrawExcessLamportsInstruction(
-    source: Address,
-    destination: Address,
-    authority: Address,
-    multiSigners: (Signer | Address)[] = [],
+    source: PublicKey,
+    destination: PublicKey,
+    authority: PublicKey,
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -66,7 +66,7 @@ export function createWithdrawExcessLamportsInstruction(
 
 /** A decoded, valid WithdrawExcessLamports instruction */
 export interface DecodedWithdrawExcessLamportsInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         source: AccountMeta;
         destination: AccountMeta;
@@ -115,7 +115,7 @@ export function decodeWithdrawExcessLamportsInstruction(
 
 /** A decoded, non-validated WithdrawExcessLamports instruction */
 export interface DecodedWithdrawExcessLamportsInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         source: AccountMeta | undefined;
         destination: AccountMeta | undefined;

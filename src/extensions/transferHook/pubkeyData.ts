@@ -1,4 +1,4 @@
-import { PUBLIC_KEY_LENGTH, Address } from '@solana/web3.js';
+import { PUBLIC_KEY_LENGTH, PublicKey } from '@solana/web3.js';
 import type { AccountMeta, Connection } from '@solana/web3.js';
 import {
     TokenTransferHookAccountDataNotFound,
@@ -12,7 +12,7 @@ export async function unpackPubkeyData(
     previousMetas: AccountMeta[],
     instructionData: Buffer,
     connection: Connection,
-): Promise<Address> {
+): Promise<PublicKey> {
     const [discriminator, ...rest] = keyDataConfig;
     const remaining = new Uint8Array(rest);
     switch (discriminator) {
@@ -25,7 +25,7 @@ export async function unpackPubkeyData(
     }
 }
 
-function unpackPubkeyDataFromInstructionData(remaining: Uint8Array, instructionData: Buffer): Address {
+function unpackPubkeyDataFromInstructionData(remaining: Uint8Array, instructionData: Buffer): PublicKey {
     if (remaining.length < 1) {
         throw new TokenTransferHookInvalidPubkeyData();
     }
@@ -33,14 +33,14 @@ function unpackPubkeyDataFromInstructionData(remaining: Uint8Array, instructionD
     if (instructionData.length < dataIndex + PUBLIC_KEY_LENGTH) {
         throw new TokenTransferHookPubkeyDataTooSmall();
     }
-    return new Address(instructionData.subarray(dataIndex, dataIndex + PUBLIC_KEY_LENGTH));
+    return new PublicKey(instructionData.subarray(dataIndex, dataIndex + PUBLIC_KEY_LENGTH));
 }
 
 async function unpackPubkeyDataFromAccountData(
     remaining: Uint8Array,
     previousMetas: AccountMeta[],
     connection: Connection,
-): Promise<Address> {
+): Promise<PublicKey> {
     if (remaining.length < 2) {
         throw new TokenTransferHookInvalidPubkeyData();
     }
@@ -55,5 +55,5 @@ async function unpackPubkeyDataFromAccountData(
     if (accountInfo.data.length < dataIndex + PUBLIC_KEY_LENGTH) {
         throw new TokenTransferHookPubkeyDataTooSmall();
     }
-    return new Address(accountInfo.data.subarray(dataIndex, dataIndex + PUBLIC_KEY_LENGTH));
+    return new PublicKey(accountInfo.data.subarray(dataIndex, dataIndex + PUBLIC_KEY_LENGTH));
 }

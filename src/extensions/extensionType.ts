@@ -1,4 +1,4 @@
-import type { AccountInfo, Address } from '@solana/web3.js';
+import type { AccountInfo, PublicKey } from '@solana/web3.js';
 
 import { ACCOUNT_SIZE } from '../state/account.js';
 import type { Mint } from '../state/mint.js';
@@ -318,7 +318,7 @@ export function getAccountLenForMint(mint: Mint): number {
 
 export function getNewAccountLenForExtensionLen(
     info: AccountInfo<Uint8Array>,
-    address: Address,
+    address: PublicKey,
     extensionType: ExtensionType,
     extensionLen: number,
     programId = TOKEN_2022_PROGRAM_ID,

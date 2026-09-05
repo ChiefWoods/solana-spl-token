@@ -1,12 +1,12 @@
 import { getAddressCodec, getStructCodec } from '@solana/kit';
 import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import type { Mint } from '../state/mint.js';
 import { ExtensionType, getExtensionData } from './extensionType.js';
 
 /** MintCloseAuthority as stored by the program */
 export interface MintCloseAuthority {
-    closeAuthority: Address;
+    closeAuthority: PublicKey;
 }
 
 type MintCloseAuthorityCodecData = {
@@ -26,5 +26,5 @@ export function getMintCloseAuthority(mint: Mint): MintCloseAuthority | null {
     const extensionData = getExtensionData(ExtensionType.MintCloseAuthority, mint.tlvData);
     if (extensionData === null) return null;
     const { closeAuthority } = MintCloseAuthorityCodec.decode(extensionData);
-    return { closeAuthority: new Address(closeAuthority) };
+    return { closeAuthority: new PublicKey(closeAuthority) };
 }

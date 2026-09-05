@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
 
@@ -27,7 +27,7 @@ describe('pausable', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Keypair;
-    let mint: Address;
+    let mint: PublicKey;
     let mintAuthority: Keypair;
     beforeAll(async () => {
         connection = await getConnection();
@@ -43,7 +43,7 @@ describe('pausable', () => {
         const mintLamports = await connection.getMinimumBalanceForRentExemption(mintLen);
         const mintTransaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: mint,
                 space: mintLen,
                 lamports: mintLamports,
@@ -106,7 +106,7 @@ describe('pausable', () => {
         const pausableConfig = getPausableConfig(mintInfo);
         expect(pausableConfig).not.toBeNull();
         if (pausableConfig !== null) {
-            expect(pausableConfig.authority).toEqual(Address.default);
+            expect(pausableConfig.authority).toEqual(PublicKey.default);
         }
     });
 });

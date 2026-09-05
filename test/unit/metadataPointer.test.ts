@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Address, Keypair, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey, Keypair, TransactionInstruction } from '@solana/web3.js';
 import type { Mint } from '../../src';
 import {
     TOKEN_2022_PROGRAM_ID,
@@ -15,8 +15,8 @@ const NULL_OPTIONAL_NONZERO_PUBKEY_BYTES = Buffer.alloc(32).fill(0);
 describe('SPL Token 2022 MetadataPointer Extension', () => {
     it('can create InitializeMetadataPointerInstruction', async () => {
         const mint = (await Keypair.generate()).publicKey;
-        const authority = new Address(AUTHORITY_ADDRESS_BYTES);
-        const metadataAddress = new Address(METADATA_ADDRESS_BYTES);
+        const authority = new PublicKey(AUTHORITY_ADDRESS_BYTES);
+        const metadataAddress = new PublicKey(METADATA_ADDRESS_BYTES);
         const instruction = createInitializeMetadataPointerInstruction(
             mint,
             authority,
@@ -41,7 +41,7 @@ describe('SPL Token 2022 MetadataPointer Extension', () => {
     it('can create UpdateMetadataPointerInstruction', async () => {
         const mint = (await Keypair.generate()).publicKey;
         const authority = (await Keypair.generate()).publicKey;
-        const metadataAddress = new Address(METADATA_ADDRESS_BYTES);
+        const metadataAddress = new PublicKey(METADATA_ADDRESS_BYTES);
         const instruction = createUpdateMetadataPointerInstruction(mint, authority, metadataAddress);
         expect(instruction).toEqual(
             new TransactionInstruction({
@@ -97,8 +97,8 @@ describe('SPL Token 2022 MetadataPointer Extension', () => {
         } as Mint;
         const metadataPointer = getMetadataPointerState(mintInfo);
         expect(metadataPointer).toEqual({
-            authority: new Address(AUTHORITY_ADDRESS_BYTES),
-            metadataAddress: new Address(METADATA_ADDRESS_BYTES),
+            authority: new PublicKey(AUTHORITY_ADDRESS_BYTES),
+            metadataAddress: new PublicKey(METADATA_ADDRESS_BYTES),
         });
     });
     it('can get state with only metadata address', async () => {
@@ -117,7 +117,7 @@ describe('SPL Token 2022 MetadataPointer Extension', () => {
         const metadataPointer = getMetadataPointerState(mintInfo);
         expect(metadataPointer).toEqual({
             authority: null,
-            metadataAddress: new Address(METADATA_ADDRESS_BYTES),
+            metadataAddress: new PublicKey(METADATA_ADDRESS_BYTES),
         });
     });
     it('can get state with only authority address', async () => {
@@ -135,7 +135,7 @@ describe('SPL Token 2022 MetadataPointer Extension', () => {
         } as Mint;
         const metadataPointer = getMetadataPointerState(mintInfo);
         expect(metadataPointer).toEqual({
-            authority: new Address(AUTHORITY_ADDRESS_BYTES),
+            authority: new PublicKey(AUTHORITY_ADDRESS_BYTES),
             metadataAddress: null,
         });
     });

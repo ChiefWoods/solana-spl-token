@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import type { Address, Connection, Signer } from '@solana/web3.js';
+import type { PublicKey, Connection, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 import {
     NATIVE_MINT,
@@ -15,7 +15,7 @@ import { TEST_PROGRAM_ID, getConnection, newAccountWithLamports } from '../commo
 describe('unwrapLamports', () => {
     let connection: Connection;
     let payer: Signer;
-    let nativeMint: Address;
+    let nativeMint: PublicKey;
 
     beforeAll(async () => {
         connection = await getConnection();

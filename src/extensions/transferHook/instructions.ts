@@ -2,7 +2,7 @@ import {
     getInitializeTransferHookInstructionDataEncoder,
     getUpdateTransferHookInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { AccountMeta, Commitment, Connection, Address, Signer } from '@solana/web3.js';
+import type { AccountMeta, Commitment, Connection, PublicKey, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions, TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
@@ -22,8 +22,8 @@ export enum TransferHookInstruction {
 export interface InitializeTransferHookInstructionData {
     instruction: TokenInstruction.TransferHookExtension;
     transferHookInstruction: TransferHookInstruction.Initialize;
-    authority: Address;
-    transferHookProgramId: Address;
+    authority: PublicKey;
+    transferHookProgramId: PublicKey;
 }
 
 /**
@@ -37,10 +37,10 @@ export interface InitializeTransferHookInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createInitializeTransferHookInstruction(
-    mint: Address,
-    authority: Address,
-    transferHookProgramId: Address,
-    programId: Address,
+    mint: PublicKey,
+    authority: PublicKey,
+    transferHookProgramId: PublicKey,
+    programId: PublicKey,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
@@ -60,7 +60,7 @@ export function createInitializeTransferHookInstruction(
 export interface UpdateTransferHookInstructionData {
     instruction: TokenInstruction.TransferHookExtension;
     transferHookInstruction: TransferHookInstruction.Update;
-    transferHookProgramId: Address;
+    transferHookProgramId: PublicKey;
 }
 
 /**
@@ -75,10 +75,10 @@ export interface UpdateTransferHookInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createUpdateTransferHookInstruction(
-    mint: Address,
-    authority: Address,
-    transferHookProgramId: Address,
-    multiSigners: (Signer | Address)[] = [],
+    mint: PublicKey,
+    authority: PublicKey,
+    transferHookProgramId: PublicKey,
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
@@ -126,12 +126,12 @@ function deEscalateAccountMeta(accountMeta: AccountMeta, accountMetas: AccountMe
  * @returns Instruction to add to a transaction
  */
 export function createExecuteInstruction(
-    programId: Address,
-    source: Address,
-    mint: Address,
-    destination: Address,
-    owner: Address,
-    validateStatePubkey: Address,
+    programId: PublicKey,
+    source: PublicKey,
+    mint: PublicKey,
+    destination: PublicKey,
+    owner: PublicKey,
+    validateStatePubkey: PublicKey,
     amount: bigint,
 ): TransactionInstruction {
     const keys = [source, mint, destination, owner, validateStatePubkey].map(pubkey => ({
@@ -165,11 +165,11 @@ export function createExecuteInstruction(
 export async function addExtraAccountMetasForExecute(
     connection: Connection,
     instruction: TransactionInstruction,
-    programId: Address,
-    source: Address,
-    mint: Address,
-    destination: Address,
-    owner: Address,
+    programId: PublicKey,
+    source: PublicKey,
+    mint: PublicKey,
+    destination: PublicKey,
+    owner: PublicKey,
     amount: number | bigint,
     commitment?: Commitment,
 ) {
@@ -236,13 +236,13 @@ export async function addExtraAccountMetasForExecute(
  */
 export async function createTransferCheckedWithTransferHookInstruction(
     connection: Connection,
-    source: Address,
-    mint: Address,
-    destination: Address,
-    owner: Address,
+    source: PublicKey,
+    mint: PublicKey,
+    destination: PublicKey,
+    owner: PublicKey,
     amount: bigint,
     decimals: number,
-    multiSigners: (Signer | Address)[] = [],
+    multiSigners: (Signer | PublicKey)[] = [],
     commitment?: Commitment,
     programId = TOKEN_PROGRAM_ID,
 ) {
@@ -296,14 +296,14 @@ export async function createTransferCheckedWithTransferHookInstruction(
  */
 export async function createTransferCheckedWithFeeAndTransferHookInstruction(
     connection: Connection,
-    source: Address,
-    mint: Address,
-    destination: Address,
-    owner: Address,
+    source: PublicKey,
+    mint: PublicKey,
+    destination: PublicKey,
+    owner: PublicKey,
     amount: bigint,
     decimals: number,
     fee: bigint,
-    multiSigners: (Signer | Address)[] = [],
+    multiSigners: (Signer | PublicKey)[] = [],
     commitment?: Commitment,
     programId = TOKEN_PROGRAM_ID,
 ) {

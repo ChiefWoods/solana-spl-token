@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
+import { PublicKey, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 
 import {
     ExtensionType,
@@ -21,7 +21,7 @@ describe('Metadata pointer', () => {
     let payer: Signer;
     let mint: Keypair;
     let mintAuthority: Keypair;
-    let metadataAddress: Address;
+    let metadataAddress: PublicKey;
 
     beforeAll(async () => {
         connection = await getConnection();
@@ -38,7 +38,7 @@ describe('Metadata pointer', () => {
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: mint.publicKey,
                 space: mintLen,
                 lamports,

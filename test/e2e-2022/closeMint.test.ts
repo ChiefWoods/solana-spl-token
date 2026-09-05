@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import {
     createAccount,
@@ -22,11 +22,11 @@ const EXTENSIONS = [ExtensionType.MintCloseAuthority];
 describe('closeMint', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: Address;
+    let mint: PublicKey;
     let mintAuthority: Keypair;
     let closeAuthority: Keypair;
-    let account: Address;
-    let destination: Address;
+    let account: PublicKey;
+    let destination: PublicKey;
     beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
@@ -41,7 +41,7 @@ describe('closeMint', () => {
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: mint,
                 space: mintLen,
                 lamports,
@@ -99,7 +99,7 @@ describe('closeMint', () => {
         const mintCloseAuthority = getMintCloseAuthority(mintInfo);
         expect(mintCloseAuthority).not.toBeNull();
         if (mintCloseAuthority !== null) {
-            expect(mintCloseAuthority.closeAuthority).toEqual(Address.default);
+            expect(mintCloseAuthority.closeAuthority).toEqual(PublicKey.default);
         }
     });
 });

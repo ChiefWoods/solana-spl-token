@@ -3,7 +3,7 @@ import {
     getInitializePermanentDelegateInstructionDataEncoder,
 } from '@solana-program/token-2022';
 import type { AccountMeta } from '@solana/web3.js';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions } from '../constants.js';
 import {
@@ -19,7 +19,7 @@ import { addressFromString, addressToString, createInstructionDataCodec } from '
 /** Instruction data for an InitializePermanentDelegate instruction. */
 export interface InitializePermanentDelegateInstructionData {
     instruction: TokenInstruction.InitializePermanentDelegate;
-    delegate: Address;
+    delegate: PublicKey;
 }
 
 /** Codec for encoding and decoding InitializePermanentDelegate instruction data. */
@@ -40,9 +40,9 @@ export const initializePermanentDelegateInstructionData = createInstructionDataC
  * @return Instruction to add to a transaction
  */
 export function createInitializePermanentDelegateInstruction(
-    mint: Address,
-    permanentDelegate: Address | null,
-    programId: Address,
+    mint: PublicKey,
+    permanentDelegate: PublicKey | null,
+    programId: PublicKey,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
@@ -53,7 +53,7 @@ export function createInitializePermanentDelegateInstruction(
     initializePermanentDelegateInstructionData.encode(
         {
             instruction: TokenInstruction.InitializePermanentDelegate,
-            delegate: permanentDelegate || new Address(0),
+            delegate: permanentDelegate || new PublicKey(0),
         },
         data,
     );
@@ -63,13 +63,13 @@ export function createInitializePermanentDelegateInstruction(
 
 /** A decoded, valid InitializePermanentDelegate instruction */
 export interface DecodedInitializePermanentDelegateInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
     };
     data: {
         instruction: TokenInstruction.InitializePermanentDelegate;
-        delegate: Address | null;
+        delegate: PublicKey | null;
     };
 }
 
@@ -83,7 +83,7 @@ export interface DecodedInitializePermanentDelegateInstruction {
  */
 export function decodeInitializePermanentDelegateInstruction(
     instruction: TransactionInstruction,
-    programId: Address,
+    programId: PublicKey,
 ): DecodedInitializePermanentDelegateInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
     if (instruction.data.length !== initializePermanentDelegateInstructionData.span)
@@ -107,13 +107,13 @@ export function decodeInitializePermanentDelegateInstruction(
 
 /** A decoded, non-validated InitializePermanentDelegate instruction */
 export interface DecodedInitializePermanentDelegateInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta | undefined;
     };
     data: {
         instruction: number;
-        delegate: Address | null;
+        delegate: PublicKey | null;
     };
 }
 

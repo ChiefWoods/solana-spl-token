@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address, Transaction, SystemProgram, Keypair, sendAndConfirmTransaction } from '@solana/web3.js';
+import { PublicKey, Transaction, SystemProgram, Keypair, sendAndConfirmTransaction } from '@solana/web3.js';
 import {
     getMinimumBalanceForRentExemptMint,
     MINT_SIZE,
@@ -28,7 +28,7 @@ describe('initialize mint', () => {
         const freezeAuthority = (await Keypair.generate()).publicKey;
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: mintKeypair.publicKey,
                 space: MINT_SIZE,
                 lamports,
@@ -54,7 +54,7 @@ describe('initialize mint', () => {
         const mintAuthority = (await Keypair.generate()).publicKey;
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: mintKeypair.publicKey,
                 space: MINT_SIZE,
                 lamports,
@@ -93,7 +93,7 @@ describe('initialize mint 2', () => {
         const freezeAuthority = (await Keypair.generate()).publicKey;
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: mintKeypair.publicKey,
                 space: MINT_SIZE,
                 lamports,
@@ -119,7 +119,7 @@ describe('initialize mint 2', () => {
         const mintAuthority = (await Keypair.generate()).publicKey;
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: mintKeypair.publicKey,
                 space: MINT_SIZE,
                 lamports,

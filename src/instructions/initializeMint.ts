@@ -2,7 +2,7 @@ import {
     getInitializeMintInstructionDataDecoder,
     getInitializeMintInstructionDataEncoder,
 } from '@solana-program/token';
-import type { AccountMeta, Address } from '@solana/web3.js';
+import type { AccountMeta, PublicKey } from '@solana/web3.js';
 import { SYSVAR_RENT_PUBKEY, TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -24,8 +24,8 @@ import {
 export interface InitializeMintInstructionData {
     instruction: TokenInstruction.InitializeMint;
     decimals: number;
-    mintAuthority: Address;
-    freezeAuthority: Address | null;
+    mintAuthority: PublicKey;
+    freezeAuthority: PublicKey | null;
 }
 
 /** Codec for encoding and decoding InitializeMint instruction data. */
@@ -57,10 +57,10 @@ export const initializeMintInstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createInitializeMintInstruction(
-    mint: Address,
+    mint: PublicKey,
     decimals: number,
-    mintAuthority: Address,
-    freezeAuthority: Address | null,
+    mintAuthority: PublicKey,
+    freezeAuthority: PublicKey | null,
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = [
@@ -88,7 +88,7 @@ export function createInitializeMintInstruction(
 
 /** A decoded, valid InitializeMint instruction */
 export interface DecodedInitializeMintInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
         rent: AccountMeta;
@@ -96,8 +96,8 @@ export interface DecodedInitializeMintInstruction {
     data: {
         instruction: TokenInstruction.InitializeMint;
         decimals: number;
-        mintAuthority: Address;
-        freezeAuthority: Address | null;
+        mintAuthority: PublicKey;
+        freezeAuthority: PublicKey | null;
     };
 }
 
@@ -138,7 +138,7 @@ export function decodeInitializeMintInstruction(
 
 /** A decoded, non-validated InitializeMint instruction */
 export interface DecodedInitializeMintInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta | undefined;
         rent: AccountMeta | undefined;
@@ -146,8 +146,8 @@ export interface DecodedInitializeMintInstructionUnchecked {
     data: {
         instruction: number;
         decimals: number;
-        mintAuthority: Address;
-        freezeAuthority: Address | null;
+        mintAuthority: PublicKey;
+        freezeAuthority: PublicKey | null;
     };
 }
 

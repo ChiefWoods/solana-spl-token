@@ -3,7 +3,7 @@ import {
     sendAndConfirmTransaction,
     Connection,
     Keypair,
-    Address,
+    PublicKey,
     SystemProgram,
     Transaction,
     LAMPORTS_PER_SOL,
@@ -34,8 +34,8 @@ import {
     const extensions = [ExtensionType.TransferHook];
     const mintLen = getMintLen(extensions);
     const decimals = 9;
-    const transferHookPogramId = new Address('7N4HggYEJAtCLJdnHGCtFqfxcB5rhQCsQTze3ftYstVj');
-    const newTransferHookProgramId = new Address('7N4HggYEJAtCLJdnHGCtFqfxcB5rhQCsQTze3ftYstVj');
+    const transferHookPogramId = new PublicKey('7N4HggYEJAtCLJdnHGCtFqfxcB5rhQCsQTze3ftYstVj');
+    const newTransferHookProgramId = new PublicKey('7N4HggYEJAtCLJdnHGCtFqfxcB5rhQCsQTze3ftYstVj');
 
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
 

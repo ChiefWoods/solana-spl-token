@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address, Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
+import { PublicKey, Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 
 import {
     AuthorityType,
@@ -19,8 +19,8 @@ describe('immutableOwner', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Keypair;
-    let account: Address;
-    let mint: Address;
+    let account: PublicKey;
+    let mint: PublicKey;
     beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
@@ -45,7 +45,7 @@ describe('immutableOwner', () => {
         account = accountKeypair.publicKey;
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: account,
                 space: accountLen,
                 lamports,

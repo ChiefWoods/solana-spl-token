@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
+import { PublicKey, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import { createMemoInstruction } from '@solana/spl-memo';
 import {
     createAccount,
@@ -26,10 +26,10 @@ describe('memoTransfer', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Keypair;
-    let mint: Address;
+    let mint: PublicKey;
     let mintAuthority: Keypair;
-    let source: Address;
-    let destination: Address;
+    let source: PublicKey;
+    let destination: PublicKey;
     beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
@@ -66,7 +66,7 @@ describe('memoTransfer', () => {
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: destination,
                 space: accountLen,
                 lamports,
@@ -110,7 +110,7 @@ describe('memoTransfer', () => {
     });
     it('works with memo when enabled', async () => {
         const transaction = new Transaction().add(
-            createMemoInstruction('transfer with a memo', [new Address(payer.address), new Address(owner.address)]),
+            createMemoInstruction('transfer with a memo', [new PublicKey(payer.address), new PublicKey(owner.address)]),
             createTransferInstruction(source, destination, owner.publicKey, TRANSFER_AMOUNT, [], TEST_PROGRAM_ID),
         );
         await sendAndConfirmTransaction(connection, transaction, [payer, owner], {

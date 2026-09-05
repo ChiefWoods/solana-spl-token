@@ -2,7 +2,7 @@ import {
     getTransferCheckedInstructionDataDecoder,
     getTransferCheckedInstructionDataEncoder,
 } from '@solana-program/token';
-import type { AccountMeta, Address, Signer } from '@solana/web3.js';
+import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -45,13 +45,13 @@ export const transferCheckedInstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createTransferCheckedInstruction(
-    source: Address,
-    mint: Address,
-    destination: Address,
-    owner: Address,
+    source: PublicKey,
+    mint: PublicKey,
+    destination: PublicKey,
+    owner: PublicKey,
     amount: number | bigint,
     decimals: number,
-    multiSigners: (Signer | Address)[] = [],
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -79,7 +79,7 @@ export function createTransferCheckedInstruction(
 
 /** A decoded, valid TransferChecked instruction */
 export interface DecodedTransferCheckedInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         source: AccountMeta;
         mint: AccountMeta;
@@ -134,7 +134,7 @@ export function decodeTransferCheckedInstruction(
 
 /** A decoded, non-validated TransferChecked instruction */
 export interface DecodedTransferCheckedInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         source: AccountMeta | undefined;
         mint: AccountMeta | undefined;

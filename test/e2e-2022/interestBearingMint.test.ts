@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 import {
     AuthorityType,
@@ -19,7 +19,7 @@ const TEST_UPDATE_RATE = 50;
 describe('interestBearingMint', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: Address;
+    let mint: PublicKey;
     let rateAuthority: Keypair;
     let mintAuthority: Keypair;
     let freezeAuthority: Keypair;
@@ -97,7 +97,7 @@ describe('interestBearingMint', () => {
         const rateConfigState = getInterestBearingMintConfigState(mintInfo);
         expect(rateConfigState).not.toBeNull();
         if (rateConfigState !== null) {
-            expect(rateConfigState.rateAuthority).toEqual(Address.default);
+            expect(rateConfigState.rateAuthority).toEqual(PublicKey.default);
         }
     });
 });

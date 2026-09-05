@@ -1,5 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import type { Connection, Address, Signer } from '@solana/web3.js';
+import type { Connection, PublicKey, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 import { createMint, createAccount, getAccount, mintTo, burn, burnChecked } from '../../src';
 import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
@@ -8,10 +8,10 @@ const TEST_TOKEN_DECIMALS = 2;
 describe('burn', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: Address;
+    let mint: PublicKey;
     let mintAuthority: Keypair;
     let owner: Keypair;
-    let account: Address;
+    let account: PublicKey;
     let amount: bigint;
     beforeAll(async () => {
         connection = await getConnection();

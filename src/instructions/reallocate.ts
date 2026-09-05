@@ -1,5 +1,5 @@
 import { getReallocateInstructionDataEncoder } from '@solana-program/token-2022';
-import type { Address, Signer } from '@solana/web3.js';
+import type { PublicKey, Signer } from '@solana/web3.js';
 import { SystemProgram, TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions, TOKEN_2022_PROGRAM_ID } from '../constants.js';
 import { TokenUnsupportedInstructionError } from '../errors.js';
@@ -26,11 +26,11 @@ export interface ReallocateInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createReallocateInstruction(
-    account: Address,
-    payer: Address,
+    account: PublicKey,
+    payer: PublicKey,
     extensionTypes: ExtensionType[],
-    owner: Address,
-    multiSigners: (Signer | Address)[] = [],
+    owner: PublicKey,
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {

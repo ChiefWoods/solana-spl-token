@@ -1,7 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { getBase64Encoder } from '@solana/codecs-strings';
 import {
-    Address,
+    PublicKey,
     type Connection,
     sendAndConfirmTransaction,
     Keypair,
@@ -54,7 +54,7 @@ describe('tokenMetadata', async () => {
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: mint.publicKey,
                 space: mintLen,
                 lamports: lamports,
@@ -96,7 +96,7 @@ describe('tokenMetadata', async () => {
         const lamports = await connection.getMinimumBalanceForRentExemption(pack(tokenMetadata).length);
         const transaction = new Transaction().add(
             SystemProgram.transfer({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 toPubkey: mint.publicKey,
                 lamports,
             }),
@@ -498,7 +498,7 @@ describe('tokenMetadata', async () => {
             TEST_PROGRAM_ID,
         );
 
-        const payerKey = new Address(payer.address);
+        const payerKey = new PublicKey(payer.address);
         const recentBlockhash = await connection.getLatestBlockhash().then(res => res.blockhash);
         const instructions = [
             createEmitInstruction({

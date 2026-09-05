@@ -2,7 +2,7 @@ import {
     getInitializeAccount2InstructionDataDecoder,
     getInitializeAccount2InstructionDataEncoder,
 } from '@solana-program/token';
-import type { AccountMeta, Address } from '@solana/web3.js';
+import type { AccountMeta, PublicKey } from '@solana/web3.js';
 import { SYSVAR_RENT_PUBKEY, TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -16,7 +16,7 @@ import { addressFromString, addressToString, createInstructionDataCodec } from '
 
 export interface InitializeAccount2InstructionData {
     instruction: TokenInstruction.InitializeAccount2;
-    owner: Address;
+    owner: PublicKey;
 }
 
 export const initializeAccount2InstructionData = createInstructionDataCodec({
@@ -37,9 +37,9 @@ export const initializeAccount2InstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createInitializeAccount2Instruction(
-    account: Address,
-    mint: Address,
-    owner: Address,
+    account: PublicKey,
+    mint: PublicKey,
+    owner: PublicKey,
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = [
@@ -54,7 +54,7 @@ export function createInitializeAccount2Instruction(
 
 /** A decoded, valid InitializeAccount2 instruction */
 export interface DecodedInitializeAccount2Instruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta;
         mint: AccountMeta;
@@ -62,7 +62,7 @@ export interface DecodedInitializeAccount2Instruction {
     };
     data: {
         instruction: TokenInstruction.InitializeAccount2;
-        owner: Address;
+        owner: PublicKey;
     };
 }
 
@@ -104,7 +104,7 @@ export function decodeInitializeAccount2Instruction(
 
 /** A decoded, non-validated InitializeAccount2 instruction */
 export interface DecodedInitializeAccount2InstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta | undefined;
         mint: AccountMeta | undefined;
@@ -112,7 +112,7 @@ export interface DecodedInitializeAccount2InstructionUnchecked {
     };
     data: {
         instruction: number;
-        owner: Address;
+        owner: PublicKey;
     };
 }
 

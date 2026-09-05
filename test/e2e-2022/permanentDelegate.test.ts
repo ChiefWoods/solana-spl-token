@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import {
     createAccount,
@@ -23,11 +23,11 @@ const EXTENSIONS = [ExtensionType.PermanentDelegate];
 describe('permanentDelegate', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: Address;
+    let mint: PublicKey;
     let mintAuthority: Keypair;
     let permanentDelegate: Keypair;
-    let account: Address;
-    let destination: Address;
+    let account: PublicKey;
+    let destination: PublicKey;
     beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
@@ -41,7 +41,7 @@ describe('permanentDelegate', () => {
         const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: mint,
                 space: mintLen,
                 lamports,
@@ -118,7 +118,7 @@ describe('permanentDelegate', () => {
         const permanentDelegateConfig = getPermanentDelegate(mintInfo);
         expect(permanentDelegateConfig).not.toBeNull();
         if (permanentDelegateConfig !== null) {
-            expect(permanentDelegateConfig.delegate).toEqual(Address.default);
+            expect(permanentDelegateConfig.delegate).toEqual(PublicKey.default);
         }
     });
 });

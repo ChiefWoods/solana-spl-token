@@ -1,6 +1,6 @@
 import { getAddressCodec, getStructCodec, getU16Codec, getU64Codec } from '@solana/kit';
 import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import type { Account } from '../../state/account.js';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
@@ -24,9 +24,9 @@ export interface TransferFee {
 /** Transfer fee extension data for mints. */
 export interface TransferFeeConfig {
     /** Optional authority to set the fee */
-    transferFeeConfigAuthority: Address;
+    transferFeeConfigAuthority: PublicKey;
     /** Withdraw from mint instructions must be signed by this key */
-    withdrawWithheldAuthority: Address;
+    withdrawWithheldAuthority: PublicKey;
     /** Withheld transfer fee tokens that have been moved to the mint for withdrawal */
     withheldAmount: bigint;
     /** Older transfer fee, used if the current epoch < newerTransferFee.epoch */
@@ -133,8 +133,8 @@ export function getTransferFeeConfig(mint: Mint): TransferFeeConfig | null {
     const decoded = TransferFeeConfigCodec.decode(extensionData);
     return {
         ...decoded,
-        transferFeeConfigAuthority: new Address(decoded.transferFeeConfigAuthority),
-        withdrawWithheldAuthority: new Address(decoded.withdrawWithheldAuthority),
+        transferFeeConfigAuthority: new PublicKey(decoded.transferFeeConfigAuthority),
+        withdrawWithheldAuthority: new PublicKey(decoded.withdrawWithheldAuthority),
     };
 }
 

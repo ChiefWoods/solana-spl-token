@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address, Keypair, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
+import { PublicKey, Keypair, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 
 import {
     ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -19,11 +19,11 @@ describe('recoverNested', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Signer;
-    let mint: Address;
-    let associatedToken: Address;
-    let nestedMint: Address;
+    let mint: PublicKey;
+    let associatedToken: PublicKey;
+    let nestedMint: PublicKey;
     const nestedMintAmount = 1;
-    let nestedAssociatedToken: Address;
+    let nestedAssociatedToken: PublicKey;
     beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 10000000000);
@@ -47,7 +47,7 @@ describe('recoverNested', () => {
             connection,
             payer,
             mint,
-            new Address(owner.address),
+            new PublicKey(owner.address),
             undefined,
             TEST_PROGRAM_ID,
         );
@@ -75,7 +75,7 @@ describe('recoverNested', () => {
         );
         const transaction = new Transaction().add(
             createAssociatedTokenAccountInstruction(
-                new Address(payer.address),
+                new PublicKey(payer.address),
                 nestedAssociatedToken,
                 associatedToken,
                 nestedMint,
@@ -104,7 +104,7 @@ describe('recoverNested', () => {
             connection,
             payer,
             nestedMint,
-            new Address(owner.address),
+            new PublicKey(owner.address),
             undefined,
             TEST_PROGRAM_ID,
         );
@@ -116,7 +116,7 @@ describe('recoverNested', () => {
         const accountInfo = await getAccount(connection, destinationAssociatedToken, undefined, TEST_PROGRAM_ID);
         expect(accountInfo).not.toBeNull();
         expect(accountInfo.mint).toEqual(nestedMint);
-        expect(accountInfo.owner).toEqual(new Address(owner.address));
+        expect(accountInfo.owner).toEqual(new PublicKey(owner.address));
         expect(accountInfo.amount).toEqual(BigInt(nestedMintAmount));
     });
 });

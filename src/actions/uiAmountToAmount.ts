@@ -1,5 +1,5 @@
 import { getU64Decoder } from '@solana/kit';
-import type { Connection, Address, Signer, TransactionError } from '@solana/web3.js';
+import type { Connection, PublicKey, Signer, TransactionError } from '@solana/web3.js';
 import { Transaction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import { createUiAmountToAmountInstruction } from '../instructions/uiAmountToAmount.js';
@@ -18,7 +18,7 @@ import { createUiAmountToAmountInstruction } from '../instructions/uiAmountToAmo
 export async function uiAmountToAmount(
     connection: Connection,
     payer: Signer,
-    mint: Address,
+    mint: PublicKey,
     amount: string,
     programId = TOKEN_PROGRAM_ID,
 ): Promise<bigint | TransactionError | null> {

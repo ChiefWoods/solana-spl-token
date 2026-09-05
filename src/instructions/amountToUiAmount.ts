@@ -2,7 +2,7 @@ import {
     getAmountToUiAmountInstructionDataDecoder,
     getAmountToUiAmountInstructionDataEncoder,
 } from '@solana-program/token';
-import type { AccountMeta, Address } from '@solana/web3.js';
+import type { AccountMeta, PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -38,7 +38,7 @@ export const amountToUiAmountInstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createAmountToUiAmountInstruction(
-    mint: Address,
+    mint: PublicKey,
     amount: number | bigint,
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
@@ -58,7 +58,7 @@ export function createAmountToUiAmountInstruction(
 
 /** A decoded, valid AmountToUiAmount instruction */
 export interface DecodedAmountToUiAmountInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
     };
@@ -101,7 +101,7 @@ export function decodeAmountToUiAmountInstruction(
 
 /** A decoded, non-validated AmountToUiAmount instruction */
 export interface DecodedAmountToUiAmountInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta | undefined;
     };

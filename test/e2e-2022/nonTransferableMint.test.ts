@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
+import { PublicKey, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import {
     createInitializeMintInstruction,
     createInitializeNonTransferableMintInstruction,
@@ -21,7 +21,7 @@ const EXTENSIONS = [ExtensionType.NonTransferable];
 describe('nonTransferable', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: Address;
+    let mint: PublicKey;
     let mintAuthority: Keypair;
     beforeAll(async () => {
         connection = await getConnection();
@@ -36,7 +36,7 @@ describe('nonTransferable', () => {
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: mint,
                 space: mintLen,
                 lamports,
@@ -61,7 +61,7 @@ describe('nonTransferable', () => {
         const source = sourceKeypair.publicKey;
         let transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: source,
                 space: accountLen,
                 lamports,
@@ -76,7 +76,7 @@ describe('nonTransferable', () => {
         const destination = destinationKeypair.publicKey;
         transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: destination,
                 space: accountLen,
                 lamports,

@@ -5,18 +5,18 @@ import {
     getUpdateTokenMetadataFieldInstructionDataEncoder,
     getUpdateTokenMetadataUpdateAuthorityInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { Address } from '@solana/web3.js';
+import type { PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import type { Field } from './field.js';
 import { toTokenMetadataField } from './field.js';
 
 export interface InitializeInstructionArgs {
-    programId?: Address;
-    metadata: Address;
-    updateAuthority: Address;
-    mint: Address;
-    mintAuthority: Address;
+    programId?: PublicKey;
+    metadata: PublicKey;
+    updateAuthority: PublicKey;
+    mint: PublicKey;
+    mintAuthority: PublicKey;
     name: string;
     symbol: string;
     uri: string;
@@ -61,9 +61,9 @@ export function createInitializeInstruction(args: InitializeInstructionArgs): Tr
 }
 
 export interface UpdateFieldInstructionArgs {
-    programId?: Address;
-    metadata: Address;
-    updateAuthority: Address;
+    programId?: PublicKey;
+    metadata: PublicKey;
+    updateAuthority: PublicKey;
     field: Field | string;
     value: string;
 }
@@ -98,9 +98,9 @@ export function createUpdateFieldInstruction(args: UpdateFieldInstructionArgs): 
 }
 
 export interface RemoveKeyInstructionArgs {
-    programId?: Address;
-    metadata: Address;
-    updateAuthority: Address;
+    programId?: PublicKey;
+    metadata: PublicKey;
+    updateAuthority: PublicKey;
     key: string;
     idempotent: boolean;
 }
@@ -130,10 +130,10 @@ export function createRemoveKeyInstruction(args: RemoveKeyInstructionArgs): Tran
 }
 
 export interface UpdateAuthorityInstructionArgs {
-    programId?: Address;
-    metadata: Address;
-    oldAuthority: Address;
-    newAuthority: Address | null;
+    programId?: PublicKey;
+    metadata: PublicKey;
+    oldAuthority: PublicKey;
+    newAuthority: PublicKey | null;
 }
 
 /**
@@ -164,8 +164,8 @@ export function createUpdateAuthorityInstruction(args: UpdateAuthorityInstructio
 }
 
 export interface EmitInstructionArgs {
-    programId?: Address;
-    metadata: Address;
+    programId?: PublicKey;
+    metadata: PublicKey;
     start?: bigint;
     end?: bigint;
 }

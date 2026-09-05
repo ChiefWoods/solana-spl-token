@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
+import { PublicKey, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 
 import type { Account, Mint } from '../../src';
 import {
@@ -52,7 +52,7 @@ describe('tlv test', () => {
 
             const transaction = new Transaction().add(
                 SystemProgram.createAccount({
-                    fromPubkey: new Address(payer.address),
+                    fromPubkey: new PublicKey(payer.address),
                     newAccountPubkey: account,
                     space: accountLen,
                     lamports,
@@ -73,7 +73,7 @@ describe('tlv test', () => {
 
             promises.push(
                 initTestAccount(i)
-                    .then((account: Address) => getAccount(connection, account, undefined, TEST_PROGRAM_ID))
+                    .then((account: PublicKey) => getAccount(connection, account, undefined, TEST_PROGRAM_ID))
                     .then((accountInfo: Account) => {
                         for (const extension of ACCOUNT_EXTENSIONS) {
                             // realistically this will never fail with a non-null value, it will just throw

@@ -1,5 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import type { Connection, Address, Signer } from '@solana/web3.js';
+import type { Connection, PublicKey, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 
 import {
@@ -23,14 +23,14 @@ const N = 5;
 describe('multisig', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: Address;
+    let mint: PublicKey;
     let mintAuthority: Keypair;
-    let account1: Address;
-    let account2: Address;
+    let account1: PublicKey;
+    let account2: PublicKey;
     let amount: bigint;
-    let multisig: Address;
+    let multisig: PublicKey;
     let signers: Keypair[];
-    let signerPublicKeys: Address[];
+    let signerPublicKeys: PublicKey[];
     beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);

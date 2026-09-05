@@ -1,5 +1,5 @@
 import { getMintToCheckedInstructionDataDecoder, getMintToCheckedInstructionDataEncoder } from '@solana-program/token';
-import type { AccountMeta, Address, Signer } from '@solana/web3.js';
+import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -41,12 +41,12 @@ export const mintToCheckedInstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createMintToCheckedInstruction(
-    mint: Address,
-    destination: Address,
-    authority: Address,
+    mint: PublicKey,
+    destination: PublicKey,
+    authority: PublicKey,
     amount: number | bigint,
     decimals: number,
-    multiSigners: (Signer | Address)[] = [],
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -73,7 +73,7 @@ export function createMintToCheckedInstruction(
 
 /** A decoded, valid MintToChecked instruction */
 export interface DecodedMintToCheckedInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
         destination: AccountMeta;
@@ -126,7 +126,7 @@ export function decodeMintToCheckedInstruction(
 
 /** A decoded, non-validated MintToChecked instruction */
 export interface DecodedMintToCheckedInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta | undefined;
         destination: AccountMeta | undefined;

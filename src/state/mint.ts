@@ -6,7 +6,7 @@ import {
     type MintArgs,
 } from '@solana-program/token';
 import type { AccountInfo, Commitment, Connection } from '@solana/web3.js';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../constants.js';
 import {
     TokenAccountNotFoundError,
@@ -24,12 +24,12 @@ import { MULTISIG_SIZE } from './multisig.js';
 /** Information about a mint */
 export interface Mint {
     /** Address of the mint */
-    address: Address;
+    address: PublicKey;
     /**
      * Optional authority used to mint new tokens. The mint authority may only be provided during mint creation.
      * If no mint authority is present then the mint has a fixed supply and no further tokens may be minted.
      */
-    mintAuthority: Address | null;
+    mintAuthority: PublicKey | null;
     /** Total supply of tokens */
     supply: bigint;
     /** Number of base 10 digits to the right of the decimal place */
@@ -37,7 +37,7 @@ export interface Mint {
     /** Is this mint initialized */
     isInitialized: boolean;
     /** Optional authority to freeze token accounts */
-    freezeAuthority: Address | null;
+    freezeAuthority: PublicKey | null;
     /** Additional data for extension */
     tlvData: Buffer;
 }
@@ -45,25 +45,25 @@ export interface Mint {
 /** Mint as stored by the program */
 export interface RawMint {
     mintAuthorityOption: 1 | 0;
-    mintAuthority: Address;
+    mintAuthority: PublicKey;
     supply: bigint;
     decimals: number;
     isInitialized: boolean;
     freezeAuthorityOption: 1 | 0;
-    freezeAuthority: Address;
+    freezeAuthority: PublicKey;
 }
 
 type CodamaOption<T> = { __option: 'Some'; value: T } | { __option: 'None' };
 
-const DEFAULT_ADDRESS = new Address('11111111111111111111111111111111');
+const DEFAULT_ADDRESS = new PublicKey('11111111111111111111111111111111');
 
-function unwrapAddressOption(option: CodamaOption<string>): Address | null {
-    return option.__option === 'Some' ? new Address(option.value) : null;
+function unwrapAddressOption(option: CodamaOption<string>): PublicKey | null {
+    return option.__option === 'Some' ? new PublicKey(option.value) : null;
 }
 
-function getRawAddressOption(option: CodamaOption<string>): { option: 1 | 0; address: Address } {
+function getRawAddressOption(option: CodamaOption<string>): { option: 1 | 0; address: PublicKey } {
     return option.__option === 'Some'
-        ? { option: 1, address: new Address(option.value) }
+        ? { option: 1, address: new PublicKey(option.value) }
         : { option: 0, address: DEFAULT_ADDRESS };
 }
 
@@ -120,7 +120,7 @@ export const MINT_SIZE = getMintSize();
  */
 export async function getMint(
     connection: Connection,
-    address: Address,
+    address: PublicKey,
     commitment?: Commitment,
     programId = TOKEN_PROGRAM_ID,
 ): Promise<Mint> {
@@ -137,7 +137,7 @@ export async function getMint(
  *
  * @return Unpacked mint
  */
-export function unpackMint(address: Address, info: AccountInfo<Uint8Array> | null, programId = TOKEN_PROGRAM_ID): Mint {
+export function unpackMint(address: PublicKey, info: AccountInfo<Uint8Array> | null, programId = TOKEN_PROGRAM_ID): Mint {
     if (!info) throw new TokenAccountNotFoundError();
     if (!info.owner.equals(programId)) throw new TokenInvalidAccountOwnerError();
     if (info.data.length < MINT_SIZE) throw new TokenInvalidAccountSizeError();
@@ -206,15 +206,15 @@ export async function getMinimumBalanceForRentExemptMintWithExtensions(
  * @return Promise containing the address of the associated token account
  */
 export async function getAssociatedTokenAddress(
-    mint: Address,
-    owner: Address,
+    mint: PublicKey,
+    owner: PublicKey,
     allowOwnerOffCurve = false,
     programId = TOKEN_PROGRAM_ID,
     associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID,
-): Promise<Address> {
-    if (!allowOwnerOffCurve && !Address.isOnCurve(owner.toBytes())) throw new TokenOwnerOffCurveError();
+): Promise<PublicKey> {
+    if (!allowOwnerOffCurve && !PublicKey.isOnCurve(owner.toBytes())) throw new TokenOwnerOffCurveError();
 
-    const [address] = await Address.findProgramAddress(
+    const [address] = await PublicKey.findProgramAddress(
         [owner.toBytes(), programId.toBytes(), mint.toBytes()],
         associatedTokenProgramId,
     );
@@ -234,13 +234,13 @@ export async function getAssociatedTokenAddress(
  * @return Address of the associated token account
  */
 export function getAssociatedTokenAddressSync(
-    mint: Address,
-    owner: Address,
+    mint: PublicKey,
+    owner: PublicKey,
     allowOwnerOffCurve = false,
     programId = TOKEN_PROGRAM_ID,
     associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID,
-): Address {
-    if (!allowOwnerOffCurve && !Address.isOnCurve(owner.toBytes())) throw new TokenOwnerOffCurveError();
+): PublicKey {
+    if (!allowOwnerOffCurve && !PublicKey.isOnCurve(owner.toBytes())) throw new TokenOwnerOffCurveError();
     throw new Error(
         'getAssociatedTokenAddressSync is not supported with @solana/web3.js v3; use getAssociatedTokenAddress instead',
     );

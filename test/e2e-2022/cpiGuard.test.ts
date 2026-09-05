@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
+import { PublicKey, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import {
     createAccount,
     createMint,
@@ -23,7 +23,7 @@ describe('cpiGuard', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Keypair;
-    let account: Address;
+    let account: PublicKey;
 
     beforeAll(async () => {
         connection = await getConnection();
@@ -52,7 +52,7 @@ describe('cpiGuard', () => {
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: account,
                 space: accountLen,
                 lamports,

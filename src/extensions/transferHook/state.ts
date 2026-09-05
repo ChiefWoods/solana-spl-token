@@ -13,7 +13,7 @@ import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
 import type { AccountInfo, AccountMeta, Connection } from '@solana/web3.js';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import type { Account } from '../../state/account.js';
 import { TokenTransferHookAccountNotFound } from '../../errors.js';
 import { unpackSeeds } from './seeds.js';
@@ -22,9 +22,9 @@ import { unpackPubkeyData } from './pubkeyData.js';
 /** TransferHook as stored by the program */
 export interface TransferHook {
     /** The transfer hook update authority */
-    authority: Address;
+    authority: PublicKey;
     /** The transfer hook program account */
-    programId: Address;
+    programId: PublicKey;
 }
 
 type TransferHookCodecData = {
@@ -47,7 +47,7 @@ export function getTransferHook(mint: Mint): TransferHook | null {
     const extensionData = getExtensionData(ExtensionType.TransferHook, mint.tlvData);
     if (extensionData === null) return null;
     const { authority, programId } = TransferHookCodec.decode(extensionData);
-    return { authority: new Address(authority), programId: new Address(programId) };
+    return { authority: new PublicKey(authority), programId: new PublicKey(programId) };
 }
 
 /** TransferHookAccount as stored by the program */
@@ -72,9 +72,9 @@ export function getTransferHookAccount(account: Account): TransferHookAccount | 
     return extensionData !== null ? TransferHookAccountCodec.decode(extensionData) : null;
 }
 
-export async function getExtraAccountMetaAddress(mint: Address, programId: Address): Promise<Address> {
+export async function getExtraAccountMetaAddress(mint: PublicKey, programId: PublicKey): Promise<PublicKey> {
     const seeds = [Buffer.from('extra-account-metas'), mint.toBytes()];
-    return (await Address.findProgramAddress(seeds, programId))[0];
+    return (await PublicKey.findProgramAddress(seeds, programId))[0];
 }
 
 /** ExtraAccountMeta as stored by the transfer hook program */
@@ -143,11 +143,11 @@ export async function resolveExtraAccountMeta(
     extraMeta: ExtraAccountMeta,
     previousMetas: AccountMeta[],
     instructionData: Buffer,
-    transferHookProgramId: Address,
+    transferHookProgramId: PublicKey,
 ): Promise<AccountMeta> {
     if (extraMeta.discriminator === 0) {
         return {
-            pubkey: new Address(extraMeta.addressConfig),
+            pubkey: new PublicKey(extraMeta.addressConfig),
             isSigner: extraMeta.isSigner,
             isWritable: extraMeta.isWritable,
         };
@@ -160,7 +160,7 @@ export async function resolveExtraAccountMeta(
         };
     }
 
-    let programId = Address.default;
+    let programId = PublicKey.default;
 
     if (extraMeta.discriminator === 1) {
         programId = transferHookProgramId;
@@ -173,7 +173,7 @@ export async function resolveExtraAccountMeta(
     }
 
     const seeds = await unpackSeeds(extraMeta.addressConfig, previousMetas, instructionData, connection);
-    const pubkey = (await Address.findProgramAddress(seeds, programId))[0];
+    const pubkey = (await PublicKey.findProgramAddress(seeds, programId))[0];
 
     return { pubkey, isSigner: extraMeta.isSigner, isWritable: extraMeta.isWritable };
 }

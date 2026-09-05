@@ -2,7 +2,7 @@ import {
     getInitializeNonTransferableMintInstructionDataDecoder,
     getInitializeNonTransferableMintInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { Address } from '@solana/web3.js';
+import type { PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions } from '../constants.js';
 import { TokenUnsupportedInstructionError } from '../errors.js';
@@ -31,8 +31,8 @@ export const initializeNonTransferableMintInstructionData = createInstructionDat
  * @return Instruction to add to a transaction
  */
 export function createInitializeNonTransferableMintInstruction(
-    mint: Address,
-    programId: Address,
+    mint: PublicKey,
+    programId: PublicKey,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();

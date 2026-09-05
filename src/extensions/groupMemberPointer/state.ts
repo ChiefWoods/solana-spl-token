@@ -1,15 +1,15 @@
 import { getAddressCodec, getStructCodec } from '@solana/kit';
 import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
 
 /** GroupMemberPointer as stored by the program */
 export interface GroupMemberPointer {
     /** Optional authority that can set the member address */
-    authority: Address | null;
+    authority: PublicKey | null;
     /** Optional account address that holds the member */
-    memberAddress: Address | null;
+    memberAddress: PublicKey | null;
 }
 
 type GroupMemberPointerCodecData = {
@@ -34,10 +34,10 @@ export function getGroupMemberPointerState(mint: Mint): Partial<GroupMemberPoint
     if (extensionData === null) return null;
 
     const decoded = GroupMemberPointerCodec.decode(extensionData);
-    const authority = new Address(decoded.authority);
-    const memberAddress = new Address(decoded.memberAddress);
+    const authority = new PublicKey(decoded.authority);
+    const memberAddress = new PublicKey(decoded.memberAddress);
     return {
-        authority: authority.equals(Address.default) ? null : authority,
-        memberAddress: memberAddress.equals(Address.default) ? null : memberAddress,
+        authority: authority.equals(PublicKey.default) ? null : authority,
+        memberAddress: memberAddress.equals(PublicKey.default) ? null : memberAddress,
     };
 }

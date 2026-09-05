@@ -1,5 +1,5 @@
 import type { ConfirmOptions, Connection, Signer } from '@solana/web3.js';
-import { sendAndConfirmTransaction, Transaction, Address } from '@solana/web3.js';
+import { sendAndConfirmTransaction, Transaction, PublicKey } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../constants.js';
 import { createAssociatedTokenAccountInstruction } from '../instructions/associatedTokenAccount.js';
 import { getAssociatedTokenAddress } from '../state/mint.js';
@@ -21,13 +21,13 @@ import { getAssociatedTokenAddress } from '../state/mint.js';
 export async function createAssociatedTokenAccount(
     connection: Connection,
     payer: Signer,
-    mint: Address,
-    owner: Address,
+    mint: PublicKey,
+    owner: PublicKey,
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_PROGRAM_ID,
     associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID,
     allowOwnerOffCurve = false,
-): Promise<Address> {
+): Promise<PublicKey> {
     const associatedToken = await getAssociatedTokenAddress(
         mint,
         owner,
@@ -38,7 +38,7 @@ export async function createAssociatedTokenAccount(
 
     const transaction = new Transaction().add(
         createAssociatedTokenAccountInstruction(
-            new Address(payer.address),
+            new PublicKey(payer.address),
             associatedToken,
             owner,
             mint,

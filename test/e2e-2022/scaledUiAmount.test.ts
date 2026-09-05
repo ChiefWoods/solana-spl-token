@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
 
@@ -23,7 +23,7 @@ describe('scaledUiAmount', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Keypair;
-    let mint: Address;
+    let mint: PublicKey;
     let mintAuthority: Keypair;
     let multiplier: number;
     beforeAll(async () => {
@@ -41,7 +41,7 @@ describe('scaledUiAmount', () => {
         const mintLamports = await connection.getMinimumBalanceForRentExemption(mintLen);
         const mintTransaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: mint,
                 space: mintLen,
                 lamports: mintLamports,
@@ -79,7 +79,7 @@ describe('scaledUiAmount', () => {
         const scaledUiAmountConfig = getScaledUiAmountConfig(mintInfo);
         expect(scaledUiAmountConfig).not.toBeNull();
         if (scaledUiAmountConfig !== null) {
-            expect(scaledUiAmountConfig.authority).toEqual(Address.default);
+            expect(scaledUiAmountConfig.authority).toEqual(PublicKey.default);
         }
     });
 

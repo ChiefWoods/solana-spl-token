@@ -1,5 +1,5 @@
 import type { ConfirmOptions, Connection, Signer, TransactionSignature } from '@solana/web3.js';
-import { sendAndConfirmTransaction, Transaction, Address } from '@solana/web3.js';
+import { sendAndConfirmTransaction, Transaction, PublicKey } from '@solana/web3.js';
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID } from '../constants.js';
 import { createRecoverNestedInstruction } from '../instructions/associatedTokenAccount.js';
 import { getAssociatedTokenAddress } from '../state/mint.js';
@@ -22,13 +22,13 @@ export async function recoverNested(
     connection: Connection,
     payer: Signer,
     owner: Signer,
-    mint: Address,
-    nestedMint: Address,
+    mint: PublicKey,
+    nestedMint: PublicKey,
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_PROGRAM_ID,
     associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID,
 ): Promise<TransactionSignature> {
-    const ownerPublicKey = new Address(owner.address);
+    const ownerPublicKey = new PublicKey(owner.address);
     const ownerAssociatedToken = await getAssociatedTokenAddress(
         mint,
         ownerPublicKey,

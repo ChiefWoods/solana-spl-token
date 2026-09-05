@@ -3,7 +3,7 @@ import {
     getUpdateMultiplierScaledUiMintInstructionDataEncoder,
 } from '@solana-program/token-2022';
 import type { TokenInstruction } from '../../instructions/types.js';
-import type { Signer, Address } from '@solana/web3.js';
+import type { Signer, PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions, TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
@@ -17,7 +17,7 @@ export enum ScaledUiAmountInstruction {
 export interface InitializeScaledUiAmountConfigData {
     instruction: TokenInstruction.ScaledUiAmountExtension;
     scaledUiAmountInstruction: ScaledUiAmountInstruction.Initialize;
-    authority: Address | null;
+    authority: PublicKey | null;
     multiplier: number;
 }
 
@@ -32,10 +32,10 @@ export interface InitializeScaledUiAmountConfigData {
  * @return Instruction to add to a transaction
  */
 export function createInitializeScaledUiAmountConfigInstruction(
-    mint: Address,
-    authority: Address | null,
+    mint: PublicKey,
+    authority: PublicKey | null,
     multiplier: number,
-    programId: Address = TOKEN_2022_PROGRAM_ID,
+    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
@@ -71,12 +71,12 @@ export interface UpdateMultiplierData {
  * @return Instruction to add to a transaction
  */
 export function createUpdateMultiplierDataInstruction(
-    mint: Address,
-    authority: Address,
+    mint: PublicKey,
+    authority: PublicKey,
     multiplier: number,
     effectiveTimestamp: bigint,
-    multiSigners: (Signer | Address)[] = [],
-    programId: Address = TOKEN_2022_PROGRAM_ID,
+    multiSigners: (Signer | PublicKey)[] = [],
+    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();

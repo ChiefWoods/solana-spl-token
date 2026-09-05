@@ -11,7 +11,7 @@ import {
     getU8Encoder,
     type ReadonlyUint8Array,
 } from '@solana/kit';
-import type { AccountMeta, Address } from '@solana/web3.js';
+import type { AccountMeta, PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -143,7 +143,7 @@ export interface DecodedBatchEntry {
 
 /** A decoded, valid Batch instruction */
 export interface DecodedBatchInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         accounts: AccountMeta[];
     };
@@ -192,7 +192,7 @@ export function decodeBatchInstruction(
 
 /** A decoded, non-validated Batch instruction */
 export interface DecodedBatchInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         accounts: AccountMeta[];
     };

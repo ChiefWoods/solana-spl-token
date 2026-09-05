@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 
 import { Field, updateTokenMetadata, type TokenMetadata } from '../../src';
 
@@ -7,7 +7,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
     describe('Update token metadata', () => {
         it('guards against updates on mint or updateAuthority', async () => {
             const input = Object.freeze({
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'new_name',
                 symbol: 'new_symbol',
                 uri: 'new_uri',
@@ -26,7 +26,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
         });
         it('can update name', async () => {
             const input = Object.freeze({
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'new_name',
                 symbol: 'new_symbol',
                 uri: 'new_uri',
@@ -37,7 +37,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
             } as TokenMetadata);
 
             const expected: TokenMetadata = {
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'updated_name',
                 symbol: 'new_symbol',
                 uri: 'new_uri',
@@ -54,7 +54,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
 
         it('can update symbol', async () => {
             const input = Object.freeze({
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'new_name',
                 symbol: 'new_symbol',
                 uri: 'new_uri',
@@ -65,7 +65,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
             } as TokenMetadata);
 
             const expected: TokenMetadata = {
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'new_name',
                 symbol: 'updated_symbol',
                 uri: 'new_uri',
@@ -82,7 +82,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
 
         it('can update uri', async () => {
             const input = Object.freeze({
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'new_name',
                 symbol: 'new_symbol',
                 uri: 'new_uri',
@@ -93,7 +93,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
             } as TokenMetadata);
 
             const expected: TokenMetadata = {
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'new_name',
                 symbol: 'new_symbol',
                 uri: 'updated_uri',
@@ -110,7 +110,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
 
         it('can update additional Metadata', async () => {
             const input = Object.freeze({
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'new_name',
                 symbol: 'new_symbol',
                 uri: 'new_uri',
@@ -121,7 +121,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
             } as TokenMetadata);
 
             const expected: TokenMetadata = {
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'new_name',
                 symbol: 'new_symbol',
                 uri: 'new_uri',
@@ -136,7 +136,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
 
         it('can add additional Metadata', async () => {
             const input = Object.freeze({
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'new_name',
                 symbol: 'new_symbol',
                 uri: 'new_uri',
@@ -147,7 +147,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
             } as TokenMetadata);
 
             const expected: TokenMetadata = {
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'new_name',
                 symbol: 'new_symbol',
                 uri: 'new_uri',
@@ -163,7 +163,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
 
         it('can update `additionalMetadata` key to additional metadata', async () => {
             const input = Object.freeze({
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'new_name',
                 symbol: 'new_symbol',
                 uri: 'new_uri',
@@ -175,7 +175,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
             } as TokenMetadata);
 
             const expected: TokenMetadata = {
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'new_name',
                 symbol: 'new_symbol',
                 uri: 'new_uri',
@@ -191,7 +191,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
 
         it('can add `additionalMetadata` key to additional metadata', async () => {
             const input = Object.freeze({
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'new_name',
                 symbol: 'new_symbol',
                 uri: 'new_uri',
@@ -202,7 +202,7 @@ describe('SPL Token 2022 Metadata Extension', () => {
             } as TokenMetadata);
 
             const expected: TokenMetadata = {
-                mint: Address.default,
+                mint: PublicKey.default,
                 name: 'new_name',
                 symbol: 'new_symbol',
                 uri: 'new_uri',

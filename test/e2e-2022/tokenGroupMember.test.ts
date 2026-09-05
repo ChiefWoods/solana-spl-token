@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 
 import {
@@ -54,7 +54,7 @@ describe('tokenGroupMember', async () => {
             connection,
             new Transaction().add(
                 SystemProgram.createAccount({
-                    fromPubkey: new Address(payer.address),
+                    fromPubkey: new PublicKey(payer.address),
                     newAccountPubkey: groupMint.publicKey,
                     space: groupMintLen,
                     lamports: groupMintLamports,
@@ -94,7 +94,7 @@ describe('tokenGroupMember', async () => {
             connection,
             new Transaction().add(
                 SystemProgram.createAccount({
-                    fromPubkey: new Address(payer.address),
+                    fromPubkey: new PublicKey(payer.address),
                     newAccountPubkey: memberMint.publicKey,
                     space: memberMintLen,
                     lamports: memberMintLamports,

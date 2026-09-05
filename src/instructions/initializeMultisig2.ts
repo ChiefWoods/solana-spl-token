@@ -3,7 +3,7 @@ import {
     getInitializeMultisig2InstructionDataEncoder,
 } from '@solana-program/token';
 import type { AccountMeta, Signer } from '@solana/web3.js';
-import { Address, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
     TokenInvalidInstructionDataError,
@@ -39,15 +39,15 @@ export const initializeMultisig2InstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createInitializeMultisig2Instruction(
-    account: Address,
-    signers: (Signer | Address)[],
+    account: PublicKey,
+    signers: (Signer | PublicKey)[],
     m: number,
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = [{ pubkey: account, isSigner: false, isWritable: true }];
     for (const signer of signers) {
         keys.push({
-            pubkey: signer instanceof Address ? signer : new Address(signer.address),
+            pubkey: signer instanceof PublicKey ? signer : new PublicKey(signer.address),
             isSigner: false,
             isWritable: false,
         });
@@ -67,7 +67,7 @@ export function createInitializeMultisig2Instruction(
 
 /** A decoded, valid InitializeMultisig2 instruction */
 export interface DecodedInitializeMultisig2Instruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta;
         signers: AccountMeta[];
@@ -113,7 +113,7 @@ export function decodeInitializeMultisig2Instruction(
 
 /** A decoded, non-validated InitializeMultisig2 instruction */
 export interface DecodedInitializeMultisig2InstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta | undefined;
         signers: AccountMeta[];

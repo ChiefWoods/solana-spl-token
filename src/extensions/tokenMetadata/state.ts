@@ -1,5 +1,5 @@
 import type { Commitment, Connection } from '@solana/web3.js';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { extension, getExtensionDecoder, getExtensionEncoder } from '@solana-program/token-2022';
 import { address, type ReadonlyUint8Array } from '@solana/kit';
 
@@ -10,9 +10,9 @@ import { Field } from './field.js';
 
 export interface TokenMetadata {
     /** The authority that can sign to update the metadata */
-    updateAuthority?: Address;
+    updateAuthority?: PublicKey;
     /** The associated mint, used to counter spoofing */
-    mint: Address;
+    mint: PublicKey;
     /** The longer name of the token */
     name: string;
     /** The shortened symbol for the token */
@@ -25,10 +25,10 @@ export interface TokenMetadata {
 
 const TLV_HEADER_SIZE = TYPE_SIZE + LENGTH_SIZE;
 
-function optionToAddress(option: { __option: 'None' } | { __option: 'Some'; value: string }): Address | undefined {
+function optionToAddress(option: { __option: 'None' } | { __option: 'Some'; value: string }): PublicKey | undefined {
     if (option.__option === 'None') return undefined;
-    const value = new Address(option.value);
-    return value.equals(Address.default) ? undefined : value;
+    const value = new PublicKey(option.value);
+    return value.equals(PublicKey.default) ? undefined : value;
 }
 
 /** Pack TokenMetadata into the extension payload byte slab (no TLV type/length header) */
@@ -62,7 +62,7 @@ export function unpack(buffer: Buffer | Uint8Array | ReadonlyUint8Array): TokenM
 
     return {
         updateAuthority: optionToAddress(decoded.updateAuthority),
-        mint: new Address(decoded.mint),
+        mint: new PublicKey(decoded.mint),
         name: decoded.name,
         symbol: decoded.symbol,
         uri: decoded.uri,
@@ -132,7 +132,7 @@ export function updateTokenMetadata(current: TokenMetadata, key: Field | string,
  */
 export async function getTokenMetadata(
     connection: Connection,
-    mintAddress: Address,
+    mintAddress: PublicKey,
     commitment?: Commitment,
     programId = TOKEN_2022_PROGRAM_ID,
 ): Promise<TokenMetadata | null> {

@@ -1,5 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import type { Connection, Address, Signer } from '@solana/web3.js';
+import type { Connection, PublicKey, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 
 import {
@@ -19,8 +19,8 @@ describe('unwrapLamports', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Keypair;
-    let account1: Address;
-    let account2: Address;
+    let account1: PublicKey;
+    let account2: PublicKey;
     let balance: number;
     beforeAll(async () => {
         connection = await getConnection();

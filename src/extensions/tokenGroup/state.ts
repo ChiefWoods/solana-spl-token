@@ -1,14 +1,14 @@
 import { extension, getExtensionDecoder, getExtensionEncoder } from '@solana-program/token-2022';
 import { address, type ReadonlyUint8Array } from '@solana/kit';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
 
 export interface TokenGroup {
     /** The authority that can sign to update the group */
-    updateAuthority?: Address;
+    updateAuthority?: PublicKey;
     /** The associated mint, used to counter spoofing */
-    mint: Address;
+    mint: PublicKey;
     /** The current number of group members */
     size: bigint;
     /** The maximum number of group members */
@@ -17,9 +17,9 @@ export interface TokenGroup {
 
 export interface TokenGroupMember {
     /** The associated mint, used to counter spoofing */
-    mint: Address;
+    mint: PublicKey;
     /** The pubkey of the `TokenGroup` */
-    group: Address;
+    group: PublicKey;
     /** The member number */
     memberNumber: bigint;
 }
@@ -51,10 +51,10 @@ export const TOKEN_GROUP_MEMBER_SIZE =
         }),
     ).length - TLV_HEADER_SIZE;
 
-function optionToAddress(option: { __option: 'None' } | { __option: 'Some'; value: string }): Address | undefined {
+function optionToAddress(option: { __option: 'None' } | { __option: 'Some'; value: string }): PublicKey | undefined {
     if (option.__option === 'None') return undefined;
-    const value = new Address(option.value);
-    return value.equals(Address.default) ? undefined : value;
+    const value = new PublicKey(option.value);
+    return value.equals(PublicKey.default) ? undefined : value;
 }
 
 function decodeExtensionPayload(extensionType: ExtensionType, payload: Uint8Array) {
@@ -90,7 +90,7 @@ export function unpackTokenGroup(buffer: Buffer | Uint8Array | ReadonlyUint8Arra
 
     return {
         updateAuthority: optionToAddress(decoded.updateAuthority),
-        mint: new Address(decoded.mint),
+        mint: new PublicKey(decoded.mint),
         size: decoded.size,
         maxSize: decoded.maxSize,
     };
@@ -118,8 +118,8 @@ export function unpackTokenGroupMember(buffer: Buffer | Uint8Array | ReadonlyUin
     }
 
     return {
-        mint: new Address(decoded.mint),
-        group: new Address(decoded.group),
+        mint: new PublicKey(decoded.mint),
+        group: new PublicKey(decoded.group),
         memberNumber: decoded.memberNumber,
     };
 }

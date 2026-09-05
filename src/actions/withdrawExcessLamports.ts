@@ -1,4 +1,4 @@
-import type { ConfirmOptions, Connection, Address, Signer, TransactionSignature } from '@solana/web3.js';
+import type { ConfirmOptions, Connection, PublicKey, Signer, TransactionSignature } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import { getSigners } from './internal.js';
@@ -21,9 +21,9 @@ import { createWithdrawExcessLamportsInstruction } from '../instructions/withdra
 export async function withdrawExcessLamports(
     connection: Connection,
     payer: Signer,
-    source: Address,
-    destination: Address,
-    authority: Signer | Address,
+    source: PublicKey,
+    destination: PublicKey,
+    authority: Signer | PublicKey,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_PROGRAM_ID,

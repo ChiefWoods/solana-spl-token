@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { AccountMeta, Connection, Signer } from '@solana/web3.js';
-import { Address, TransactionInstruction } from '@solana/web3.js';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import {
     createInitializeMintInstruction,
@@ -30,17 +30,17 @@ const EXTENSIONS = [ExtensionType.TransferHook];
 describe('transferHook', () => {
     let connection: Connection;
     let payer: Signer;
-    let payerAddress: Address;
-    let payerAta: Address;
-    let destinationAuthority: Address;
-    let destinationAta: Address;
+    let payerAddress: PublicKey;
+    let payerAta: PublicKey;
+    let destinationAuthority: PublicKey;
+    let destinationAta: PublicKey;
     let transferHookAuthority: Keypair;
-    let pdaExtraAccountMeta: Address;
-    let mint: Address;
+    let pdaExtraAccountMeta: PublicKey;
+    let mint: PublicKey;
     beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
-        payerAddress = new Address(payer.address);
+        payerAddress = new PublicKey(payer.address);
         destinationAuthority = (await Keypair.generate()).publicKey;
         transferHookAuthority = await Keypair.generate();
     });
@@ -50,7 +50,7 @@ describe('transferHook', () => {
         pdaExtraAccountMeta = await getExtraAccountMetaAddress(mint, TRANSFER_HOOK_TEST_PROGRAM_ID);
         payerAta = await getAssociatedTokenAddress(
             mint,
-            new Address(payer.address),
+            new PublicKey(payer.address),
             false,
             TEST_PROGRAM_ID,
             ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -128,7 +128,7 @@ describe('transferHook', () => {
         const transferHook = getTransferHook(mintInfo);
         expect(transferHook).not.toBeNull();
         if (transferHook !== null) {
-            expect(transferHook.authority).toEqual(Address.default);
+            expect(transferHook.authority).toEqual(PublicKey.default);
         }
     });
     it('transferChecked', async () => {

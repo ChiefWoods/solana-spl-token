@@ -19,7 +19,7 @@ import {
     resolveExtraAccountMeta,
 } from '../../src';
 import type { Connection } from '@solana/web3.js';
-import { Keypair, Address, TransactionInstruction } from '@solana/web3.js';
+import { Keypair, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { getConnection } from '../common';
 
 describe('transferHook', () => {
@@ -27,14 +27,14 @@ describe('transferHook', () => {
         let connection: Connection;
 
         /** Plain account keys **/
-        const testProgramId = new Address('7N4HggYEJAtCLJdnHGCtFqfxcB5rhQCsQTze3ftYstVj');
-        const plainAccount = new Address('6c5q79ccBTWvZTEx3JkdHThtMa2eALba5bfvHGf8kA2c');
+        const testProgramId = new PublicKey('7N4HggYEJAtCLJdnHGCtFqfxcB5rhQCsQTze3ftYstVj');
+        const plainAccount = new PublicKey('6c5q79ccBTWvZTEx3JkdHThtMa2eALba5bfvHGf8kA2c');
         /** **/
 
         /** Account data for getAccountInfo **/
         const accountData = {
             data: Buffer.from([0, 0, 2, 2, 2, 2, ...plainAccount.toBytes()]),
-            owner: Address.default,
+            owner: PublicKey.default,
             executable: false,
             lamports: 0n,
             rentEpoch: 0n,
@@ -49,8 +49,8 @@ describe('transferHook', () => {
             plainAccount.toBytes(),
             Buffer.from([2, 2, 2, 2]),
         ];
-        let pdaPublicKey: Address;
-        let pdaPublicKeyWithProgramId: Address;
+        let pdaPublicKey: PublicKey;
+        let pdaPublicKeyWithProgramId: PublicKey;
         /** **/
 
         /** Instruction data **/
@@ -217,10 +217,10 @@ describe('transferHook', () => {
 
         beforeAll(async () => {
             connection = await getConnection();
-            pdaPublicKey = (await Address.findProgramAddress(seeds, testProgramId))[0];
-            pdaPublicKeyWithProgramId = (await Address.findProgramAddress(seeds, plainAccount))[0];
+            pdaPublicKey = (await PublicKey.findProgramAddress(seeds, testProgramId))[0];
+            pdaPublicKeyWithProgramId = (await PublicKey.findProgramAddress(seeds, plainAccount))[0];
             connection.getAccountInfo = async (
-                _publicKey: Address,
+                _publicKey: PublicKey,
                 _commitmentOrConfig?: Parameters<(typeof connection)['getAccountInfo']>[1],
             ): ReturnType<(typeof connection)['getAccountInfo']> => accountData;
         });
@@ -228,7 +228,7 @@ describe('transferHook', () => {
         it('can parse extra metas', () => {
             const accountInfo = {
                 data: extraAccountList,
-                owner: Address.default,
+                owner: PublicKey.default,
                 executable: false,
                 lamports: 0n,
                 rentEpoch: 0n,
@@ -341,13 +341,13 @@ describe('transferHook', () => {
     describe('adding extra metas to instructions', () => {
         let connection: Connection;
 
-        let transferHookProgramId: Address;
+        let transferHookProgramId: PublicKey;
 
-        let sourcePubkey: Address;
-        let mintPubkey: Address;
-        let destinationPubkey: Address;
-        let authorityPubkey: Address;
-        let validateStatePubkey: Address;
+        let sourcePubkey: PublicKey;
+        let mintPubkey: PublicKey;
+        let destinationPubkey: PublicKey;
+        let authorityPubkey: PublicKey;
+        let validateStatePubkey: PublicKey;
 
         const amount = 100n;
         const amountInLeBytes = Buffer.alloc(8);
@@ -355,7 +355,7 @@ describe('transferHook', () => {
         const decimals = 0;
 
         // Arbitrary program ID included to test external PDAs
-        let arbitraryProgramId: Address;
+        let arbitraryProgramId: PublicKey;
 
         beforeEach(async () => {
             connection = await getConnection();
@@ -373,7 +373,7 @@ describe('transferHook', () => {
 
         function createMockFetchAccountDataFn(extraAccounts: ExtraAccountMeta[]) {
             return async function mockFetchAccountDataFn(
-                publicKey: Address,
+                publicKey: PublicKey,
                 _commitmentOrConfig?: Parameters<Connection['getAccountInfo']>[1],
             ): ReturnType<Connection['getAccountInfo']> {
                 // Mocked mint state
@@ -384,12 +384,12 @@ describe('transferHook', () => {
                     MintLayout.encode(
                         {
                             mintAuthorityOption: 0,
-                            mintAuthority: Address.default,
+                            mintAuthority: PublicKey.default,
                             supply: 10000n,
                             decimals,
                             isInitialized: true,
                             freezeAuthorityOption: 0,
-                            freezeAuthority: Address.default,
+                            freezeAuthority: PublicKey.default,
                         },
                         data,
                         0,
@@ -447,7 +447,7 @@ describe('transferHook', () => {
                 const data = Buffer.from([]);
                 return {
                     data,
-                    owner: Address.default,
+                    owner: PublicKey.default,
                     executable: false,
                     lamports: 0n,
                     rentEpoch: 0n,
@@ -462,7 +462,7 @@ describe('transferHook', () => {
             return addressConfig;
         };
 
-        const fixedAddress = (address: Address, isSigner: boolean, isWritable: boolean) => ({
+        const fixedAddress = (address: PublicKey, isSigner: boolean, isWritable: boolean) => ({
             discriminator: 0,
             addressConfig: address.toBytes(),
             isSigner,
@@ -508,19 +508,19 @@ describe('transferHook', () => {
             ]);
 
             const extraMeta4Pubkey = (
-                await Address.findProgramAddress(
+                await PublicKey.findProgramAddress(
                     [sourcePubkey.toBytes(), validateStatePubkey.toBytes()],
                     transferHookProgramId,
                 )
             )[0];
             const extraMeta5Pubkey = (
-                await Address.findProgramAddress(
+                await PublicKey.findProgramAddress(
                     [extraMeta1Pubkey.toBytes(), extraMeta2Pubkey.toBytes()],
                     transferHookProgramId,
                 )
             )[0];
             const extraMeta6Pubkey = (
-                await Address.findProgramAddress(
+                await PublicKey.findProgramAddress(
                     [
                         Buffer.from('prefix'),
                         amountInLeBytes, // Instruction data 8..16
@@ -621,7 +621,7 @@ describe('transferHook', () => {
             ]);
 
             const extraMeta1Pubkey = (
-                await Address.findProgramAddress(
+                await PublicKey.findProgramAddress(
                     [
                         sourcePubkey.toBytes(), // Account key at index 0
                         mintPubkey.toBytes(), // Account key at index 1
@@ -630,7 +630,7 @@ describe('transferHook', () => {
                 )
             )[0];
             const extraMeta2Pubkey = (
-                await Address.findProgramAddress(
+                await PublicKey.findProgramAddress(
                     [
                         validateStatePubkey.toBytes(), // Account key at index 4
                     ],
@@ -638,7 +638,7 @@ describe('transferHook', () => {
                 )
             )[0];
             const extraMeta3Pubkey = (
-                await Address.findProgramAddress(
+                await PublicKey.findProgramAddress(
                     [
                         Buffer.from('prefix'),
                         amountInLeBytes, // Instruction data 8..16
@@ -648,7 +648,7 @@ describe('transferHook', () => {
             )[0];
             const extraMeta4Pubkey = arbitraryProgramId;
             const extraMeta5Pubkey = (
-                await Address.findProgramAddress(
+                await PublicKey.findProgramAddress(
                     [
                         Buffer.from('prefix'),
                         amountInLeBytes, // Instruction data 8..16
@@ -658,7 +658,7 @@ describe('transferHook', () => {
                 )
             )[0];
             const extraMeta6Pubkey = (
-                await Address.findProgramAddress(
+                await PublicKey.findProgramAddress(
                     [
                         Buffer.from('another_prefix'),
                         amountInLeBytes, // Instruction data 8..16

@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 
 import {
@@ -43,7 +43,7 @@ describe('tokenGroup', async () => {
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: mint.publicKey,
                 space: mintLen,
                 lamports,
@@ -84,7 +84,7 @@ describe('tokenGroup', async () => {
         const lamports = await connection.getMinimumBalanceForRentExemption(packTokenGroup(tokenGroup).length);
         const transaction = new Transaction().add(
             SystemProgram.transfer({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 toPubkey: mint.publicKey,
                 lamports,
             }),
@@ -145,7 +145,7 @@ describe('tokenGroup', async () => {
         const lamports = await connection.getMinimumBalanceForRentExemption(packTokenGroup(tokenGroup).length);
         const transaction = new Transaction().add(
             SystemProgram.transfer({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 toPubkey: mint.publicKey,
                 lamports,
             }),
@@ -197,7 +197,7 @@ describe('tokenGroup', async () => {
         const lamports = await connection.getMinimumBalanceForRentExemption(packTokenGroup(tokenGroup).length);
         const transaction = new Transaction().add(
             SystemProgram.transfer({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 toPubkey: mint.publicKey,
                 lamports,
             }),

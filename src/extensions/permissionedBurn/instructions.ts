@@ -3,7 +3,7 @@ import {
     getPermissionedBurnCheckedInstructionDataEncoder,
     getPermissionedBurnInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { Address, Signer } from '@solana/web3.js';
+import type { PublicKey, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions, TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
@@ -19,7 +19,7 @@ export enum PermissionedBurnInstruction {
 export interface InitializePermissionedBurnInstructionData {
     instruction: TokenInstruction.PermissionedBurnExtension;
     permissionedBurnInstruction: PermissionedBurnInstruction.Initialize;
-    authority: Address;
+    authority: PublicKey;
 }
 
 /**
@@ -30,8 +30,8 @@ export interface InitializePermissionedBurnInstructionData {
  * @param programId     SPL Token program account
  */
 export function createInitializePermissionedBurnInstruction(
-    mint: Address,
-    authority: Address,
+    mint: PublicKey,
+    authority: PublicKey,
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
@@ -64,12 +64,12 @@ export interface PermissionedBurnInstructionData {
  * @param programId                     SPL Token program account
  */
 export function createPermissionedBurnInstruction(
-    account: Address,
-    mint: Address,
-    owner: Address,
-    permissionedBurnAuthority: Address,
+    account: PublicKey,
+    mint: PublicKey,
+    owner: PublicKey,
+    permissionedBurnAuthority: PublicKey,
     amount: number | bigint,
-    multiSigners: (Signer | Address)[] = [],
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
@@ -111,13 +111,13 @@ export interface PermissionedBurnCheckedInstructionData {
  * @param programId                     SPL Token program account
  */
 export function createPermissionedBurnCheckedInstruction(
-    account: Address,
-    mint: Address,
-    owner: Address,
-    permissionedBurnAuthority: Address,
+    account: PublicKey,
+    mint: PublicKey,
+    owner: PublicKey,
+    permissionedBurnAuthority: PublicKey,
     amount: number | bigint,
     decimals: number,
-    multiSigners: (Signer | Address)[] = [],
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {

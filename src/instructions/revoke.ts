@@ -1,5 +1,5 @@
 import { getRevokeInstructionDataDecoder, getRevokeInstructionDataEncoder } from '@solana-program/token';
-import type { AccountMeta, Address, Signer } from '@solana/web3.js';
+import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -36,9 +36,9 @@ export const revokeInstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createRevokeInstruction(
-    account: Address,
-    owner: Address,
-    multiSigners: (Signer | Address)[] = [],
+    account: PublicKey,
+    owner: PublicKey,
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners([{ pubkey: account, isSigner: false, isWritable: true }], owner, multiSigners);
@@ -51,7 +51,7 @@ export function createRevokeInstruction(
 
 /** A decoded, valid Revoke instruction */
 export interface DecodedRevokeInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta;
         owner: AccountMeta;
@@ -99,7 +99,7 @@ export function decodeRevokeInstruction(
 
 /** A decoded, non-validated Revoke instruction */
 export interface DecodedRevokeInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta | undefined;
         owner: AccountMeta | undefined;

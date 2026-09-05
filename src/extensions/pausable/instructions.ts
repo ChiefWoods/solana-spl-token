@@ -3,7 +3,7 @@ import {
     getPauseInstructionDataEncoder,
     getResumeInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { Signer, Address } from '@solana/web3.js';
+import type { Signer, PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ID, programSupportsExtensions } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
@@ -19,7 +19,7 @@ export enum PausableInstruction {
 export interface InitializePausableConfigInstructionData {
     instruction: TokenInstruction.PausableExtension;
     pausableInstruction: PausableInstruction.Initialize;
-    authority: Address;
+    authority: PublicKey;
 }
 
 /**
@@ -30,9 +30,9 @@ export interface InitializePausableConfigInstructionData {
  * @param programId     SPL Token program account
  */
 export function createInitializePausableConfigInstruction(
-    mint: Address,
-    authority: Address | null,
-    programId: Address = TOKEN_2022_PROGRAM_ID,
+    mint: PublicKey,
+    authority: PublicKey | null,
+    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
@@ -59,10 +59,10 @@ export interface PauseInstructionData {
  * @param programId     SPL Token program account
  */
 export function createPauseInstruction(
-    mint: Address,
-    authority: Address,
-    multiSigners: (Signer | Address)[] = [],
-    programId: Address = TOKEN_2022_PROGRAM_ID,
+    mint: PublicKey,
+    authority: PublicKey,
+    multiSigners: (Signer | PublicKey)[] = [],
+    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
@@ -87,10 +87,10 @@ export interface ResumeInstructionData {
  * @param programId     SPL Token program account
  */
 export function createResumeInstruction(
-    mint: Address,
-    authority: Address,
-    multiSigners: (Signer | Address)[] = [],
-    programId: Address = TOKEN_2022_PROGRAM_ID,
+    mint: PublicKey,
+    authority: PublicKey,
+    multiSigners: (Signer | PublicKey)[] = [],
+    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();

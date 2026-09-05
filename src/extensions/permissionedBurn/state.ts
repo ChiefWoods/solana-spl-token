@@ -1,12 +1,12 @@
 import { getAddressCodec, getStructCodec } from '@solana/kit';
 import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
 
 /** Permissioned burn configuration as stored by the program */
 export interface PermissionedBurn {
-    authority: Address | null;
+    authority: PublicKey | null;
 }
 
 type PermissionedBurnCodecData = {
@@ -26,6 +26,6 @@ export function getPermissionedBurn(mint: Mint): PermissionedBurn | null {
     const extensionData = getExtensionData(ExtensionType.PermissionedBurn, mint.tlvData);
     if (extensionData === null) return null;
 
-    const authority = new Address(PermissionedBurnCodec.decode(extensionData).authority);
-    return { authority: authority.equals(Address.default) ? null : authority };
+    const authority = new PublicKey(PermissionedBurnCodec.decode(extensionData).authority);
+    return { authority: authority.equals(PublicKey.default) ? null : authority };
 }

@@ -1,5 +1,5 @@
 import type { Signer } from '@solana/web3.js';
-import { Address, Keypair, Connection } from '@solana/web3.js';
+import { PublicKey, Keypair, Connection } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../src';
 
 export async function newAccountWithLamports(connection: Connection, lamports = 1000000): Promise<Signer> {
@@ -16,7 +16,7 @@ export async function getConnection(): Promise<Connection> {
 }
 
 export const TEST_PROGRAM_ID = process.env.TEST_PROGRAM_ID
-    ? new Address(process.env.TEST_PROGRAM_ID)
+    ? new PublicKey(process.env.TEST_PROGRAM_ID)
     : TOKEN_PROGRAM_ID;
 
-export const TRANSFER_HOOK_TEST_PROGRAM_ID = new Address('TokenHookExampLe8smaVNrxTBezWTRbEwxwb1Zykrb');
+export const TRANSFER_HOOK_TEST_PROGRAM_ID = new PublicKey('TokenHookExampLe8smaVNrxTBezWTRbEwxwb1Zykrb');

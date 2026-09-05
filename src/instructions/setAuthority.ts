@@ -2,7 +2,7 @@ import {
     getSetAuthorityInstructionDataDecoder,
     getSetAuthorityInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { AccountMeta, Signer, Address } from '@solana/web3.js';
+import type { AccountMeta, Signer, PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -41,7 +41,7 @@ export enum AuthorityType {
 export interface SetAuthorityInstructionData {
     instruction: TokenInstruction.SetAuthority;
     authorityType: AuthorityType;
-    newAuthority: Address | null;
+    newAuthority: PublicKey | null;
 }
 
 /** Codec for encoding and decoding SetAuthority instruction data. */
@@ -72,11 +72,11 @@ export const setAuthorityInstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createSetAuthorityInstruction(
-    account: Address,
-    currentAuthority: Address,
+    account: PublicKey,
+    currentAuthority: PublicKey,
     authorityType: AuthorityType,
-    newAuthority: Address | null,
-    multiSigners: (Signer | Address)[] = [],
+    newAuthority: PublicKey | null,
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners([{ pubkey: account, isSigner: false, isWritable: true }], currentAuthority, multiSigners);
@@ -100,7 +100,7 @@ export function createSetAuthorityInstruction(
 
 /** A decoded, valid SetAuthority instruction */
 export interface DecodedSetAuthorityInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta;
         currentAuthority: AccountMeta;
@@ -109,7 +109,7 @@ export interface DecodedSetAuthorityInstruction {
     data: {
         instruction: TokenInstruction.SetAuthority;
         authorityType: AuthorityType;
-        newAuthority: Address | null;
+        newAuthority: PublicKey | null;
     };
 }
 
@@ -152,7 +152,7 @@ export function decodeSetAuthorityInstruction(
 
 /** A decoded, non-validated SetAuthority instruction */
 export interface DecodedSetAuthorityInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta | undefined;
         currentAuthority: AccountMeta | undefined;
@@ -161,7 +161,7 @@ export interface DecodedSetAuthorityInstructionUnchecked {
     data: {
         instruction: number;
         authorityType: AuthorityType;
-        newAuthority: Address | null;
+        newAuthority: PublicKey | null;
     };
 }
 

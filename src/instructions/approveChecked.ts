@@ -2,7 +2,7 @@ import {
     getApproveCheckedInstructionDataDecoder,
     getApproveCheckedInstructionDataEncoder,
 } from '@solana-program/token';
-import type { AccountMeta, Address, Signer } from '@solana/web3.js';
+import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -45,13 +45,13 @@ export const approveCheckedInstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createApproveCheckedInstruction(
-    account: Address,
-    mint: Address,
-    delegate: Address,
-    owner: Address,
+    account: PublicKey,
+    mint: PublicKey,
+    delegate: PublicKey,
+    owner: PublicKey,
     amount: number | bigint,
     decimals: number,
-    multiSigners: (Signer | Address)[] = [],
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -79,7 +79,7 @@ export function createApproveCheckedInstruction(
 
 /** A decoded, valid ApproveChecked instruction */
 export interface DecodedApproveCheckedInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta;
         mint: AccountMeta;
@@ -133,7 +133,7 @@ export function decodeApproveCheckedInstruction(
 
 /** A decoded, non-validated ApproveChecked instruction */
 export interface DecodedApproveCheckedInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta | undefined;
         mint: AccountMeta | undefined;

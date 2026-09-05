@@ -1,5 +1,5 @@
 import { getSyncNativeInstructionDataDecoder, getSyncNativeInstructionDataEncoder } from '@solana-program/token';
-import type { AccountMeta, Address } from '@solana/web3.js';
+import type { AccountMeta, PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -32,7 +32,7 @@ export const syncNativeInstructionData = createInstructionDataCodec({
  *
  * @return Instruction to add to a transaction
  */
-export function createSyncNativeInstruction(account: Address, programId = TOKEN_PROGRAM_ID): TransactionInstruction {
+export function createSyncNativeInstruction(account: PublicKey, programId = TOKEN_PROGRAM_ID): TransactionInstruction {
     const keys = [{ pubkey: account, isSigner: false, isWritable: true }];
 
     const data = Buffer.alloc(syncNativeInstructionData.span);
@@ -43,7 +43,7 @@ export function createSyncNativeInstruction(account: Address, programId = TOKEN_
 
 /** A decoded, valid SyncNative instruction */
 export interface DecodedSyncNativeInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta;
     };
@@ -87,7 +87,7 @@ export function decodeSyncNativeInstruction(
 
 /** A decoded, non-validated SyncNative instruction */
 export interface DecodedSyncNativeInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta | undefined;
     };

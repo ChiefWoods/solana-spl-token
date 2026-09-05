@@ -1,5 +1,5 @@
 import type { ConfirmOptions, Connection, Signer, TransactionSignature } from '@solana/web3.js';
-import { sendAndConfirmTransaction, SystemProgram, Transaction, Address } from '@solana/web3.js';
+import { sendAndConfirmTransaction, SystemProgram, Transaction, PublicKey } from '@solana/web3.js';
 
 import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import { getSigners } from '../../actions/internal.js';
@@ -31,9 +31,9 @@ import { TOKEN_GROUP_SIZE, TOKEN_GROUP_MEMBER_SIZE } from './state.js';
 export async function tokenGroupInitializeGroup(
     connection: Connection,
     payer: Signer,
-    mint: Address,
-    mintAuthority: Address | Signer,
-    updateAuthority: Address | null,
+    mint: PublicKey,
+    mintAuthority: PublicKey | Signer,
+    updateAuthority: PublicKey | null,
     maxSize: bigint,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
@@ -75,9 +75,9 @@ export async function tokenGroupInitializeGroup(
 export async function tokenGroupInitializeGroupWithRentTransfer(
     connection: Connection,
     payer: Signer,
-    mint: Address,
-    mintAuthority: Address | Signer,
-    updateAuthority: Address | null,
+    mint: PublicKey,
+    mintAuthority: PublicKey | Signer,
+    updateAuthority: PublicKey | null,
     maxSize: bigint,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
@@ -89,7 +89,7 @@ export async function tokenGroupInitializeGroupWithRentTransfer(
 
     const transaction = new Transaction().add(
         SystemProgram.transfer({
-            fromPubkey: new Address(payer.address),
+            fromPubkey: new PublicKey(payer.address),
             toPubkey: mint,
             lamports,
         }),
@@ -123,8 +123,8 @@ export async function tokenGroupInitializeGroupWithRentTransfer(
 export async function tokenGroupUpdateGroupMaxSize(
     connection: Connection,
     payer: Signer,
-    mint: Address,
-    updateAuthority: Address | Signer,
+    mint: PublicKey,
+    updateAuthority: PublicKey | Signer,
     maxSize: bigint,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
@@ -161,9 +161,9 @@ export async function tokenGroupUpdateGroupMaxSize(
 export async function tokenGroupUpdateGroupAuthority(
     connection: Connection,
     payer: Signer,
-    mint: Address,
-    updateAuthority: Address | Signer,
-    newAuthority: Address | null,
+    mint: PublicKey,
+    updateAuthority: PublicKey | Signer,
+    newAuthority: PublicKey | null,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,
@@ -203,10 +203,10 @@ export async function tokenGroupUpdateGroupAuthority(
 export async function tokenGroupMemberInitialize(
     connection: Connection,
     payer: Signer,
-    mint: Address,
-    mintAuthority: Address | Signer,
-    group: Address,
-    groupUpdateAuthority: Address,
+    mint: PublicKey,
+    mintAuthority: PublicKey | Signer,
+    group: PublicKey,
+    groupUpdateAuthority: PublicKey,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,
@@ -248,10 +248,10 @@ export async function tokenGroupMemberInitialize(
 export async function tokenGroupMemberInitializeWithRentTransfer(
     connection: Connection,
     payer: Signer,
-    mint: Address,
-    mintAuthority: Address | Signer,
-    group: Address,
-    groupUpdateAuthority: Address,
+    mint: PublicKey,
+    mintAuthority: PublicKey | Signer,
+    group: PublicKey,
+    groupUpdateAuthority: PublicKey,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,
@@ -262,7 +262,7 @@ export async function tokenGroupMemberInitializeWithRentTransfer(
 
     const transaction = new Transaction().add(
         SystemProgram.transfer({
-            fromPubkey: new Address(payer.address),
+            fromPubkey: new PublicKey(payer.address),
             toPubkey: mint,
             lamports,
         }),

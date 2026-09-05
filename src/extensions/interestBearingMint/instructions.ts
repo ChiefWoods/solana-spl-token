@@ -2,7 +2,7 @@ import {
     getInitializeInterestBearingMintInstructionDataEncoder,
     getUpdateRateInterestBearingMintInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { Address, Signer } from '@solana/web3.js';
+import type { PublicKey, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import { addSigners } from '../../instructions/internal.js';
@@ -16,7 +16,7 @@ export enum InterestBearingMintInstruction {
 export interface InterestBearingMintInitializeInstructionData {
     instruction: TokenInstruction.InterestBearingMintExtension;
     interestBearingMintInstruction: InterestBearingMintInstruction.Initialize;
-    rateAuthority: Address;
+    rateAuthority: PublicKey;
     rate: number;
 }
 
@@ -37,8 +37,8 @@ export interface InterestBearingMintUpdateRateInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createInitializeInterestBearingMintInstruction(
-    mint: Address,
-    rateAuthority: Address,
+    mint: PublicKey,
+    rateAuthority: PublicKey,
     rate: number,
     programId = TOKEN_2022_PROGRAM_ID,
 ) {
@@ -64,10 +64,10 @@ export function createInitializeInterestBearingMintInstruction(
  * @return Instruction to add to a transaction
  */
 export function createUpdateRateInterestBearingMintInstruction(
-    mint: Address,
-    rateAuthority: Address,
+    mint: PublicKey,
+    rateAuthority: PublicKey,
     rate: number,
-    multiSigners: (Signer | Address)[] = [],
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ) {
     const keys = addSigners(

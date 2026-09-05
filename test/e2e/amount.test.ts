@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import type { Connection, Address, Signer } from '@solana/web3.js';
+import type { Connection, PublicKey, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 import { createMint, amountToUiAmount, uiAmountToAmount } from '../../src';
 import { TEST_PROGRAM_ID, newAccountWithLamports, getConnection } from '../common';
@@ -8,7 +8,7 @@ const TEST_TOKEN_DECIMALS = 2;
 describe('Amount', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: Address;
+    let mint: PublicKey;
     let mintAuthority: Keypair;
     beforeAll(async () => {
         connection = await getConnection();

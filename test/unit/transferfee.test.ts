@@ -7,7 +7,7 @@ import {
     decodeInitializeTransferFeeConfigInstruction,
     TOKEN_2022_PROGRAM_ID,
 } from '../../src';
-import { Keypair, Address } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 
 describe('transferFee', () => {
     describe('encoding/decoding `InitializeTransferFeeConfig` instructions', () => {
@@ -133,8 +133,8 @@ describe('transferFee', () => {
 
     describe('calculateEpochFee', () => {
         const transferFeeConfig = {
-            transferFeeConfigAuthority: Address.default,
-            withdrawWithheldAuthority: Address.default,
+            transferFeeConfigAuthority: PublicKey.default,
+            withdrawWithheldAuthority: PublicKey.default,
             withheldAmount: 500n,
             olderTransferFee: {
                 epoch: 1n,

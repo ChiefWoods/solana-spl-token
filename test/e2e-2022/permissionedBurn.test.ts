@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address, Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
+import { PublicKey, Keypair, SystemProgram, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import {
     ExtensionType,
     burn,
@@ -21,7 +21,7 @@ const EXTENSIONS = [ExtensionType.PermissionedBurn];
 describe('permissioned burn', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: Address;
+    let mint: PublicKey;
     let mintAuthority: Keypair;
     let permissionedAuthority: Keypair;
     beforeAll(async () => {
@@ -38,7 +38,7 @@ describe('permissioned burn', () => {
         const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: mint,
                 space: mintLen,
                 lamports,

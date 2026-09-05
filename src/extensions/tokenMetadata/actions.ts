@@ -1,5 +1,5 @@
 import type { ConfirmOptions, Connection, Signer, TransactionSignature } from '@solana/web3.js';
-import { sendAndConfirmTransaction, SystemProgram, Transaction, Address } from '@solana/web3.js';
+import { sendAndConfirmTransaction, SystemProgram, Transaction, PublicKey } from '@solana/web3.js';
 
 import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import { getSigners } from '../../actions/internal.js';
@@ -17,7 +17,7 @@ import { pack, unpack, updateTokenMetadata, type TokenMetadata } from './state.j
 
 async function getAdditionalRentForNewMetadata(
     connection: Connection,
-    address: Address,
+    address: PublicKey,
     tokenMetadata: TokenMetadata,
     programId = TOKEN_2022_PROGRAM_ID,
 ): Promise<number> {
@@ -46,7 +46,7 @@ async function getAdditionalRentForNewMetadata(
 
 async function getAdditionalRentForUpdatedMetadata(
     connection: Connection,
-    address: Address,
+    address: PublicKey,
     field: string | Field,
     value: string,
     programId = TOKEN_2022_PROGRAM_ID,
@@ -102,9 +102,9 @@ async function getAdditionalRentForUpdatedMetadata(
 export async function tokenMetadataInitialize(
     connection: Connection,
     payer: Signer,
-    mint: Address,
-    updateAuthority: Address,
-    mintAuthority: Address | Signer,
+    mint: PublicKey,
+    updateAuthority: PublicKey,
+    mintAuthority: PublicKey | Signer,
     name: string,
     symbol: string,
     uri: string,
@@ -151,9 +151,9 @@ export async function tokenMetadataInitialize(
 export async function tokenMetadataInitializeWithRentTransfer(
     connection: Connection,
     payer: Signer,
-    mint: Address,
-    updateAuthority: Address,
-    mintAuthority: Address | Signer,
+    mint: PublicKey,
+    updateAuthority: PublicKey,
+    mintAuthority: PublicKey | Signer,
     name: string,
     symbol: string,
     uri: string,
@@ -181,7 +181,7 @@ export async function tokenMetadataInitializeWithRentTransfer(
 
     if (lamports > 0) {
         transaction.add(
-            SystemProgram.transfer({ fromPubkey: new Address(payer.address), toPubkey: mint, lamports: lamports }),
+            SystemProgram.transfer({ fromPubkey: new PublicKey(payer.address), toPubkey: mint, lamports: lamports }),
         );
     }
 
@@ -223,8 +223,8 @@ export async function tokenMetadataInitializeWithRentTransfer(
 export async function tokenMetadataUpdateField(
     connection: Connection,
     payer: Signer,
-    mint: Address,
-    updateAuthority: Address | Signer,
+    mint: PublicKey,
+    updateAuthority: PublicKey | Signer,
     field: string | Field,
     value: string,
     multiSigners: Signer[] = [],
@@ -269,8 +269,8 @@ export async function tokenMetadataUpdateField(
 export async function tokenMetadataUpdateFieldWithRentTransfer(
     connection: Connection,
     payer: Signer,
-    mint: Address,
-    updateAuthority: Address | Signer,
+    mint: PublicKey,
+    updateAuthority: PublicKey | Signer,
     field: string | Field,
     value: string,
     multiSigners: Signer[] = [],
@@ -285,7 +285,7 @@ export async function tokenMetadataUpdateFieldWithRentTransfer(
 
     if (lamports > 0) {
         transaction.add(
-            SystemProgram.transfer({ fromPubkey: new Address(payer.address), toPubkey: mint, lamports: lamports }),
+            SystemProgram.transfer({ fromPubkey: new PublicKey(payer.address), toPubkey: mint, lamports: lamports }),
         );
     }
 
@@ -322,8 +322,8 @@ export async function tokenMetadataUpdateFieldWithRentTransfer(
 export async function tokenMetadataRemoveKey(
     connection: Connection,
     payer: Signer,
-    mint: Address,
-    updateAuthority: Address | Signer,
+    mint: PublicKey,
+    updateAuthority: PublicKey | Signer,
     key: string,
     idempotent: boolean,
     multiSigners: Signer[] = [],
@@ -362,9 +362,9 @@ export async function tokenMetadataRemoveKey(
 export async function tokenMetadataUpdateAuthority(
     connection: Connection,
     payer: Signer,
-    mint: Address,
-    updateAuthority: Address | Signer,
-    newAuthority: Address | null,
+    mint: PublicKey,
+    updateAuthority: PublicKey | Signer,
+    newAuthority: PublicKey | null,
     multiSigners: Signer[] = [],
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,

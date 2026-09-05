@@ -6,7 +6,7 @@ import {
     type TokenArgs,
 } from '@solana-program/token';
 import type { AccountInfo, Commitment, Connection } from '@solana/web3.js';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
     TokenAccountNotFoundError,
@@ -22,15 +22,15 @@ import { MULTISIG_SIZE } from './multisig.js';
 /** Information about a token account */
 export interface Account {
     /** Address of the account */
-    address: Address;
+    address: PublicKey;
     /** Mint associated with the account */
-    mint: Address;
+    mint: PublicKey;
     /** Owner of the account */
-    owner: Address;
+    owner: PublicKey;
     /** Number of tokens the account holds */
     amount: bigint;
     /** Authority that can transfer tokens from the account */
-    delegate: Address | null;
+    delegate: PublicKey | null;
     /** Number of tokens the delegate is authorized to transfer */
     delegatedAmount: bigint;
     /** True if the account is initialized */
@@ -45,7 +45,7 @@ export interface Account {
      */
     rentExemptReserve: bigint | null;
     /** Optional authority to close the account */
-    closeAuthority: Address | null;
+    closeAuthority: PublicKey | null;
     tlvData: Buffer;
 }
 
@@ -58,34 +58,34 @@ export enum AccountState {
 
 /** Token account as stored by the program */
 export interface RawAccount {
-    mint: Address;
-    owner: Address;
+    mint: PublicKey;
+    owner: PublicKey;
     amount: bigint;
     delegateOption: 1 | 0;
-    delegate: Address;
+    delegate: PublicKey;
     state: AccountState;
     isNativeOption: 1 | 0;
     isNative: bigint;
     delegatedAmount: bigint;
     closeAuthorityOption: 1 | 0;
-    closeAuthority: Address;
+    closeAuthority: PublicKey;
 }
 
 type CodamaOption<T> = { __option: 'Some'; value: T } | { __option: 'None' };
 
-const DEFAULT_ADDRESS = new Address('11111111111111111111111111111111');
+const DEFAULT_ADDRESS = new PublicKey('11111111111111111111111111111111');
 
-function unwrapAddressOption(option: CodamaOption<string>): Address | null {
-    return option.__option === 'Some' ? new Address(option.value) : null;
+function unwrapAddressOption(option: CodamaOption<string>): PublicKey | null {
+    return option.__option === 'Some' ? new PublicKey(option.value) : null;
 }
 
 function unwrapBigIntOption(option: CodamaOption<bigint>): bigint | null {
     return option.__option === 'Some' ? option.value : null;
 }
 
-function getRawAddressOption(option: CodamaOption<string>): { option: 1 | 0; address: Address } {
+function getRawAddressOption(option: CodamaOption<string>): { option: 1 | 0; address: PublicKey } {
     return option.__option === 'Some'
-        ? { option: 1, address: new Address(option.value) }
+        ? { option: 1, address: new PublicKey(option.value) }
         : { option: 0, address: DEFAULT_ADDRESS };
 }
 
@@ -113,8 +113,8 @@ export const AccountLayout = {
         const closeAuthority = getRawAddressOption(account.closeAuthority);
 
         return {
-            mint: new Address(account.mint),
-            owner: new Address(account.owner),
+            mint: new PublicKey(account.mint),
+            owner: new PublicKey(account.owner),
             amount: account.amount,
             delegateOption: delegate.option,
             delegate: delegate.address,
@@ -147,7 +147,7 @@ export const ACCOUNT_SIZE = getTokenSize();
  */
 export async function getAccount(
     connection: Connection,
-    address: Address,
+    address: PublicKey,
     commitment?: Commitment,
     programId = TOKEN_PROGRAM_ID,
 ): Promise<Account> {
@@ -167,7 +167,7 @@ export async function getAccount(
  */
 export async function getMultipleAccounts(
     connection: Connection,
-    addresses: Address[],
+    addresses: PublicKey[],
     commitment?: Commitment,
     programId = TOKEN_PROGRAM_ID,
 ): Promise<Account[]> {
@@ -215,7 +215,7 @@ export async function getMinimumBalanceForRentExemptAccountWithExtensions(
  * @return Unpacked token account
  */
 export function unpackAccount(
-    address: Address,
+    address: PublicKey,
     info: AccountInfo<Uint8Array> | null,
     programId = TOKEN_PROGRAM_ID,
 ): Account {
@@ -233,8 +233,8 @@ export function unpackAccount(
 
     return {
         address,
-        mint: new Address(rawAccount.mint),
-        owner: new Address(rawAccount.owner),
+        mint: new PublicKey(rawAccount.mint),
+        owner: new PublicKey(rawAccount.owner),
         amount: rawAccount.amount,
         delegate: unwrapAddressOption(rawAccount.delegate),
         delegatedAmount: rawAccount.delegatedAmount,

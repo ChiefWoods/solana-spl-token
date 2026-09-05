@@ -2,7 +2,7 @@ import {
     getDisableMemoTransfersInstructionDataEncoder,
     getEnableMemoTransfersInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { Address, Signer } from '@solana/web3.js';
+import type { PublicKey, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions, TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
@@ -31,9 +31,9 @@ export interface MemoTransferInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createEnableRequiredMemoTransfersInstruction(
-    account: Address,
-    authority: Address,
-    multiSigners: (Signer | Address)[] = [],
+    account: PublicKey,
+    authority: PublicKey,
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     return createMemoTransferInstruction(MemoTransferInstruction.Enable, account, authority, multiSigners, programId);
@@ -50,9 +50,9 @@ export function createEnableRequiredMemoTransfersInstruction(
  * @return Instruction to add to a transaction
  */
 export function createDisableRequiredMemoTransfersInstruction(
-    account: Address,
-    authority: Address,
-    multiSigners: (Signer | Address)[] = [],
+    account: PublicKey,
+    authority: PublicKey,
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     return createMemoTransferInstruction(MemoTransferInstruction.Disable, account, authority, multiSigners, programId);
@@ -60,10 +60,10 @@ export function createDisableRequiredMemoTransfersInstruction(
 
 function createMemoTransferInstruction(
     memoTransferInstruction: MemoTransferInstruction,
-    account: Address,
-    authority: Address,
-    multiSigners: (Signer | Address)[],
-    programId: Address,
+    account: PublicKey,
+    authority: PublicKey,
+    multiSigners: (Signer | PublicKey)[],
+    programId: PublicKey,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();

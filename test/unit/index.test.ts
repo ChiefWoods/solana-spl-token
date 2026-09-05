@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Keypair, Address } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import {
     ASSOCIATED_TOKEN_PROGRAM_ID,
     createAssociatedTokenAccountInstruction,
@@ -220,49 +220,49 @@ describe('spl-associated-token-account instructions', () => {
 describe('state', () => {
     it('getAssociatedTokenAddress', async () => {
         const associatedPublicKey = await getAssociatedTokenAddress(
-            new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
-            new Address('B8UwBUUnKwCyKuGMbFKWaG7exYdDk2ozZrPg72NyVbfj'),
+            new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
+            new PublicKey('B8UwBUUnKwCyKuGMbFKWaG7exYdDk2ozZrPg72NyVbfj'),
         );
         expect(associatedPublicKey.toString()).toEqual(
-            new Address('DShWnroshVbeUp28oopA3Pu7oFPDBtC1DBmPECXXAQ9n').toString(),
+            new PublicKey('DShWnroshVbeUp28oopA3Pu7oFPDBtC1DBmPECXXAQ9n').toString(),
         );
         await expect(
-            getAssociatedTokenAddress(new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'), associatedPublicKey),
+            getAssociatedTokenAddress(new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'), associatedPublicKey),
         ).rejects.toThrow(TokenOwnerOffCurveError);
 
         const associatedPublicKey2 = await getAssociatedTokenAddress(
-            new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
+            new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
             associatedPublicKey,
             true,
         );
         expect(associatedPublicKey2.toString()).toEqual(
-            new Address('F3DmXZFqkfEWFA7MN2vDPs813GeEWPaT6nLk4PSGuWJd').toString(),
+            new PublicKey('F3DmXZFqkfEWFA7MN2vDPs813GeEWPaT6nLk4PSGuWJd').toString(),
         );
     });
 
     it('getAssociatedTokenAddressSync reports unsupported under web3.js v3', async () => {
         const asyncAssociatedPublicKey = await getAssociatedTokenAddress(
-            new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
-            new Address('B8UwBUUnKwCyKuGMbFKWaG7exYdDk2ozZrPg72NyVbfj'),
+            new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
+            new PublicKey('B8UwBUUnKwCyKuGMbFKWaG7exYdDk2ozZrPg72NyVbfj'),
         );
         expect(asyncAssociatedPublicKey.toString()).toEqual(
-            new Address('DShWnroshVbeUp28oopA3Pu7oFPDBtC1DBmPECXXAQ9n').toString(),
+            new PublicKey('DShWnroshVbeUp28oopA3Pu7oFPDBtC1DBmPECXXAQ9n').toString(),
         );
 
         expect(function () {
             getAssociatedTokenAddressSync(
-                new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
-                new Address('B8UwBUUnKwCyKuGMbFKWaG7exYdDk2ozZrPg72NyVbfj'),
+                new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
+                new PublicKey('B8UwBUUnKwCyKuGMbFKWaG7exYdDk2ozZrPg72NyVbfj'),
             );
         }).toThrow('getAssociatedTokenAddressSync is not supported with @solana/web3.js v3');
 
         const asyncAssociatedPublicKey2 = await getAssociatedTokenAddress(
-            new Address('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
+            new PublicKey('7o36UsWR1JQLpZ9PE2gn9L4SQ69CNNiWAXd4Jt7rqz9Z'),
             asyncAssociatedPublicKey,
             true,
         );
         expect(asyncAssociatedPublicKey2.toString()).toEqual(
-            new Address('F3DmXZFqkfEWFA7MN2vDPs813GeEWPaT6nLk4PSGuWJd').toString(),
+            new PublicKey('F3DmXZFqkfEWFA7MN2vDPs813GeEWPaT6nLk4PSGuWJd').toString(),
         );
     });
 });

@@ -1,5 +1,5 @@
 import { getApproveInstructionDataDecoder, getApproveInstructionDataEncoder } from '@solana-program/token';
-import type { AccountMeta, Address, Signer } from '@solana/web3.js';
+import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -39,11 +39,11 @@ export const approveInstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createApproveInstruction(
-    account: Address,
-    delegate: Address,
-    owner: Address,
+    account: PublicKey,
+    delegate: PublicKey,
+    owner: PublicKey,
     amount: number | bigint,
-    multiSigners: (Signer | Address)[] = [],
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -69,7 +69,7 @@ export function createApproveInstruction(
 
 /** A decoded, valid Approve instruction */
 export interface DecodedApproveInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta;
         delegate: AccountMeta;
@@ -120,7 +120,7 @@ export function decodeApproveInstruction(
 
 /** A decoded, non-validated Approve instruction */
 export interface DecodedApproveInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta | undefined;
         delegate: AccountMeta | undefined;

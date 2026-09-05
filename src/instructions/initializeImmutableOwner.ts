@@ -2,7 +2,7 @@ import {
     getInitializeImmutableOwnerInstructionDataDecoder,
     getInitializeImmutableOwnerInstructionDataEncoder,
 } from '@solana-program/token';
-import type { AccountMeta, Address } from '@solana/web3.js';
+import type { AccountMeta, PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import {
     TokenInvalidInstructionDataError,
@@ -35,8 +35,8 @@ export const initializeImmutableOwnerInstructionData = createInstructionDataCode
  * @return Instruction to add to a transaction
  */
 export function createInitializeImmutableOwnerInstruction(
-    account: Address,
-    programId: Address,
+    account: PublicKey,
+    programId: PublicKey,
 ): TransactionInstruction {
     const keys = [{ pubkey: account, isSigner: false, isWritable: true }];
 
@@ -53,7 +53,7 @@ export function createInitializeImmutableOwnerInstruction(
 
 /** A decoded, valid InitializeImmutableOwner instruction */
 export interface DecodedInitializeImmutableOwnerInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta;
     };
@@ -72,7 +72,7 @@ export interface DecodedInitializeImmutableOwnerInstruction {
  */
 export function decodeInitializeImmutableOwnerInstruction(
     instruction: TransactionInstruction,
-    programId: Address,
+    programId: PublicKey,
 ): DecodedInitializeImmutableOwnerInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
     if (instruction.data.length !== initializeImmutableOwnerInstructionData.span)
@@ -96,7 +96,7 @@ export function decodeInitializeImmutableOwnerInstruction(
 
 /** A decoded, non-validated InitializeImmutableOwner instruction */
 export interface DecodedInitializeImmutableOwnerInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta | undefined;
     };

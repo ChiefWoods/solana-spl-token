@@ -1,5 +1,5 @@
 import type { ConfirmOptions, Connection, Signer } from '@solana/web3.js';
-import { Keypair, sendAndConfirmTransaction, SystemProgram, Transaction, Address } from '@solana/web3.js';
+import { Keypair, sendAndConfirmTransaction, SystemProgram, Transaction, PublicKey } from '@solana/web3.js';
 import { getSigners } from '../../actions/internal.js';
 import { TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import { createInitializeMintInstruction } from '../../instructions/initializeMint.js';
@@ -28,21 +28,21 @@ import {
 export async function createInterestBearingMint(
     connection: Connection,
     payer: Signer,
-    mintAuthority: Address,
-    freezeAuthority: Address,
-    rateAuthority: Address,
+    mintAuthority: PublicKey,
+    freezeAuthority: PublicKey,
+    rateAuthority: PublicKey,
     rate: number,
     decimals: number,
     keypair?: Keypair,
     confirmOptions?: ConfirmOptions,
     programId = TOKEN_2022_PROGRAM_ID,
-): Promise<Address> {
+): Promise<PublicKey> {
     keypair ??= await Keypair.generate();
     const mintLen = getMintLen([ExtensionType.InterestBearingConfig]);
     const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
     const transaction = new Transaction().add(
         SystemProgram.createAccount({
-            fromPubkey: new Address(payer.address),
+            fromPubkey: new PublicKey(payer.address),
             newAccountPubkey: keypair.publicKey,
             space: mintLen,
             lamports,
@@ -72,7 +72,7 @@ export async function createInterestBearingMint(
 export async function updateRateInterestBearingMint(
     connection: Connection,
     payer: Signer,
-    mint: Address,
+    mint: PublicKey,
     rateAuthority: Signer,
     rate: number,
     multiSigners: Signer[] = [],

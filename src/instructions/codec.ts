@@ -1,5 +1,5 @@
 import type { Address as KitAddress, ReadonlyUint8Array } from '@solana/kit';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 
 type Encoder<TValue> = {
     fixedSize?: number;
@@ -12,20 +12,20 @@ type Decoder<TValue> = {
 
 type Option<TValue> = { __option: 'None' } | { __option: 'Some'; value: TValue };
 
-export function addressToString(address: Address): KitAddress {
+export function addressToString(address: PublicKey): KitAddress {
     return address.toBase58();
 }
 
-export function addressFromString(address: string): Address {
-    return new Address(address);
+export function addressFromString(address: string): PublicKey {
+    return new PublicKey(address);
 }
 
-export function nullableAddressToOption(address: Address | null): KitAddress | null {
+export function nullableAddressToOption(address: PublicKey | null): KitAddress | null {
     return address?.toBase58() ?? null;
 }
 
-export function optionToNullableAddress(option: Option<string>): Address | null {
-    return option.__option === 'Some' ? new Address(option.value) : null;
+export function optionToNullableAddress(option: Option<string>): PublicKey | null {
+    return option.__option === 'Some' ? new PublicKey(option.value) : null;
 }
 
 export function optionToNullableBigInt(option: Option<bigint>): bigint | null {

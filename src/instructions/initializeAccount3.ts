@@ -2,7 +2,7 @@ import {
     getInitializeAccount3InstructionDataDecoder,
     getInitializeAccount3InstructionDataEncoder,
 } from '@solana-program/token';
-import type { AccountMeta, Address } from '@solana/web3.js';
+import type { AccountMeta, PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -16,7 +16,7 @@ import { addressFromString, addressToString, createInstructionDataCodec } from '
 
 export interface InitializeAccount3InstructionData {
     instruction: TokenInstruction.InitializeAccount3;
-    owner: Address;
+    owner: PublicKey;
 }
 
 export const initializeAccount3InstructionData = createInstructionDataCodec({
@@ -37,9 +37,9 @@ export const initializeAccount3InstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createInitializeAccount3Instruction(
-    account: Address,
-    mint: Address,
-    owner: Address,
+    account: PublicKey,
+    mint: PublicKey,
+    owner: PublicKey,
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = [
@@ -53,14 +53,14 @@ export function createInitializeAccount3Instruction(
 
 /** A decoded, valid InitializeAccount3 instruction */
 export interface DecodedInitializeAccount3Instruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta;
         mint: AccountMeta;
     };
     data: {
         instruction: TokenInstruction.InitializeAccount3;
-        owner: Address;
+        owner: PublicKey;
     };
 }
 
@@ -101,14 +101,14 @@ export function decodeInitializeAccount3Instruction(
 
 /** A decoded, non-validated InitializeAccount3 instruction */
 export interface DecodedInitializeAccount3InstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta | undefined;
         mint: AccountMeta | undefined;
     };
     data: {
         instruction: number;
-        owner: Address;
+        owner: PublicKey;
     };
 }
 

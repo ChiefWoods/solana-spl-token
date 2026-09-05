@@ -58,7 +58,7 @@
         "deploy:docs": "pnpm run docs && gh-pages --dest token/js --dist docs --dotfiles"
     },
     "peerDependencies": {
-        "@solana/web3.js": "3.0.0-rc.2"
+        "@solana/web3.js": "3.0.0-rc.3"
     },
     "dependencies": {
         "@solana-program/token": "^0.14.0",
@@ -70,7 +70,7 @@
         "@solana-config/oxc": "^0.1.1",
         "@solana/codecs-strings": "7.0.0",
         "@solana/spl-memo": "0.2.5",
-        "@solana/web3.js": "3.0.0-rc.2",
+        "@solana/web3.js": "3.0.0-rc.3",
         "@types/node": "^26.0.0",
         "@types/node-fetch": "^2.6.12",
         "gh-pages": "^6.3.0",

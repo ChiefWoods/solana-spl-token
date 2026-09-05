@@ -2,7 +2,7 @@ import {
     getInitializeDefaultAccountStateInstructionDataEncoder,
     getUpdateDefaultAccountStateInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { Address, Signer } from '@solana/web3.js';
+import type { PublicKey, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions, TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
@@ -32,7 +32,7 @@ export interface DefaultAccountStateInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createInitializeDefaultAccountStateInstruction(
-    mint: Address,
+    mint: PublicKey,
     accountState: AccountState,
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
@@ -57,10 +57,10 @@ export function createInitializeDefaultAccountStateInstruction(
  * @return Instruction to add to a transaction
  */
 export function createUpdateDefaultAccountStateInstruction(
-    mint: Address,
+    mint: PublicKey,
     accountState: AccountState,
-    freezeAuthority: Address,
-    multiSigners: (Signer | Address)[] = [],
+    freezeAuthority: PublicKey,
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {

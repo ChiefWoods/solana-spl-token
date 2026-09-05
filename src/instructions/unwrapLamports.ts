@@ -2,7 +2,7 @@ import {
     getUnwrapLamportsInstructionDataDecoder,
     getUnwrapLamportsInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { AccountMeta, Address, Signer } from '@solana/web3.js';
+import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -45,11 +45,11 @@ export const unwrapLamportsInstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createUnwrapLamportsInstruction(
-    source: Address,
-    destination: Address,
-    owner: Address,
+    source: PublicKey,
+    destination: PublicKey,
+    owner: PublicKey,
     amount: bigint | null,
-    multiSigners: (Signer | Address)[] = [],
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -73,7 +73,7 @@ export function createUnwrapLamportsInstruction(
 
 /** A decoded, valid UnwrapLamports instruction */
 export interface DecodedUnwrapLamportsInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         source: AccountMeta;
         destination: AccountMeta;
@@ -96,7 +96,7 @@ export interface DecodedUnwrapLamportsInstruction {
  */
 export function decodeUnwrapLamportsInstruction(
     instruction: TransactionInstruction,
-    programId: Address,
+    programId: PublicKey,
 ): DecodedUnwrapLamportsInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
     if (instruction.data.length < unwrapLamportsInstructionData.getSpan(instruction.data))
@@ -123,7 +123,7 @@ export function decodeUnwrapLamportsInstruction(
 
 /** A decoded, non-validated UnwrapLamports instruction */
 export interface DecodedUnwrapLamportsInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         source: AccountMeta | undefined;
         destination: AccountMeta | undefined;

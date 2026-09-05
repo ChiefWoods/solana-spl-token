@@ -1,6 +1,6 @@
 import { getAddressCodec, getBooleanCodec, getStructCodec, getUnitCodec } from '@solana/kit';
 import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import type { Account } from '../../state/account.js';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
@@ -8,7 +8,7 @@ import { ExtensionType, getExtensionData } from '../extensionType.js';
 /** PausableConfig as stored by the program */
 export interface PausableConfig {
     /** Authority that can pause or resume activity on the mint */
-    authority: Address;
+    authority: PublicKey;
     /** Whether minting / transferring / burning tokens is paused */
     paused: boolean;
 }
@@ -33,7 +33,7 @@ export function getPausableConfig(mint: Mint): PausableConfig | null {
     const extensionData = getExtensionData(ExtensionType.PausableConfig, mint.tlvData);
     if (extensionData === null) return null;
     const { authority, paused } = PausableConfigCodec.decode(extensionData);
-    return { authority: new Address(authority), paused };
+    return { authority: new PublicKey(authority), paused };
 }
 
 /** Pausable token account state as stored by the program */

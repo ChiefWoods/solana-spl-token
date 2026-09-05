@@ -2,7 +2,7 @@ import {
     getInitializeAccountInstructionDataDecoder,
     getInitializeAccountInstructionDataEncoder,
 } from '@solana-program/token';
-import type { AccountMeta, Address } from '@solana/web3.js';
+import type { AccountMeta, PublicKey } from '@solana/web3.js';
 import { SYSVAR_RENT_PUBKEY, TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -38,9 +38,9 @@ export const initializeAccountInstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createInitializeAccountInstruction(
-    account: Address,
-    mint: Address,
-    owner: Address,
+    account: PublicKey,
+    mint: PublicKey,
+    owner: PublicKey,
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = [
@@ -58,7 +58,7 @@ export function createInitializeAccountInstruction(
 
 /** A decoded, valid InitializeAccount instruction */
 export interface DecodedInitializeAccountInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta;
         mint: AccountMeta;
@@ -108,7 +108,7 @@ export function decodeInitializeAccountInstruction(
 
 /** A decoded, non-validated InitializeAccount instruction */
 export interface DecodedInitializeAccountInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta | undefined;
         mint: AccountMeta | undefined;

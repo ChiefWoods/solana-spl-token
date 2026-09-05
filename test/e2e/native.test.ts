@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address, Keypair, Transaction, SystemProgram, sendAndConfirmTransaction } from '@solana/web3.js';
+import { PublicKey, Keypair, Transaction, SystemProgram, sendAndConfirmTransaction } from '@solana/web3.js';
 import {
     NATIVE_MINT,
     NATIVE_MINT_2022,
@@ -17,9 +17,9 @@ describe('native', () => {
     let connection: Connection;
     let payer: Signer;
     let owner: Keypair;
-    let account: Address;
+    let account: PublicKey;
     let amount: number;
-    let nativeMint: Address;
+    let nativeMint: PublicKey;
     beforeAll(async () => {
         amount = 1_000_000_000;
         connection = await getConnection();
@@ -65,7 +65,7 @@ describe('native', () => {
             connection,
             new Transaction().add(
                 SystemProgram.transfer({
-                    fromPubkey: new Address(payer.address),
+                    fromPubkey: new PublicKey(payer.address),
                     toPubkey: account,
                     lamports: additionalLamports,
                 }),

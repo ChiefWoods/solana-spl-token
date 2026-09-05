@@ -2,7 +2,7 @@ import {
     getInitializeMetadataPointerInstructionDataEncoder,
     getUpdateMetadataPointerInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { Signer, Address } from '@solana/web3.js';
+import type { Signer, PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ID, programSupportsExtensions } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
@@ -17,8 +17,8 @@ export enum MetadataPointerInstruction {
 export interface InitializeMetadataPointerInstructionData {
     instruction: TokenInstruction.MetadataPointerExtension;
     metadataPointerInstruction: number;
-    authority: Address;
-    metadataAddress: Address;
+    authority: PublicKey;
+    metadataAddress: PublicKey;
 }
 
 /**
@@ -32,10 +32,10 @@ export interface InitializeMetadataPointerInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createInitializeMetadataPointerInstruction(
-    mint: Address,
-    authority: Address | null,
-    metadataAddress: Address | null,
-    programId: Address,
+    mint: PublicKey,
+    authority: PublicKey | null,
+    metadataAddress: PublicKey | null,
+    programId: PublicKey,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
@@ -54,15 +54,15 @@ export function createInitializeMetadataPointerInstruction(
 export interface UpdateMetadataPointerInstructionData {
     instruction: TokenInstruction.MetadataPointerExtension;
     metadataPointerInstruction: number;
-    metadataAddress: Address;
+    metadataAddress: PublicKey;
 }
 
 export function createUpdateMetadataPointerInstruction(
-    mint: Address,
-    authority: Address,
-    metadataAddress: Address | null,
-    multiSigners: (Signer | Address)[] = [],
-    programId: Address = TOKEN_2022_PROGRAM_ID,
+    mint: PublicKey,
+    authority: PublicKey,
+    metadataAddress: PublicKey | null,
+    multiSigners: (Signer | PublicKey)[] = [],
+    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();

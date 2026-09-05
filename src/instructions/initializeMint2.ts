@@ -2,7 +2,7 @@ import {
     getInitializeMint2InstructionDataDecoder,
     getInitializeMint2InstructionDataEncoder,
 } from '@solana-program/token';
-import type { AccountMeta, Address } from '@solana/web3.js';
+import type { AccountMeta, PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -24,8 +24,8 @@ import {
 export interface InitializeMint2InstructionData {
     instruction: TokenInstruction.InitializeMint2;
     decimals: number;
-    mintAuthority: Address;
-    freezeAuthority: Address | null;
+    mintAuthority: PublicKey;
+    freezeAuthority: PublicKey | null;
 }
 
 /** Codec for encoding and decoding InitializeMint2 instruction data. */
@@ -57,10 +57,10 @@ export const initializeMint2InstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createInitializeMint2Instruction(
-    mint: Address,
+    mint: PublicKey,
     decimals: number,
-    mintAuthority: Address,
-    freezeAuthority: Address | null,
+    mintAuthority: PublicKey,
+    freezeAuthority: PublicKey | null,
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = [{ pubkey: mint, isSigner: false, isWritable: true }];
@@ -85,15 +85,15 @@ export function createInitializeMint2Instruction(
 
 /** A decoded, valid InitializeMint2 instruction */
 export interface DecodedInitializeMint2Instruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
     };
     data: {
         instruction: TokenInstruction.InitializeMint2;
         decimals: number;
-        mintAuthority: Address;
-        freezeAuthority: Address | null;
+        mintAuthority: PublicKey;
+        freezeAuthority: PublicKey | null;
     };
 }
 
@@ -131,15 +131,15 @@ export function decodeInitializeMint2Instruction(
 
 /** A decoded, non-validated InitializeMint2 instruction */
 export interface DecodedInitializeMint2InstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta | undefined;
     };
     data: {
         instruction: number;
         decimals: number;
-        mintAuthority: Address;
-        freezeAuthority: Address | null;
+        mintAuthority: PublicKey;
+        freezeAuthority: PublicKey | null;
     };
 }
 

@@ -6,14 +6,14 @@ import {
     type MultisigArgs,
 } from '@solana-program/token';
 import type { AccountInfo, Commitment, Connection } from '@solana/web3.js';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import { TokenAccountNotFoundError, TokenInvalidAccountOwnerError, TokenInvalidAccountSizeError } from '../errors.js';
 
 /** Information about a multisig */
 export interface Multisig {
     /** Address of the multisig */
-    address: Address;
+    address: PublicKey;
     /** Number of signers required */
     m: number;
     /** Number of possible signers, corresponds to the number of `signers` that are valid */
@@ -21,17 +21,17 @@ export interface Multisig {
     /** Is this mint initialized */
     isInitialized: boolean;
     /** Full set of signers, of which `n` are valid */
-    signer1: Address;
-    signer2: Address;
-    signer3: Address;
-    signer4: Address;
-    signer5: Address;
-    signer6: Address;
-    signer7: Address;
-    signer8: Address;
-    signer9: Address;
-    signer10: Address;
-    signer11: Address;
+    signer1: PublicKey;
+    signer2: PublicKey;
+    signer3: PublicKey;
+    signer4: PublicKey;
+    signer5: PublicKey;
+    signer6: PublicKey;
+    signer7: PublicKey;
+    signer8: PublicKey;
+    signer9: PublicKey;
+    signer10: PublicKey;
+    signer11: PublicKey;
 }
 
 /** Multisig as stored by the program */
@@ -63,17 +63,17 @@ function codamaMultisigToRaw(multisig: CodamaMultisig): RawMultisig {
         m: multisig.m,
         n: multisig.n,
         isInitialized: multisig.isInitialized,
-        signer1: new Address(multisig.signers[0]),
-        signer2: new Address(multisig.signers[1]),
-        signer3: new Address(multisig.signers[2]),
-        signer4: new Address(multisig.signers[3]),
-        signer5: new Address(multisig.signers[4]),
-        signer6: new Address(multisig.signers[5]),
-        signer7: new Address(multisig.signers[6]),
-        signer8: new Address(multisig.signers[7]),
-        signer9: new Address(multisig.signers[8]),
-        signer10: new Address(multisig.signers[9]),
-        signer11: new Address(multisig.signers[10]),
+        signer1: new PublicKey(multisig.signers[0]),
+        signer2: new PublicKey(multisig.signers[1]),
+        signer3: new PublicKey(multisig.signers[2]),
+        signer4: new PublicKey(multisig.signers[3]),
+        signer5: new PublicKey(multisig.signers[4]),
+        signer6: new PublicKey(multisig.signers[5]),
+        signer7: new PublicKey(multisig.signers[6]),
+        signer8: new PublicKey(multisig.signers[7]),
+        signer9: new PublicKey(multisig.signers[8]),
+        signer10: new PublicKey(multisig.signers[9]),
+        signer11: new PublicKey(multisig.signers[10]),
     };
 }
 
@@ -104,7 +104,7 @@ export const MULTISIG_SIZE = getMultisigSize();
  */
 export async function getMultisig(
     connection: Connection,
-    address: Address,
+    address: PublicKey,
     commitment?: Commitment,
     programId = TOKEN_PROGRAM_ID,
 ): Promise<Multisig> {
@@ -122,7 +122,7 @@ export async function getMultisig(
  * @return Unpacked multisig
  */
 export function unpackMultisig(
-    address: Address,
+    address: PublicKey,
     info: AccountInfo<Uint8Array> | null,
     programId = TOKEN_PROGRAM_ID,
 ): Multisig {

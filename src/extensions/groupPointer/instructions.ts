@@ -2,7 +2,7 @@ import {
     getInitializeGroupPointerInstructionDataEncoder,
     getUpdateGroupPointerInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { Signer, Address } from '@solana/web3.js';
+import type { Signer, PublicKey } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_2022_PROGRAM_ID, programSupportsExtensions } from '../../constants.js';
 import { TokenUnsupportedInstructionError } from '../../errors.js';
@@ -17,8 +17,8 @@ export enum GroupPointerInstruction {
 export interface InitializeGroupPointerInstructionData {
     instruction: TokenInstruction.GroupPointerExtension;
     groupPointerInstruction: number;
-    authority: Address;
-    groupAddress: Address;
+    authority: PublicKey;
+    groupAddress: PublicKey;
 }
 
 /**
@@ -32,10 +32,10 @@ export interface InitializeGroupPointerInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createInitializeGroupPointerInstruction(
-    mint: Address,
-    authority: Address | null,
-    groupAddress: Address | null,
-    programId: Address = TOKEN_2022_PROGRAM_ID,
+    mint: PublicKey,
+    authority: PublicKey | null,
+    groupAddress: PublicKey | null,
+    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();
@@ -54,15 +54,15 @@ export function createInitializeGroupPointerInstruction(
 export interface UpdateGroupPointerInstructionData {
     instruction: TokenInstruction.GroupPointerExtension;
     groupPointerInstruction: number;
-    groupAddress: Address;
+    groupAddress: PublicKey;
 }
 
 export function createUpdateGroupPointerInstruction(
-    mint: Address,
-    authority: Address,
-    groupAddress: Address | null,
-    multiSigners: (Signer | Address)[] = [],
-    programId: Address = TOKEN_2022_PROGRAM_ID,
+    mint: PublicKey,
+    authority: PublicKey,
+    groupAddress: PublicKey | null,
+    multiSigners: (Signer | PublicKey)[] = [],
+    programId: PublicKey = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
         throw new TokenUnsupportedInstructionError();

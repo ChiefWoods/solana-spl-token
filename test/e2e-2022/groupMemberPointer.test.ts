@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Connection, Signer } from '@solana/web3.js';
-import { Address, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
+import { PublicKey, sendAndConfirmTransaction, Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 
 import {
     AuthorityType,
@@ -23,7 +23,7 @@ describe('GroupMember pointer', () => {
     let payer: Signer;
     let mint: Keypair;
     let mintAuthority: Keypair;
-    let memberAddress: Address;
+    let memberAddress: PublicKey;
 
     beforeAll(async () => {
         connection = await getConnection();
@@ -40,7 +40,7 @@ describe('GroupMember pointer', () => {
 
         const transaction = new Transaction().add(
             SystemProgram.createAccount({
-                fromPubkey: new Address(payer.address),
+                fromPubkey: new PublicKey(payer.address),
                 newAccountPubkey: mint.publicKey,
                 space: mintLen,
                 lamports,

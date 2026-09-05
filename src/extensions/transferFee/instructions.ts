@@ -12,8 +12,8 @@ import {
     getWithdrawWithheldTokensFromMintInstructionDataDecoder,
     getWithdrawWithheldTokensFromMintInstructionDataEncoder,
 } from '@solana-program/token-2022';
-import type { AccountMeta, Signer, Address } from '@solana/web3.js';
-import { Address as Web3Address, TransactionInstruction } from '@solana/web3.js';
+import type { AccountMeta, Signer, PublicKey } from '@solana/web3.js';
+import { PublicKey as Web3Address, TransactionInstruction } from '@solana/web3.js';
 import { programSupportsExtensions, TOKEN_2022_PROGRAM_ID } from '../../constants.js';
 import {
     TokenInvalidInstructionDataError,
@@ -27,7 +27,7 @@ import { TokenInstruction } from '../../instructions/types.js';
 
 type CodamaOption<T> = { __option: 'Some'; value: T } | { __option: 'None' };
 
-function unwrapAddressOption(option: CodamaOption<string>): Address | null {
+function unwrapAddressOption(option: CodamaOption<string>): PublicKey | null {
     return option.__option === 'Some' ? new Web3Address(option.value) : null;
 }
 
@@ -46,8 +46,8 @@ export enum TransferFeeInstruction {
 export interface InitializeTransferFeeConfigInstructionData {
     instruction: TokenInstruction.TransferFeeExtension;
     transferFeeInstruction: TransferFeeInstruction.InitializeTransferFeeConfig;
-    transferFeeConfigAuthority: Address | null;
-    withdrawWithheldAuthority: Address | null;
+    transferFeeConfigAuthority: PublicKey | null;
+    withdrawWithheldAuthority: PublicKey | null;
     transferFeeBasisPoints: number;
     maximumFee: bigint;
 }
@@ -65,9 +65,9 @@ export interface InitializeTransferFeeConfigInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createInitializeTransferFeeConfigInstruction(
-    mint: Address,
-    transferFeeConfigAuthority: Address | null,
-    withdrawWithheldAuthority: Address | null,
+    mint: PublicKey,
+    transferFeeConfigAuthority: PublicKey | null,
+    withdrawWithheldAuthority: PublicKey | null,
     transferFeeBasisPoints: number,
     maximumFee: bigint,
     programId = TOKEN_2022_PROGRAM_ID,
@@ -94,15 +94,15 @@ export function createInitializeTransferFeeConfigInstruction(
 
 /** A decoded, valid InitializeTransferFeeConfig instruction */
 export interface DecodedInitializeTransferFeeConfigInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
     };
     data: {
         instruction: TokenInstruction.TransferFeeExtension;
         transferFeeInstruction: TransferFeeInstruction.InitializeTransferFeeConfig;
-        transferFeeConfigAuthority: Address | null;
-        withdrawWithheldAuthority: Address | null;
+        transferFeeConfigAuthority: PublicKey | null;
+        withdrawWithheldAuthority: PublicKey | null;
         transferFeeBasisPoints: number;
         maximumFee: bigint;
     };
@@ -118,7 +118,7 @@ export interface DecodedInitializeTransferFeeConfigInstruction {
  */
 export function decodeInitializeTransferFeeConfigInstruction(
     instruction: TransactionInstruction,
-    programId: Address,
+    programId: PublicKey,
 ): DecodedInitializeTransferFeeConfigInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
 
@@ -154,15 +154,15 @@ export function decodeInitializeTransferFeeConfigInstruction(
 
 /** A decoded, non-validated InitializeTransferFeeConfig instruction */
 export interface DecodedInitializeTransferFeeConfigInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta | undefined;
     };
     data: {
         instruction: TokenInstruction.TransferFeeExtension;
         transferFeeInstruction: TransferFeeInstruction.InitializeTransferFeeConfig;
-        transferFeeConfigAuthority: Address | null;
-        withdrawWithheldAuthority: Address | null;
+        transferFeeConfigAuthority: PublicKey | null;
+        withdrawWithheldAuthority: PublicKey | null;
         transferFeeBasisPoints: number;
         maximumFee: bigint;
     };
@@ -230,14 +230,14 @@ export interface TransferCheckedWithFeeInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createTransferCheckedWithFeeInstruction(
-    source: Address,
-    mint: Address,
-    destination: Address,
-    authority: Address,
+    source: PublicKey,
+    mint: PublicKey,
+    destination: PublicKey,
+    authority: PublicKey,
     amount: bigint,
     decimals: number,
     fee: bigint,
-    multiSigners: (Signer | Address)[] = [],
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
@@ -258,7 +258,7 @@ export function createTransferCheckedWithFeeInstruction(
 
 /** A decoded, valid TransferCheckedWithFee instruction */
 export interface DecodedTransferCheckedWithFeeInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         source: AccountMeta;
         mint: AccountMeta;
@@ -285,7 +285,7 @@ export interface DecodedTransferCheckedWithFeeInstruction {
  */
 export function decodeTransferCheckedWithFeeInstruction(
     instruction: TransactionInstruction,
-    programId: Address,
+    programId: PublicKey,
 ): DecodedTransferCheckedWithFeeInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
     if (
@@ -321,7 +321,7 @@ export function decodeTransferCheckedWithFeeInstruction(
 
 /** A decoded, non-validated TransferCheckedWithFees instruction */
 export interface DecodedTransferCheckedWithFeeInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         source: AccountMeta;
         mint: AccountMeta;
@@ -390,10 +390,10 @@ export interface WithdrawWithheldTokensFromMintInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createWithdrawWithheldTokensFromMintInstruction(
-    mint: Address,
-    destination: Address,
-    authority: Address,
-    signers: (Signer | Address)[] = [],
+    mint: PublicKey,
+    destination: PublicKey,
+    authority: PublicKey,
+    signers: (Signer | PublicKey)[] = [],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
@@ -413,7 +413,7 @@ export function createWithdrawWithheldTokensFromMintInstruction(
 
 /** A decoded, valid WithdrawWithheldTokensFromMint instruction */
 export interface DecodedWithdrawWithheldTokensFromMintInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
         destination: AccountMeta;
@@ -436,7 +436,7 @@ export interface DecodedWithdrawWithheldTokensFromMintInstruction {
  */
 export function decodeWithdrawWithheldTokensFromMintInstruction(
     instruction: TransactionInstruction,
-    programId: Address,
+    programId: PublicKey,
 ): DecodedWithdrawWithheldTokensFromMintInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
     if (instruction.data.length !== getWithdrawWithheldTokensFromMintInstructionDataEncoder().encode({}).length)
@@ -467,7 +467,7 @@ export function decodeWithdrawWithheldTokensFromMintInstruction(
 
 /** A decoded, valid WithdrawWithheldTokensFromMint instruction */
 export interface DecodedWithdrawWithheldTokensFromMintInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
         destination: AccountMeta;
@@ -530,11 +530,11 @@ export interface WithdrawWithheldTokensFromAccountsInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createWithdrawWithheldTokensFromAccountsInstruction(
-    mint: Address,
-    destination: Address,
-    authority: Address,
-    signers: (Signer | Address)[],
-    sources: Address[],
+    mint: PublicKey,
+    destination: PublicKey,
+    authority: PublicKey,
+    signers: (Signer | PublicKey)[],
+    sources: PublicKey[],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
@@ -559,7 +559,7 @@ export function createWithdrawWithheldTokensFromAccountsInstruction(
 
 /** A decoded, valid WithdrawWithheldTokensFromAccounts instruction */
 export interface DecodedWithdrawWithheldTokensFromAccountsInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
         destination: AccountMeta;
@@ -584,7 +584,7 @@ export interface DecodedWithdrawWithheldTokensFromAccountsInstruction {
  */
 export function decodeWithdrawWithheldTokensFromAccountsInstruction(
     instruction: TransactionInstruction,
-    programId: Address,
+    programId: PublicKey,
 ): DecodedWithdrawWithheldTokensFromAccountsInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
     if (
@@ -619,7 +619,7 @@ export function decodeWithdrawWithheldTokensFromAccountsInstruction(
 
 /** A decoded, valid WithdrawWithheldTokensFromAccounts instruction */
 export interface DecodedWithdrawWithheldTokensFromAccountsInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
         destination: AccountMeta;
@@ -689,8 +689,8 @@ export interface HarvestWithheldTokensToMintInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createHarvestWithheldTokensToMintInstruction(
-    mint: Address,
-    sources: Address[],
+    mint: PublicKey,
+    sources: PublicKey[],
     programId = TOKEN_2022_PROGRAM_ID,
 ): TransactionInstruction {
     if (!programSupportsExtensions(programId)) {
@@ -707,7 +707,7 @@ export function createHarvestWithheldTokensToMintInstruction(
 
 /** A decoded, valid HarvestWithheldTokensToMint instruction */
 export interface DecodedHarvestWithheldTokensToMintInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
         sources: AccountMeta[] | null;
@@ -728,7 +728,7 @@ export interface DecodedHarvestWithheldTokensToMintInstruction {
  */
 export function decodeHarvestWithheldTokensToMintInstruction(
     instruction: TransactionInstruction,
-    programId: Address,
+    programId: PublicKey,
 ): DecodedHarvestWithheldTokensToMintInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
     if (instruction.data.length !== getHarvestWithheldTokensToMintInstructionDataEncoder().encode({}).length)
@@ -757,7 +757,7 @@ export function decodeHarvestWithheldTokensToMintInstruction(
 
 /** A decoded, valid HarvestWithheldTokensToMint instruction */
 export interface DecodedHarvestWithheldTokensToMintInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
         sources: AccountMeta[] | null;
@@ -817,9 +817,9 @@ export interface SetTransferFeeInstructionData {
  * @return Instruction to add to a transaction
  */
 export function createSetTransferFeeInstruction(
-    mint: Address,
-    authority: Address,
-    signers: (Signer | Address)[],
+    mint: PublicKey,
+    authority: PublicKey,
+    signers: (Signer | PublicKey)[],
     transferFeeBasisPoints: number,
     maximumFee: bigint,
     programId = TOKEN_2022_PROGRAM_ID,
@@ -841,7 +841,7 @@ export function createSetTransferFeeInstruction(
 
 /** A decoded, valid SetTransferFee instruction */
 export interface DecodedSetTransferFeeInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
         authority: AccountMeta;
@@ -865,7 +865,7 @@ export interface DecodedSetTransferFeeInstruction {
  */
 export function decodeSetTransferFeeInstruction(
     instruction: TransactionInstruction,
-    programId: Address,
+    programId: PublicKey,
 ): DecodedSetTransferFeeInstruction {
     if (!instruction.programId.equals(programId)) throw new TokenInvalidInstructionProgramError();
     if (
@@ -898,7 +898,7 @@ export function decodeSetTransferFeeInstruction(
 
 /** A decoded, valid SetTransferFee instruction */
 export interface DecodedSetTransferFeeInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         mint: AccountMeta;
         authority: AccountMeta;

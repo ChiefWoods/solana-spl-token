@@ -1,15 +1,15 @@
 import { getAddressCodec, getStructCodec } from '@solana/kit';
 import type { Address as KitAddress, FixedSizeCodec } from '@solana/kit';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import type { Mint } from '../../state/mint.js';
 import { ExtensionType, getExtensionData } from '../extensionType.js';
 
 /** MetadataPointer as stored by the program */
 export interface MetadataPointer {
     /** Optional authority that can set the metadata address */
-    authority: Address | null;
+    authority: PublicKey | null;
     /** Optional Account Address that holds the metadata */
-    metadataAddress: Address | null;
+    metadataAddress: PublicKey | null;
 }
 
 type MetadataPointerCodecData = {
@@ -33,10 +33,10 @@ export function getMetadataPointerState(mint: Mint): Partial<MetadataPointer> | 
     if (extensionData === null) return null;
 
     const decoded = MetadataPointerCodec.decode(extensionData);
-    const authority = new Address(decoded.authority);
-    const metadataAddress = new Address(decoded.metadataAddress);
+    const authority = new PublicKey(decoded.authority);
+    const metadataAddress = new PublicKey(decoded.metadataAddress);
     return {
-        authority: authority.equals(Address.default) ? null : authority,
-        metadataAddress: metadataAddress.equals(Address.default) ? null : metadataAddress,
+        authority: authority.equals(PublicKey.default) ? null : authority,
+        metadataAddress: metadataAddress.equals(PublicKey.default) ? null : metadataAddress,
     };
 }

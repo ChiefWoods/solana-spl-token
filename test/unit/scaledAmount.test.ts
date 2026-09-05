@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { Connection } from '@solana/web3.js';
-import { Address } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import {
     amountToUiAmountForMintWithoutSimulation,
     amountToUiAmountForScaledUiAmountMintWithoutSimulation,
@@ -36,12 +36,12 @@ class MockConnection {
         };
     }
 
-    getAccountInfo = async (address: Address) => {
+    getAccountInfo = async (address: PublicKey) => {
         return this.getParsedAccountInfo(address);
     };
 
     // used to get the clock timestamp
-    getParsedAccountInfo = async (address: Address) => {
+    getParsedAccountInfo = async (address: PublicKey) => {
         if (address.toString() === 'SysvarC1ock11111111111111111111111111111111') {
             return {
                 value: {
@@ -77,12 +77,12 @@ function createMockMintData(
     MintLayout.encode(
         {
             mintAuthorityOption: 1,
-            mintAuthority: new Address(new Uint8Array(32).fill(1)),
+            mintAuthority: new PublicKey(new Uint8Array(32).fill(1)),
             supply: BigInt(1000000),
             decimals: decimals,
             isInitialized: true,
             freezeAuthorityOption: 1,
-            freezeAuthority: new Address(new Uint8Array(32).fill(1)),
+            freezeAuthority: new PublicKey(new Uint8Array(32).fill(1)),
         },
         mintData,
     );
@@ -119,7 +119,7 @@ function createMockMintData(
 
 describe('Scaled UI Amount Extension', () => {
     let connection: MockConnection;
-    const mint = new Address('So11111111111111111111111111111111111111112');
+    const mint = new PublicKey('So11111111111111111111111111111111111111112');
 
     beforeEach(() => {
         connection = new MockConnection() as unknown as MockConnection;

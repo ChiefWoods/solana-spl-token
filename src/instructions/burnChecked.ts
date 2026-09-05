@@ -1,5 +1,5 @@
 import { getBurnCheckedInstructionDataDecoder, getBurnCheckedInstructionDataEncoder } from '@solana-program/token';
-import type { AccountMeta, Address, Signer } from '@solana/web3.js';
+import type { AccountMeta, PublicKey, Signer } from '@solana/web3.js';
 import { TransactionInstruction } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '../constants.js';
 import {
@@ -41,12 +41,12 @@ export const burnCheckedInstructionData = createInstructionDataCodec({
  * @return Instruction to add to a transaction
  */
 export function createBurnCheckedInstruction(
-    account: Address,
-    mint: Address,
-    owner: Address,
+    account: PublicKey,
+    mint: PublicKey,
+    owner: PublicKey,
     amount: number | bigint,
     decimals: number,
-    multiSigners: (Signer | Address)[] = [],
+    multiSigners: (Signer | PublicKey)[] = [],
     programId = TOKEN_PROGRAM_ID,
 ): TransactionInstruction {
     const keys = addSigners(
@@ -73,7 +73,7 @@ export function createBurnCheckedInstruction(
 
 /** A decoded, valid BurnChecked instruction */
 export interface DecodedBurnCheckedInstruction {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta;
         mint: AccountMeta;
@@ -126,7 +126,7 @@ export function decodeBurnCheckedInstruction(
 
 /** A decoded, non-validated BurnChecked instruction */
 export interface DecodedBurnCheckedInstructionUnchecked {
-    programId: Address;
+    programId: PublicKey;
     keys: {
         account: AccountMeta | undefined;
         mint: AccountMeta | undefined;

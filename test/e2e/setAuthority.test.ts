@@ -1,5 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import type { Connection, Address, Signer } from '@solana/web3.js';
+import type { Connection, PublicKey, Signer } from '@solana/web3.js';
 import { Keypair } from '@solana/web3.js';
 
 import { AuthorityType, createMint, createAccount, getAccount, getMint, setAuthority } from '../../src';
@@ -10,11 +10,11 @@ const TEST_TOKEN_DECIMALS = 2;
 describe('setAuthority', () => {
     let connection: Connection;
     let payer: Signer;
-    let mint: Address;
+    let mint: PublicKey;
     let mintAuthority: Keypair;
     let freezeAuthority: Keypair;
     let owner: Keypair;
-    let account: Address;
+    let account: PublicKey;
     beforeAll(async () => {
         connection = await getConnection();
         payer = await newAccountWithLamports(connection, 1000000000);
